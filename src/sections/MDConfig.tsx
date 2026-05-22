@@ -1,58 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-const mdData = [
-  { 
-    id: '117호', 
-    type: '라멘집 / 개인 필라테스', 
-    area: '15.99평', 
-    desc: '입구 초입 가시성이 우수한 특화 호실',
-    image: 'https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&q=80&w=800'
-  },
-  { 
-    id: '118호', 
-    type: '브런치 / 베이커리카페', 
-    area: '36.35평', 
-    desc: '모던한 감성의 세련된 공간 구성 가능',
-    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=800'
-  },
-  { 
-    id: '119호', 
-    type: '문전약국', 
-    area: '58.81평', 
-    desc: '병원/의원 이용객 동선 확보 최적 입지',
-    image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?auto=format&fit=crop&q=80&w=800'
-  },
-  { 
-    id: '126호', 
-    type: '한식 / 샤브샤브전문점', 
-    area: '23.44평', 
-    desc: '대로변 노출이 우수하여 집객력이 높은 곳',
-    image: 'https://images.unsplash.com/photo-1634047462615-ca805e243956?auto=format&fit=crop&q=80&w=800'
-  },
-  { 
-    id: '127호', 
-    type: '한식 / 샤브샤브전문점', 
-    area: '25.47평', 
-    desc: '가족 단위 고객 및 단체 방문 최적화',
-    image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=800'
-  },
-  { 
-    id: '128호', 
-    type: '국밥집 / 육개장', 
-    area: '16.5평', 
-    desc: '유동인구가 많은 동선의 생활 밀착형 업종',
-    image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&q=80&w=800'
-  },
-  { 
-    id: '129호', 
-    type: '프랜차이즈 맥주전문점', 
-    area: '18.47평', 
-    desc: '퇴근길이나 여가를 즐기기에 좋은 코너 입지',
-    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800'
-  }
-];
+import { mdData } from '../constants';
 
 export default function MDConfig() {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -70,7 +19,9 @@ export default function MDConfig() {
           className="text-center mb-16"
         >
           <span className="text-accent font-bold tracking-widest text-xs uppercase">Commercial & Residential Guide</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-primary mt-3">근린생활시설 입점 추천 업종</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mt-3 leading-snug">
+            근린생활시설<br className="sm:hidden" /> 입점 추천 업종
+          </h2>
           <div className="w-16 h-1 bg-accent mx-auto mt-6" />
         </motion.div>
 
@@ -136,9 +87,9 @@ export default function MDConfig() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-gray-900/10">
-                    <th className="py-6 px-4 font-bold text-[12px] uppercase tracking-[0.1em] text-gray-500">호수</th>
-                    <th className="py-6 px-8 font-bold text-[12px] uppercase tracking-[0.1em] text-gray-500">추천 업종 및 상세 안내</th>
-                    <th className="py-6 px-4 font-bold text-[12px] uppercase tracking-[0.1em] text-gray-500 text-right">전용면적</th>
+                    <th className="py-4 md:py-6 px-2 sm:px-4 font-bold text-[10px] sm:text-xs uppercase tracking-[0.1em] text-gray-500 w-16 sm:w-24">호수</th>
+                    <th className="py-4 md:py-6 px-3 sm:px-6 md:px-8 font-bold text-[10px] sm:text-xs uppercase tracking-[0.1em] text-gray-500">추천 업종 및 상세 안내</th>
+                    <th className="py-4 md:py-6 px-2 sm:px-4 font-bold text-[10px] sm:text-xs uppercase tracking-[0.1em] text-gray-500 text-right w-20 sm:w-28">전용면적</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -156,33 +107,33 @@ export default function MDConfig() {
                               : 'hover:bg-gray-50/80'
                         }`}
                       >
-                        <td className="py-8 px-4 align-top">
+                        <td className="py-4 md:py-6 px-2 sm:px-4 align-top">
                           <div className="flex flex-col gap-1">
-                            <span className="text-xs font-black text-primary tracking-tighter">{item.id}</span>
+                            <span className="text-xs sm:text-sm font-black text-primary tracking-tighter">{item.id}</span>
                           </div>
                         </td>
-                        <td className="py-8 px-8 align-top">
-                          <div className="flex flex-col gap-1.5">
-                            <div className="flex items-center gap-3">
-                              <div className={`text-lg md:text-xl font-bold tracking-tight transition-colors ${
+                        <td className="py-4 md:py-6 px-3 sm:px-6 md:px-8 align-top">
+                          <div className="flex flex-col gap-1">
+                            <div className="flex flex-wrap items-center gap-1.5 md:gap-3">
+                              <div className={`text-xs sm:text-sm md:text-base font-bold tracking-tight transition-colors ${
                                 isHighTarget ? 'text-accent' : 'text-gray-900 group-hover:text-primary'
                               }`}>
                                 {item.type}
                               </div>
                               {isHighTarget && (
-                                <span className="text-[9px] bg-accent text-white px-2 py-0.5 rounded-sm font-bold shrink-0">KEY TENANT</span>
+                                <span className="text-[8px] sm:text-[9px] bg-accent text-white px-1.5 py-0.5 rounded-sm font-bold shrink-0">KEY TENANT</span>
                               )}
                             </div>
-                            <div className="text-xs md:text-[13px] text-gray-500 font-medium leading-relaxed max-w-sm">
+                            <div className="text-[10px] sm:text-xs md:text-[13px] text-gray-500 font-medium leading-relaxed max-w-sm">
                               {item.desc}
                             </div>
                           </div>
                         </td>
-                        <td className="py-8 px-4 text-right align-top">
-                          <span className={`text-[13px] font-bold ${
+                        <td className="py-4 md:py-6 px-2 sm:px-4 text-right align-top">
+                          <span className={`text-xs sm:text-sm font-bold ${
                             isHighTarget ? 'text-accent' : 'text-gray-400'
                           }`}>
-                            {item.area}평
+                            {item.area}
                           </span>
                         </td>
                       </tr>

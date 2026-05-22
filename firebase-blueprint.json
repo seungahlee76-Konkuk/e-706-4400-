@@ -1,0 +1,37 @@
+{
+  "entities": {
+    "Lead": {
+      "title": "Lead",
+      "description": "Customer contact inquiry details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "interest": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "phone", "interest", "createdAt"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "System administrator with read and write access",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "role": { "type": "string" }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Inquiries submitted by potential buyers/tenants"
+    },
+    "admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Global administrator mappings"
+    }
+  }
+}

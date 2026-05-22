@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import Hero from './sections/Hero';
@@ -17,6 +17,21 @@ import StickyBottomForm from './components/ui/StickyBottomForm';
 
 export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for Alt/Option + Shift + A (also supports Korean keyboard 'ㅁ')
+      if (e.altKey && e.shiftKey && (e.key === 'A' || e.key === 'a' || e.key === 'ㅁ')) {
+        e.preventDefault();
+        setIsAdminOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#F5F5F0] font-sans text-gray-900 overflow-x-hidden">

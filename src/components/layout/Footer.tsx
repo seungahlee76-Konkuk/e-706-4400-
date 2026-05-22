@@ -31,14 +31,6 @@ export default function Footer({ onAdminOpen }: { onAdminOpen: () => void }) {
                 <li><a href={`tel:${PROJECT_INFO.representativeNumber.replace(/[^0-9]/g, '')}`} className="hover:text-accent transition-colors font-bold text-primary">대표문의</a></li>
                 <li><a href="#" className="hover:text-accent transition-colors">이용약관</a></li>
                 <li><a href="#" className="hover:text-accent transition-colors text-accent">개인정보처리방침</a></li>
-                <li>
-                  <button 
-                    onClick={onAdminOpen}
-                    className="text-gray-200 hover:text-gray-400 transition-colors cursor-pointer text-[10px] uppercase font-black tracking-widest mt-4"
-                  >
-                    Admin Login
-                  </button>
-                </li>
               </ul>
             </div>
           </div>

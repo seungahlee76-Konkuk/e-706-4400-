@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { cn } from '@/src/lib/utils';
 import { Loader2, Phone } from 'lucide-react';
 import { PROJECT_INFO } from '../../constants';
+import { db, handleFirestoreError, OperationType } from '@/src/lib/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 interface ContactFormData {
   name: string;
@@ -27,35 +29,45 @@ export default function StickyBottomForm() {
 
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
+    const leadId = 'lead-' + Math.random().toString(36).substring(2, 11);
     try {
-      const response = await fetch("https://formspree.io/f/xnjrnolb", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          name: data.name,
-          phone: data.phone,
-          interest: data.interest,
-          _subject: `[${PROJECT_INFO.name}] 상담 신청(하단바) - ${data.name}`,
-        }),
+      // 1. Submit to Firestore database
+      await setDoc(doc(db, 'leads', leadId), {
+        id: leadId,
+        name: data.name,
+        phone: data.phone,
+        interest: data.interest,
+        createdAt: serverTimestamp(),
       });
 
-      if (response.ok) {
-        const existingLeads = JSON.parse(localStorage.getItem('property_leads') || '[]');
-        const newLead = {
-          ...data,
-          id: Math.random().toString(36).substr(2, 9),
-          createdAt: new Date().toISOString()
-        };
-        localStorage.setItem('property_leads', JSON.stringify([newLead, ...existingLeads]));
-        alert('상담 신청이 완료되었습니다.');
-        reset();
-      } else {
-        throw new Error('Formspree submission failed');
+      // 2. Fallback or duplicate submission to Formspree for webhooks/email
+      try {
+        await fetch("https://formspree.io/f/xnjrnolb", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            name: data.name,
+            phone: data.phone,
+            interest: data.interest,
+            _subject: `[${PROJECT_INFO.name}] 상담 신청(하단바) - ${data.name}`,
+          }),
+        });
+      } catch (err) {
+        console.warn('Formspree webhook fallback failed:', err);
       }
+
+      alert('상담 신청이 완료되었습니다.');
+      reset();
     } catch (e) {
+      console.error('Submission failed:', e);
+      try {
+        handleFirestoreError(e, OperationType.WRITE, `leads/${leadId}`);
+      } catch (fError) {
+        // Log custom error JSON to developers
+      }
       alert('오류가 발생했습니다. 잠시 후 다시 시도해주시거나 대표번호로 연락주세요.');
     } finally {
       setIsSubmitting(false);

@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { PROJECT_INFO } from '../constants';
+import { db, handleFirestoreError, OperationType } from '@/src/lib/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 interface ContactFormData {
   name: string;
@@ -20,38 +22,45 @@ export default function ContactForm() {
 
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
+    const leadId = 'lead-' + Math.random().toString(36).substring(2, 11);
     try {
-      const response = await fetch("https://formspree.io/f/xnjrnolb", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          name: data.name,
-          phone: data.phone,
-          interest: data.interest,
-          _subject: `[${PROJECT_INFO.name}] 상담 신청 - ${data.name}`,
-        }),
+      // 1. Submit to Firestore database
+      await setDoc(doc(db, 'leads', leadId), {
+        id: leadId,
+        name: data.name,
+        phone: data.phone,
+        interest: data.interest,
+        createdAt: serverTimestamp(),
       });
 
-      if (response.ok) {
-        // Also keep local storage as a backup
-        const existingLeads = JSON.parse(localStorage.getItem('property_leads') || '[]');
-        const newLead = {
-          ...data,
-          id: Math.random().toString(36).substr(2, 9),
-          createdAt: new Date().toISOString()
-        };
-        localStorage.setItem('property_leads', JSON.stringify([newLead, ...existingLeads]));
-
-        setIsSuccess(true);
-        reset();
-      } else {
-        throw new Error('Formspree submission failed');
+      // 2. Fallback or duplicate submission to Formspree for webhooks/email
+      try {
+        await fetch("https://formspree.io/f/xnjrnolb", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            name: data.name,
+            phone: data.phone,
+            interest: data.interest,
+            _subject: `[${PROJECT_INFO.name}] 상담 신청 - ${data.name}`,
+          }),
+        });
+      } catch (err) {
+        console.warn('Formspree webhook fallback failed:', err);
       }
+
+      setIsSuccess(true);
+      reset();
     } catch (error) {
       console.error('Submission failed:', error);
+      try {
+        handleFirestoreError(error, OperationType.WRITE, `leads/${leadId}`);
+      } catch (fError) {
+        // Log custom error JSON to developers
+      }
       alert('상담 신청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
@@ -69,7 +78,7 @@ export default function ContactForm() {
         >
           <span className="text-accent font-bold tracking-widest text-xs uppercase">Consultation</span>
           <h2 className="text-3xl md:text-4xl font-bold text-primary mt-3">상담 신청 및 예약</h2>
-          <p className="mt-4 text-gray-500 font-light">정보를 입력해주시면 전문 상담원이 연락드리겠습니다.</p>
+          <p className="mt-4 text-gray-500 font-light">{"정보를 입력해주시면 전문 상담원이 연락드리겠습니다."}</p>
           <div className="w-16 h-1 bg-accent mx-auto mt-6" />
         </motion.div>
 

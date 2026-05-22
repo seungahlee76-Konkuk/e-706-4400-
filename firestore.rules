@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. catch-all default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Standalone Reusable Global Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // --- Entity-Level Validation Helpers ---
+    function isValidLead(data) {
+      return data.keys().hasAll(['id', 'name', 'phone', 'interest', 'createdAt'])
+        && data.keys().size() == 5
+        && data.id is string && data.id.size() <= 128 && data.id.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 64
+        && data.phone is string && data.phone.size() > 0 && data.phone.size() <= 24
+        && data.interest is string && data.interest.size() > 0 && data.interest.size() <= 64
+        && data.createdAt == request.time;
+    }
+
+    // --- Collection matching ---
+    
+    // Leaded registration submissions
+    match /leads/{leadId} {
+      // Create is open to any user/guest as long as they provide a valid schema structure
+      allow create: if isValidId(leadId) && isValidLead(request.resource.data);
+      
+      // Reading, updating and deleting leads is restricted to verified administrators
+      allow get, list, update, delete: if isAdmin();
+    }
+
+    // Administrators catalog mapping table
+    match /admins/{adminId} {
+      // Admins can be looked up by signed-in users matching their own ID, or any existing admin
+      allow get: if isSignedIn() && (request.auth.uid == adminId || exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+      allow list: if isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      
+      // Bootstrap creation allows signing in with the designated admin email
+      allow create: if isSignedIn() 
+        && request.auth.uid == adminId 
+        && request.auth.token.email == "seungahlee76@gmail.com"
+        && request.auth.token.email_verified == true;
+      
+      // Allow modifying non-role properties or admin adjustments
+      allow update: if isSignedIn() 
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid)) 
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']);
+      
+      // Prevent self-lockout by forbidding deletion of own admin entry
+      allow delete: if isSignedIn() 
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid)) 
+        && request.auth.uid != adminId;
+    }
+  }
+}

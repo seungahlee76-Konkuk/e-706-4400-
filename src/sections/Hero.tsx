@@ -27,7 +27,7 @@ export default function Hero() {
   }, [nextSlide]);
 
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen md:h-screen flex items-center justify-center overflow-hidden py-20 md:py-0">
       {/* Background Slideshow - Pure & Responsive */}
       <div className="absolute inset-0 z-0">
         <AnimatePresence mode="wait">
@@ -56,27 +56,32 @@ export default function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mb-12"
+          className="mb-8 md:mb-12 mt-8 md:mt-0"
         >
-          <h1 className="text-4xl md:text-7xl font-bold text-white mb-6 leading-[1.1] drop-shadow-[0_4px_15px_rgba(0,0,0,0.4)]">
+          {/* Brand Name on Top */}
+          <span className="text-accent text-sm sm:text-base md:text-xl font-black tracking-wider uppercase mb-3 block drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+            {PROJECT_INFO.name} 상업시설 & 오피스텔
+          </span>
+          {/* Main Headline Below Name */}
+          <h1 className="text-2xl sm:text-3xl md:text-6xl lg:text-7xl font-extrabold text-white mb-4 md:mb-6 leading-snug md:leading-[1.1] drop-shadow-[0_4px_15px_rgba(0,0,0,0.4)]">
             서수원 행정타운의 중심,<br />
-            <span className="text-accent">브랜드 프리미엄</span>의 완성
+            <span className="text-white">브랜드 프리미엄</span>의 완성
           </h1>
-          <p className="text-lg md:text-2xl text-white font-medium tracking-wide max-w-2xl mx-auto mb-10 drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
-            {PROJECT_INFO.name} 상업시설 & 오피스텔<br/>
+          {/* Secondary Slogan Below */}
+          <p className="text-xs sm:text-sm md:text-lg text-white/90 font-medium tracking-wide max-w-2xl mx-auto mb-6 md:mb-10 drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
             서수원의 미래 가치를 선점하는 압도적 브랜드 파워
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-xs mx-auto sm:max-w-none">
             <a 
               href="#contact" 
-              className="px-10 py-5 bg-accent text-white font-bold rounded shadow-2xl transition-all hover:bg-[#e66400] hover:scale-105 active:scale-95"
+              className="w-full sm:w-auto px-6 py-3.5 sm:px-10 sm:py-5 bg-accent text-white font-bold rounded shadow-2xl transition-all hover:bg-[#e66400] hover:scale-105 active:scale-95 text-xs sm:text-sm md:text-base text-center"
             >
               상담 신청하기
             </a>
             <a 
               href="#overview" 
-              className="px-10 py-5 bg-white/10 backdrop-blur-md text-white font-bold border border-white/20 rounded transition-all hover:bg-white/20 shadow-xl"
+              className="w-full sm:w-auto px-6 py-3.5 sm:px-10 sm:py-5 bg-white/10 backdrop-blur-md text-white font-bold border border-white/20 rounded transition-all hover:bg-white/20 shadow-xl text-xs sm:text-sm md:text-base text-center"
             >
               자세히 보기
             </a>
@@ -84,12 +89,12 @@ export default function Hero() {
         </motion.div>
 
         {/* Feature Grid Layer - Bottom of Hero */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 w-full">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 w-full">
           {[
-            { id: "01", label: "고색1 · 2지구", desc: "총 4,400여 세대(예정)" },
-            { id: "02", label: "706병상", desc: "수원덕산병원(예정)" },
-            { id: "03", label: "즉시 입점", desc: "기완공 상업시설" },
-            { id: "04", label: "행정타운 배후", desc: "인근 500m 이내" },
+            { id: "01", label: "4,400세대 항아리 상권", desc: "고색 1·2지구 4,400여 세대의 중심 상업시설" },
+            { id: "02", label: "706병상 메디컬 수요", desc: "수원덕산병원 바로 앞 메인 스트리트" },
+            { id: "03", label: "1군 브랜드 랜드마크", desc: "서수원의 가치를 리딩하는 e편한세상 상가" },
+            { id: "04", label: "행정타운 365일 상권", desc: "권선구청 등 공공기관 500m 이내 직장인 수요" },
           ].map((item, idx) => (
             <motion.div
               key={idx}
@@ -99,8 +104,8 @@ export default function Hero() {
               className="bg-white/10 backdrop-blur-sm p-4 md:p-6 border-l border-white/20 text-left"
             >
               <span className="text-accent text-[10px] font-bold block mb-1">{item.id}</span>
-              <h3 className="text-white text-sm md:text-base font-bold leading-tight mb-1">{item.label}</h3>
-              <p className="text-white/60 text-[10px] leading-tight">{item.desc}</p>
+              <h3 className="text-white text-xs sm:text-sm md:text-base font-bold leading-tight mb-1">{item.label}</h3>
+              <p className="text-white/60 text-[9px] sm:text-[10px] md:text-xs leading-normal">{item.desc}</p>
             </motion.div>
           ))}
         </div>
