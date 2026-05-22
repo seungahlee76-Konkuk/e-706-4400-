@@ -1,7 +1,7 @@
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { mdData } from '../constants';
+import { mdData, officetelData } from '../constants';
 
 export default function MDConfig() {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -154,50 +154,99 @@ export default function MDConfig() {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {[
-              {
-                title: '혁신적인 3룸 평면',
-                desc: '아파트를 대체하는 3룸 구조와 넉넉한 수납공간으로 주거 만족도를 극대화했습니다.',
-                image: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=800'
-              },
-              {
-                title: '고품격 커뮤니티',
-                desc: '입주민을 위한 피트니스, 실내놀이터, 공유오피스 등 차별화된 커뮤니티 시설을 제공합니다.',
-                image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecee?auto=format&fit=crop&q=80&w=800'
-              },
-              {
-                title: '스마트 홈 시스템',
-                desc: '최첨단 IoT 시스템을 적용하여 보안부터 에너지 관리까지 편리한 생활이 가능합니다.',
-                image: 'https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&q=80&w=800'
-              }
-            ].map((unit, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="group"
-              >
-                <div className="rounded-none overflow-hidden shadow-lg border border-gray-100 bg-white">
-                  <div className="h-56 overflow-hidden">
-                    <img 
-                      src={unit.image} 
-                      alt={unit.title} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      referrerPolicy="no-referrer"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h4 className="font-bold text-lg text-primary mb-2">{unit.title}</h4>
-                    <p className="text-sm text-gray-500 leading-relaxed">{unit.desc}</p>
-                  </div>
-                </div>
-              </motion.div>
+            {officetelData.map((unit: any, idx: number) => (
+              <OfficetelProductCard key={idx} unit={unit} idx={idx} />
             ))}
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function OfficetelProductCard({ unit, idx }: { unit: any; idx: number; key?: any }) {
+  const images = unit.images && unit.images.length > 0 
+    ? unit.images.filter((img: string) => img && img.trim() !== '') 
+    : ['https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=800'];
+  
+  const [currentImgIndex, setCurrentImgIndex] = useState(0);
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImgIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImgIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ delay: idx * 0.1 }}
+      className="group"
+    >
+      <div className="rounded-none overflow-hidden shadow-lg border border-gray-100 bg-white flex flex-col h-full">
+        {/* 이미지 영역 슬라이더 */}
+        <div className="h-64 overflow-hidden relative group/slider bg-gray-50">
+          <img 
+            src={images[currentImgIndex]} 
+            alt={unit.title} 
+            className="w-full h-full object-cover transition-transform duration-700 scale-100 group-hover:scale-105"
+            referrerPolicy="no-referrer"
+          />
+          
+          {/* 이전/다음 버튼 */}
+          {images.length > 1 && (
+            <>
+              <button 
+                onClick={handlePrev}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-10"
+                aria-label="Previous image"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={handleNext}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-10"
+                aria-label="Next image"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </>
+          )}
+
+          {/* 슬라이드 도트 인디케이터 */}
+          {images.length > 1 && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+              {images.map((_: any, imgIdx: number) => (
+                <button
+                  key={imgIdx}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImgIndex(imgIdx);
+                  }}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${
+                    currentImgIndex === imgIdx ? 'bg-white w-3.5' : 'bg-white/40'
+                  }`}
+                  aria-label={`Go to slide ${imgIdx + 1}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+        
+        {/* 텍스트 내용 */}
+        <div className="p-6 flex-1 flex flex-col justify-between">
+          <div>
+            <h4 className="font-bold text-lg text-primary mb-2.5 group-hover:text-accent transition-colors">{unit.title}</h4>
+            <p className="text-sm text-gray-500 leading-relaxed font-medium">{unit.desc}</p>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 }

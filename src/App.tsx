@@ -32,19 +32,23 @@ export default function App() {
           const currentProject = localStorage.getItem('site_custom_project_info');
           const currentAnalysis = localStorage.getItem('site_custom_analysis_data');
           const currentMd = localStorage.getItem('site_custom_md_data');
+          const currentOfficetel = localStorage.getItem('site_custom_officetel_data');
 
           const serverProjectStr = data.projectInfo ? JSON.stringify(data.projectInfo) : null;
           const serverAnalysisStr = data.analysisData ? JSON.stringify(data.analysisData) : null;
           const serverMdStr = data.mdData ? JSON.stringify(data.mdData) : null;
+          const serverOfficetelStr = data.officetelData ? JSON.stringify(data.officetelData) : null;
 
           const isProjectDifferent = serverProjectStr && currentProject !== serverProjectStr;
           const isAnalysisDifferent = serverAnalysisStr && currentAnalysis !== serverAnalysisStr;
           const isMdDifferent = serverMdStr && currentMd !== serverMdStr;
+          const isOfficetelDifferent = serverOfficetelStr && currentOfficetel !== serverOfficetelStr;
 
-          if (isProjectDifferent || isAnalysisDifferent || isMdDifferent) {
+          if (isProjectDifferent || isAnalysisDifferent || isMdDifferent || isOfficetelDifferent) {
             if (serverProjectStr) localStorage.setItem('site_custom_project_info', serverProjectStr);
             if (serverAnalysisStr) localStorage.setItem('site_custom_analysis_data', serverAnalysisStr);
             if (serverMdStr) localStorage.setItem('site_custom_md_data', serverMdStr);
+            if (serverOfficetelStr) localStorage.setItem('site_custom_officetel_data', serverOfficetelStr);
             
             // Clean soft reload to update components without visual flicker loops
             window.location.reload();

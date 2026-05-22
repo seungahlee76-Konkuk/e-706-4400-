@@ -125,6 +125,36 @@ export const DEFAULT_MD_DATA = [
   }
 ];
 
+export const DEFAULT_OFFICETEL_DATA = [
+  {
+    title: '혁신적인 3룸 평면',
+    desc: '아파트를 대체하는 3룸 구조와 넉넉한 수납공간으로 주거 만족도를 극대화했습니다.',
+    images: [
+      'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&q=80&w=800'
+    ]
+  },
+  {
+    title: '고품격 커뮤니티',
+    desc: '입주민을 위한 피트니스, 실내놀이터, 공유오피스 등 차별화된 커뮤니티 시설을 제공합니다.',
+    images: [
+      'https://images.unsplash.com/photo-1540555700478-4be289fbecee?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&q=80&w=800'
+    ]
+  },
+  {
+    title: '스마트 홈 시스템',
+    desc: '최첨단 IoT 시스템을 적용하여 보안부터 에너지 관리까지 편리한 생활이 가능합니다.',
+    images: [
+      'https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1563770660941-20978e870e26?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1585776245991-cf89dd7fc73a?auto=format&fit=crop&q=80&w=800'
+    ]
+  }
+];
+
 const loadFromLocalStorage = (key: string, defaultValue: any) => {
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem(key);
@@ -150,3 +180,4 @@ const loadProjectInfo = () => {
 export const PROJECT_INFO = loadProjectInfo();
 export const analysisData = loadFromLocalStorage('site_custom_analysis_data', DEFAULT_ANALYSIS_DATA);
 export const mdData = loadFromLocalStorage('site_custom_md_data', DEFAULT_MD_DATA);
+export const officetelData = loadFromLocalStorage('site_custom_officetel_data', DEFAULT_OFFICETEL_DATA);

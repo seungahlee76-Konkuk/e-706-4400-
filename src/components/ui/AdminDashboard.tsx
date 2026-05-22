@@ -10,7 +10,8 @@ import React from 'react';
 import { 
   DEFAULT_PROJECT_INFO, 
   DEFAULT_ANALYSIS_DATA, 
-  DEFAULT_MD_DATA 
+  DEFAULT_MD_DATA,
+  DEFAULT_OFFICETEL_DATA
 } from '../../constants';
 import { auth, db, googleProvider, handleFirestoreError, OperationType } from '@/src/lib/firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
@@ -28,7 +29,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
 
   // Admin Tabs
   const [activeTab, setActiveTab] = useState<'leads' | 'edit' | 'security'>('leads');
-  const [activeSubEdit, setActiveSubEdit] = useState<'general' | 'hero' | 'analysis' | 'md' | 'overview'>('general');
+  const [activeSubEdit, setActiveSubEdit] = useState<'general' | 'hero' | 'analysis' | 'md' | 'overview' | 'officetel'>('general');
 
   // Customizer state
   const [customProjectInfo, setCustomProjectInfo] = useState<any>(() => {
@@ -48,6 +49,11 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
   const [customMd, setCustomMd] = useState<any[]>(() => {
     const saved = localStorage.getItem('site_custom_md_data');
     return saved ? JSON.parse(saved) : DEFAULT_MD_DATA;
+  });
+
+  const [customOfficetel, setCustomOfficetel] = useState<any[]>(() => {
+    const saved = localStorage.getItem('site_custom_officetel_data');
+    return saved ? JSON.parse(saved) : DEFAULT_OFFICETEL_DATA;
   });
 
   // Track Auth and auto-bootstrap designated email account
@@ -266,9 +272,18 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
       image: sanitizeHTML(item.image),
     }));
 
+    const sanitizedOfficetel = customOfficetel.map((item: any) => ({
+      title: sanitizeHTML(item.title || ""),
+      desc: sanitizeHTML(item.desc || ""),
+      images: (item.images || [])
+        .map((img: string) => sanitizeHTML(img || ""))
+        .filter((img: string) => img.trim() !== ""),
+    }));
+
     localStorage.setItem('site_custom_project_info', JSON.stringify(sanitizedProject));
     localStorage.setItem('site_custom_analysis_data', JSON.stringify(sanitizedAnalysis));
     localStorage.setItem('site_custom_md_data', JSON.stringify(sanitizedMd));
+    localStorage.setItem('site_custom_officetel_data', JSON.stringify(sanitizedOfficetel));
 
     // Save to Firestore so everyone gets it
     try {
@@ -276,6 +291,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
         projectInfo: sanitizedProject,
         analysisData: sanitizedAnalysis,
         mdData: sanitizedMd,
+        officetelData: sanitizedOfficetel,
         updatedAt: new Date().toISOString()
       });
       const timestamp = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
@@ -298,6 +314,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
     localStorage.removeItem('site_custom_project_info');
     localStorage.removeItem('site_custom_analysis_data');
     localStorage.removeItem('site_custom_md_data');
+    localStorage.removeItem('site_custom_officetel_data');
 
     // Reset cloud config as well
     try {
@@ -567,7 +584,17 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                           )}
                         >
                           <Table className="w-4 h-4 shrink-0" />
-                          오피스텔 상품안내
+                          사업개요 & 공급타입
+                        </button>
+                        <button
+                          onClick={() => setActiveSubEdit('officetel')}
+                          className={cn(
+                            "px-4 py-2.5 md:py-3 rounded-xl text-xs font-bold text-center md:text-left flex items-center justify-center md:justify-start gap-2 shrink-0 md:w-full transition-all border",
+                            activeSubEdit === 'officetel' ? "bg-primary text-white border-primary shadow-sm" : "bg-white hover:bg-gray-100 border-gray-100"
+                          )}
+                        >
+                          <Database className="w-4 h-4 shrink-0" />
+                          주거용 오피스텔 소개
                         </button>
                         <button
                           onClick={() => setActiveSubEdit('md')}
@@ -1046,6 +1073,86 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                                   </div>
                                 ))}
                               </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 2.4-B Residential Officetel Sponsoring Settings */}
+                        {activeSubEdit === 'officetel' && (
+                          <div className="space-y-8 animate-fade-in">
+                            <div>
+                              <h4 className="text-sm font-extrabold text-gray-900 border-b pb-2 mb-2">주거용 오피스텔 상품안내 편집</h4>
+                              <p className="text-xs text-gray-400 mb-4">주거용 오피스텔 섹션의 3가지 강점 카드(3룸 평면, 커뮤니티, 스마트홈 등)의 타이틀, 설명 및 각 카드별 최대 3장의 슬라이드 이미지를 관리합니다.</p>
+                            </div>
+
+                            <div className="space-y-6">
+                              {customOfficetel.map((item: any, idx: number) => (
+                                <div key={idx} className="p-5 bg-gray-50 rounded-xl border border-gray-150 space-y-4">
+                                  <div className="flex items-center justify-between border-b pb-1.5">
+                                    <span className="text-xs font-black text-[#002C5F] uppercase">
+                                      오피스텔 특장점 파트 #{idx + 1}
+                                    </span>
+                                  </div>
+
+                                  <div className="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                      <label className="text-xs font-bold text-gray-600 block mb-1">타이틀 제목</label>
+                                      <input
+                                        type="text"
+                                        value={item.title || ""}
+                                        onChange={(e) => {
+                                          const updated = [...customOfficetel];
+                                          updated[idx].title = e.target.value;
+                                          setCustomOfficetel(updated);
+                                        }}
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-xs font-bold bg-white"
+                                        placeholder="예: 혁신적인 3룸 평면"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-xs font-bold text-gray-600 block mb-1">한줄 요약 및 상세 설명</label>
+                                      <textarea
+                                        rows={2}
+                                        value={item.desc || ""}
+                                        onChange={(e) => {
+                                          const updated = [...customOfficetel];
+                                          updated[idx].desc = e.target.value;
+                                          setCustomOfficetel(updated);
+                                        }}
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-xs bg-white"
+                                        placeholder="예: 아파트를 대체하는 3룸 구조와 넉넉한 수납공간으로 주거 만족도를 극대화했습니다."
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="space-y-2 pt-2 border-t border-gray-150">
+                                    <label className="text-[10px] font-extrabold text-gray-700 block mb-1">
+                                      이미지 슬라이드 리스트 (최대 3장 등록 가능 - URL 형식)
+                                    </label>
+                                    {[0, 1, 2].map((imgIdx) => (
+                                      <div key={imgIdx} className="flex gap-2 items-center">
+                                        <span className="text-[10px] font-bold text-gray-400 w-16 shrink-0">
+                                          이미지 #{imgIdx + 1}
+                                        </span>
+                                        <input
+                                          type="text"
+                                          placeholder="https://images.unsplash.com/... 이미지 복사 주소 입력"
+                                          value={item.images && item.images[imgIdx] ? item.images[imgIdx] : ""}
+                                          onChange={(e) => {
+                                            const updated = [...customOfficetel];
+                                            if (!updated[idx].images) {
+                                              updated[idx].images = [];
+                                            }
+                                            updated[idx].images[imgIdx] = e.target.value;
+                                            setCustomOfficetel(updated);
+                                          }}
+                                          className="flex-1 px-3 py-1.5 border border-gray-200 rounded text-[11px] font-mono bg-white"
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         )}
