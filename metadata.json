@@ -1,0 +1,6 @@
+{
+  "name": "e편한세상시티 고색 홍보 사이트",
+  "description": "서수원 행정타운의 중심, e편한세상시티 고색 상업시설 및 오피스텔 공식 홍보 웹사이트",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
