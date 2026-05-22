@@ -60,11 +60,30 @@ export default function App() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Robust detection for Ctrl/Alt/Meta + Shift + A
-      const isA = e.key === 'A' || e.key === 'a' || e.key === 'ㅁ' || e.keyCode === 65;
+      // Robust detection for modifier + Shift + (A, K, Q, or Z)
+      const keyUpper = e.key.toUpperCase();
+      const isTargetKey = 
+        keyUpper === 'A' || 
+        keyUpper === 'K' || 
+        keyUpper === 'Q' || 
+        keyUpper === 'Z' || 
+        e.key === 'ㅁ' || // Korean IME 'A' mapping
+        e.key === 'ㅏ' || // Korean IME 'K' mapping
+        e.key === 'ㅂ' || // Korean IME 'Q' mapping
+        e.key === 'ㅋ' || // Korean IME 'Z' mapping
+        e.keyCode === 65 || // A
+        e.keyCode === 75 || // K
+        e.keyCode === 81 || // Q
+        e.keyCode === 90;   // Z
+        
       const hasModifiers = e.ctrlKey || e.altKey || e.metaKey;
       
-      if (hasModifiers && e.shiftKey && isA) {
+      if (hasModifiers && e.shiftKey && isTargetKey) {
+        // Prevent action when user is typing inside an input/textarea
+        const activeEl = document.activeElement;
+        if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+          return;
+        }
         e.preventDefault();
         setIsAdminOpen((prev) => !prev);
       }
