@@ -207,7 +207,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
   };
 
   // Save Configurator Form
-  const handleSaveConfig = () => {
+  const handleSaveConfig = async () => {
     // Sanitizer helper
     const sanitizeHTML = (str: string) => {
       return str
@@ -244,6 +244,22 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
     localStorage.setItem('site_custom_analysis_data', JSON.stringify(sanitizedAnalysis));
     localStorage.setItem('site_custom_md_data', JSON.stringify(sanitizedMd));
 
+    // Save to Firestore so everyone gets it
+    try {
+      await setDoc(doc(db, 'site_config', 'current'), {
+        projectInfo: sanitizedProject,
+        analysisData: sanitizedAnalysis,
+        mdData: sanitizedMd,
+        updatedAt: new Date().toISOString()
+      });
+      const timestamp = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+      setSecurityLogs(prev => [`[${timestamp}] ☁️ 실시간 원격 설정 클라우드(Firestore) 저장 완료`, ...prev]);
+    } catch (fsErr) {
+      console.error('Failed to save to Firestore:', fsErr);
+      const timestamp = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+      setSecurityLogs(prev => [`[${timestamp}] ⚠️ 원격 백업 저장 실패: ${fsErr instanceof Error ? fsErr.message : String(fsErr)}`, ...prev]);
+    }
+
     const timestamp = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
     setSecurityLogs(prev => [`[${timestamp}] ⚙️ 텍스트 및 이미지 설정 변경사항 저장 완료`, ...prev]);
     
@@ -251,11 +267,19 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
     window.location.reload();
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (!confirm('경고: 수정된 모든 이미지와 글자를 공장 초기 세팅으로 원복하시겠습니까?')) return;
     localStorage.removeItem('site_custom_project_info');
     localStorage.removeItem('site_custom_analysis_data');
     localStorage.removeItem('site_custom_md_data');
+
+    // Reset cloud config as well
+    try {
+      await deleteDoc(doc(db, 'site_config', 'current'));
+    } catch (fsErr) {
+      console.error('Failed to delete Firestore site config:', fsErr);
+    }
+
     alert('기본값으로 원 복구되었습니다! 최신 내용을 불러오기 위해 페이지가 새로고침됩니다.');
     window.location.reload();
   };

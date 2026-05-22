@@ -14,14 +14,57 @@ import ContactForm from './sections/ContactForm';
 import QuickMenu from './components/ui/QuickMenu';
 import AdminDashboard from './components/ui/AdminDashboard';
 import StickyBottomForm from './components/ui/StickyBottomForm';
+import { db } from './lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
 
+  // Sync customizations from Firestore to LocalStorage
+  useEffect(() => {
+    const syncDbConfig = async () => {
+      try {
+        const docRef = doc(db, 'site_config', 'current');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          
+          const currentProject = localStorage.getItem('site_custom_project_info');
+          const currentAnalysis = localStorage.getItem('site_custom_analysis_data');
+          const currentMd = localStorage.getItem('site_custom_md_data');
+
+          const serverProjectStr = data.projectInfo ? JSON.stringify(data.projectInfo) : null;
+          const serverAnalysisStr = data.analysisData ? JSON.stringify(data.analysisData) : null;
+          const serverMdStr = data.mdData ? JSON.stringify(data.mdData) : null;
+
+          const isProjectDifferent = serverProjectStr && currentProject !== serverProjectStr;
+          const isAnalysisDifferent = serverAnalysisStr && currentAnalysis !== serverAnalysisStr;
+          const isMdDifferent = serverMdStr && currentMd !== serverMdStr;
+
+          if (isProjectDifferent || isAnalysisDifferent || isMdDifferent) {
+            if (serverProjectStr) localStorage.setItem('site_custom_project_info', serverProjectStr);
+            if (serverAnalysisStr) localStorage.setItem('site_custom_analysis_data', serverAnalysisStr);
+            if (serverMdStr) localStorage.setItem('site_custom_md_data', serverMdStr);
+            
+            // Clean soft reload to update components without visual flicker loops
+            window.location.reload();
+          }
+        }
+      } catch (err) {
+        console.error('Failed to sync remote site config: ', err);
+      }
+    };
+
+    syncDbConfig();
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Check for Alt/Option + Shift + A (also supports Korean keyboard 'ㅁ')
-      if (e.altKey && e.shiftKey && (e.key === 'A' || e.key === 'a' || e.key === 'ㅁ')) {
+      // Robust detection for Ctrl/Alt/Meta + Shift + A
+      const isA = e.key === 'A' || e.key === 'a' || e.key === 'ㅁ' || e.keyCode === 65;
+      const hasModifiers = e.ctrlKey || e.altKey || e.metaKey;
+      
+      if (hasModifiers && e.shiftKey && isA) {
         e.preventDefault();
         setIsAdminOpen((prev) => !prev);
       }

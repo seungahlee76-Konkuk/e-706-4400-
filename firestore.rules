@@ -42,6 +42,12 @@ service cloud.firestore {
       allow get, list, update, delete: if isAdmin();
     }
 
+    // Site configuration updates stored centrally
+    match /site_config/{configId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Administrators catalog mapping table
     match /admins/{adminId} {
       // Admins can be looked up by signed-in users matching their own ID, or any existing admin
