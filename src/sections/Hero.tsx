@@ -64,12 +64,12 @@ export default function Hero() {
           </span>
           {/* Main Headline Below Name */}
           <h1 className="text-2xl sm:text-3xl md:text-6xl lg:text-7xl font-extrabold text-white mb-4 md:mb-6 leading-snug md:leading-[1.1] drop-shadow-[0_4px_15px_rgba(0,0,0,0.4)]">
-            서수원 행정타운의 중심,<br />
-            <span className="text-white">브랜드 프리미엄</span>의 완성
+            {PROJECT_INFO.heroTitleLine1 || '서수원 행정타운의 중심,'}<br />
+            <span className="text-white">{PROJECT_INFO.heroTitleLine2 || '브랜드 프리미엄의 완성'}</span>
           </h1>
           {/* Secondary Slogan Below */}
           <p className="text-xs sm:text-sm md:text-lg text-white/90 font-medium tracking-wide max-w-2xl mx-auto mb-6 md:mb-10 drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
-            서수원의 미래 가치를 선점하는 압도적 브랜드 파워
+            {PROJECT_INFO.heroSubtitle || '서수원의 미래 가치를 선점하는 압도적 브랜드 파워'}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-xs mx-auto sm:max-w-none">
@@ -90,12 +90,12 @@ export default function Hero() {
 
         {/* Feature Grid Layer - Bottom of Hero */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 w-full">
-          {[
+          {(PROJECT_INFO.heroFeatures || [
             { id: "01", label: "4,400세대 항아리 상권", desc: "고색 1·2지구 4,400여 세대의 중심 상업시설" },
             { id: "02", label: "706병상 메디컬 수요", desc: "수원덕산병원 바로 앞 메인 스트리트" },
             { id: "03", label: "1군 브랜드 랜드마크", desc: "서수원의 가치를 리딩하는 e편한세상 상가" },
             { id: "04", label: "행정타운 365일 상권", desc: "권선구청 등 공공기관 500m 이내 직장인 수요" },
-          ].map((item, idx) => (
+          ]).map((item: any, idx: number) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, y: 20 }}

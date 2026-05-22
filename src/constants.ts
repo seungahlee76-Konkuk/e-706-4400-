@@ -20,6 +20,15 @@ export const DEFAULT_PROJECT_INFO = {
     'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2200&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2200&auto=format&fit=crop',
   ],
+  heroTitleLine1: '서수원 행정타운의 중심',
+  heroTitleLine2: '브랜드 프리미엄의 완성',
+  heroSubtitle: '서수원의 미래 가치를 선점하는 압도적 브랜드 파워',
+  heroFeatures: [
+    { id: "01", label: "4,400세대 항아리 상권", desc: "고색 1·2지구 4,400여 세대의 중심 상업시설" },
+    { id: "02", label: "706병상 메디컬 수요", desc: "수원덕산병원 바로 앞 메인 스트리트" },
+    { id: "03", label: "1군 브랜드 랜드마크", desc: "서수원의 가치를 리딩하는 e편한세상 상가" },
+    { id: "04", label: "행정타운 365일 상권", desc: "권선구청 등 공공기관 500m 이내 직장인 수요" },
+  ],
   unitTypes: [
     { type: '84A', units: '302', ratio: '70.2%', areaM2: '84.63', areaPy: '25.60', totalAreaM2: '181.08', totalAreaPy: '54.77', efficiency: '46.7%' },
     { type: '84B', units: '89', ratio: '20.7%', areaM2: '84.51', areaPy: '25.56', totalAreaM2: '181.64', totalAreaPy: '54.94', efficiency: '46.5%' },
@@ -130,6 +139,14 @@ const loadFromLocalStorage = (key: string, defaultValue: any) => {
   return defaultValue;
 };
 
-export const PROJECT_INFO = loadFromLocalStorage('site_custom_project_info', DEFAULT_PROJECT_INFO);
+const loadProjectInfo = () => {
+  const loaded = loadFromLocalStorage('site_custom_project_info', DEFAULT_PROJECT_INFO);
+  return {
+    ...DEFAULT_PROJECT_INFO,
+    ...loaded
+  };
+};
+
+export const PROJECT_INFO = loadProjectInfo();
 export const analysisData = loadFromLocalStorage('site_custom_analysis_data', DEFAULT_ANALYSIS_DATA);
 export const mdData = loadFromLocalStorage('site_custom_md_data', DEFAULT_MD_DATA);

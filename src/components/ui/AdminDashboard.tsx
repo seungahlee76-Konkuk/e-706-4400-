@@ -28,15 +28,15 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
 
   // Admin Tabs
   const [activeTab, setActiveTab] = useState<'leads' | 'edit' | 'security'>('leads');
-  const [activeSubEdit, setActiveSubEdit] = useState<'general' | 'analysis' | 'md'>('general');
+  const [activeSubEdit, setActiveSubEdit] = useState<'general' | 'hero' | 'analysis' | 'md' | 'overview'>('general');
 
   // Customizer state
   const [customProjectInfo, setCustomProjectInfo] = useState<any>(() => {
     const saved = localStorage.getItem('site_custom_project_info');
-    return saved ? JSON.parse(saved) : {
-      name: DEFAULT_PROJECT_INFO.name,
-      representativeNumber: DEFAULT_PROJECT_INFO.representativeNumber,
-      businessHours: DEFAULT_PROJECT_INFO.businessHours,
+    const parsed = saved ? JSON.parse(saved) : {};
+    return {
+      ...DEFAULT_PROJECT_INFO,
+      ...parsed
     };
   });
 
@@ -221,15 +221,41 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
 
     const sanitizedProject = {
       ...DEFAULT_PROJECT_INFO,
-      name: sanitizeHTML(customProjectInfo.name),
-      representativeNumber: sanitizeHTML(customProjectInfo.representativeNumber),
-      businessHours: sanitizeHTML(customProjectInfo.businessHours),
+      ...customProjectInfo,
+      name: sanitizeHTML(customProjectInfo.name || ""),
+      representativeNumber: sanitizeHTML(customProjectInfo.representativeNumber || ""),
+      businessHours: sanitizeHTML(customProjectInfo.businessHours || ""),
+      heroTitleLine1: sanitizeHTML(customProjectInfo.heroTitleLine1 || ""),
+      heroTitleLine2: sanitizeHTML(customProjectInfo.heroTitleLine2 || ""),
+      heroSubtitle: sanitizeHTML(customProjectInfo.heroSubtitle || ""),
+      heroImages: (customProjectInfo.heroImages || []).map((img: string) => sanitizeHTML(img || "")),
+      heroFeatures: (customProjectInfo.heroFeatures || []).map((feat: any) => ({
+        id: sanitizeHTML(feat.id || ""),
+        label: sanitizeHTML(feat.label || ""),
+        desc: sanitizeHTML(feat.desc || ""),
+      })),
+      overview: (customProjectInfo.overview || []).map((item: any) => ({
+        label: sanitizeHTML(item.label || ""),
+        value: sanitizeHTML(item.value || ""),
+      })),
+      unitTypes: (customProjectInfo.unitTypes || []).map((u: any) => ({
+        type: sanitizeHTML(u.type || ""),
+        units: sanitizeHTML(u.units || ""),
+        ratio: sanitizeHTML(u.ratio || ""),
+        areaM2: sanitizeHTML(u.areaM2 || ""),
+        areaPy: sanitizeHTML(u.areaPy || ""),
+        totalAreaM2: sanitizeHTML(u.totalAreaM2 || ""),
+        totalAreaPy: sanitizeHTML(u.totalAreaPy || ""),
+        efficiency: sanitizeHTML(u.efficiency || ""),
+      }))
     };
 
     const sanitizedAnalysis = customAnalysis.map((item: any) => ({
-      title: sanitizeHTML(item.title),
-      desc: sanitizeHTML(item.desc),
-      images: item.images.map((img: string) => sanitizeHTML(img)),
+      title: sanitizeHTML(item.title || ""),
+      desc: sanitizeHTML(item.desc || ""),
+      images: (item.images || [])
+        .map((img: string) => sanitizeHTML(img || ""))
+        .filter((img: string) => img.trim() !== ""),
     }));
 
     const sanitizedMd = customMd.map((item: any) => ({
@@ -514,6 +540,16 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                           기본 설정 정보
                         </button>
                         <button
+                          onClick={() => setActiveSubEdit('hero')}
+                          className={cn(
+                            "px-4 py-2.5 md:py-3 rounded-xl text-xs font-bold text-center md:text-left flex items-center justify-center md:justify-start gap-2 shrink-0 md:w-full transition-all border",
+                            activeSubEdit === 'hero' ? "bg-primary text-white border-primary shadow-sm" : "bg-white hover:bg-gray-100 border-gray-100"
+                          )}
+                        >
+                          <RefreshCw className="w-4 h-4 shrink-0" />
+                          메인 히어로 설정
+                        </button>
+                        <button
                           onClick={() => setActiveSubEdit('analysis')}
                           className={cn(
                             "px-4 py-2.5 md:py-3 rounded-xl text-xs font-bold text-center md:text-left flex items-center justify-center md:justify-start gap-2 shrink-0 md:w-full transition-all border",
@@ -522,6 +558,16 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                         >
                           <Eye className="w-4 h-4 shrink-0" />
                           입지분석 카드
+                        </button>
+                        <button
+                          onClick={() => setActiveSubEdit('overview')}
+                          className={cn(
+                            "px-4 py-2.5 md:py-3 rounded-xl text-xs font-bold text-center md:text-left flex items-center justify-center md:justify-start gap-2 shrink-0 md:w-full transition-all border",
+                            activeSubEdit === 'overview' ? "bg-primary text-white border-primary shadow-sm" : "bg-white hover:bg-gray-100 border-gray-100"
+                          )}
+                        >
+                          <Table className="w-4 h-4 shrink-0" />
+                          오피스텔 상품안내
                         </button>
                         <button
                           onClick={() => setActiveSubEdit('md')}
@@ -594,7 +640,126 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                           </div>
                         )}
 
-                        {/* 2.2 Location Analysis Cards */}
+                        {/* 2.2 Hero Banner Settings */}
+                        {activeSubEdit === 'hero' && (
+                          <div className="space-y-8 animate-fade-in">
+                            <div>
+                              <h4 className="text-sm font-extrabold text-gray-900 border-b pb-2 mb-2">메인 히어로 섹션 편집</h4>
+                              <p className="text-xs text-gray-400 mb-4">홈페이지 최상단 히어로 배너의 비주얼 이미지, 타이틀, 슬로건 및 핵심 카드를 맞춤 설정합니다.</p>
+                            </div>
+
+                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-4">
+                              <span className="text-xs font-extrabold text-[#002C5F] uppercase block">헤드라인 타이틀 & 설명글선</span>
+                              
+                              <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-xs font-bold text-gray-600 block mb-1">메인 카피 타이틀 (1번째 줄)</label>
+                                  <input
+                                    type="text"
+                                    value={customProjectInfo.heroTitleLine1 || ""}
+                                    onChange={(e) => setCustomProjectInfo({ ...customProjectInfo, heroTitleLine1: e.target.value })}
+                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-xs font-bold"
+                                    placeholder="서수원 행정타운의 중심,"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-bold text-gray-600 block mb-1">메인 카피 타이틀 (2번째 줄 - 강조)</label>
+                                  <input
+                                    type="text"
+                                    value={customProjectInfo.heroTitleLine2 || ""}
+                                    onChange={(e) => setCustomProjectInfo({ ...customProjectInfo, heroTitleLine2: e.target.value })}
+                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-xs font-bold"
+                                    placeholder="브랜드 프리미엄의 완성"
+                                  />
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="text-xs font-bold text-gray-600 block mb-1">보조 슬로건/설명문</label>
+                                <input
+                                  type="text"
+                                  value={customProjectInfo.heroSubtitle || ""}
+                                  onChange={(e) => setCustomProjectInfo({ ...customProjectInfo, heroSubtitle: e.target.value })}
+                                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-xs"
+                                  placeholder="서수원의 미래 가치를 선점하는 압도적 브랜드 파워"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Background Images */}
+                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-4">
+                              <span className="text-xs font-extrabold text-[#002C5F] uppercase block">배경 슬라이드 쇼 이미지 (최대 4장)</span>
+                              <div className="space-y-2">
+                                {[0, 1, 2, 3].map((imgIdx) => (
+                                  <div key={imgIdx} className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-gray-400 w-16 shrink-0">배경 #{imgIdx + 1}</span>
+                                    <input
+                                      type="text"
+                                      placeholder="https://images.unsplash.com/... 이미지 URL 주소 복사 입력"
+                                      value={customProjectInfo.heroImages ? (customProjectInfo.heroImages[imgIdx] || "") : ""}
+                                      onChange={(e) => {
+                                        const updatedImages = [...(customProjectInfo.heroImages || [])];
+                                        updatedImages[imgIdx] = e.target.value;
+                                        setCustomProjectInfo({ ...customProjectInfo, heroImages: updatedImages });
+                                      }}
+                                      className="flex-1 px-3 py-1.5 border border-gray-200 rounded text-[11px] font-mono"
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Hero Feature Grid (4 items) */}
+                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-4">
+                              <span className="text-xs font-extrabold text-[#002C5F] uppercase block">하단 고정 핵심 강조문 (4가지 포인트)</span>
+                              <div className="grid md:grid-cols-2 gap-4">
+                                {[0, 1, 2, 3].map((featIdx) => {
+                                  const cFeatures = customProjectInfo.heroFeatures || [];
+                                  const currentFeat = cFeatures[featIdx] || { id: `0${featIdx + 1}`, label: "", desc: "" };
+                                  return (
+                                    <div key={featIdx} className="p-3 bg-white border border-gray-100 rounded-lg space-y-2">
+                                      <div className="text-xs font-bold text-accent">강조 요약 #{featIdx + 1}</div>
+                                      <div>
+                                        <label className="text-[10px] font-bold text-gray-500 block">메인 한줄 요약 타이틀</label>
+                                        <input
+                                          type="text"
+                                          value={currentFeat.label || ""}
+                                          onChange={(e) => {
+                                            const updatedFeats = [...cFeatures];
+                                            while (updatedFeats.length <= featIdx) {
+                                              updatedFeats.push({ id: `0${updatedFeats.length + 1}`, label: "", desc: "" });
+                                            }
+                                            updatedFeats[featIdx] = { ...updatedFeats[featIdx], label: e.target.value };
+                                            setCustomProjectInfo({ ...customProjectInfo, heroFeatures: updatedFeats });
+                                          }}
+                                          className="w-full px-2.5 py-1 border border-gray-200 rounded text-xs font-bold"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-[10px] font-bold text-gray-500 block">설명 및 부제</label>
+                                        <input
+                                          type="text"
+                                          value={currentFeat.desc || ""}
+                                          onChange={(e) => {
+                                            const updatedFeats = [...cFeatures];
+                                            while (updatedFeats.length <= featIdx) {
+                                              updatedFeats.push({ id: `0${updatedFeats.length + 1}`, label: "", desc: "" });
+                                            }
+                                            updatedFeats[featIdx] = { ...updatedFeats[featIdx], desc: e.target.value };
+                                            setCustomProjectInfo({ ...customProjectInfo, heroFeatures: updatedFeats });
+                                          }}
+                                          className="w-full px-2.5 py-1 border border-gray-200 rounded text-xs"
+                                        />
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 2.3 Location Analysis Cards */}
                         {activeSubEdit === 'analysis' && (
                           <div className="space-y-8">
                             <div>
@@ -637,25 +802,255 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                                   </div>
                                 </div>
 
-                                <div>
-                                  <label className="text-[10px] font-extrabold text-gray-500 uppercase block mb-1">이미지 리포지토리 URL 1 (Unsplash 등)</label>
-                                  <input
-                                    type="text"
-                                    value={item.images[0] || ""}
-                                    onChange={(e) => {
-                                      const updated = [...customAnalysis];
-                                      updated[idx].images[0] = e.target.value;
-                                      setCustomAnalysis(updated);
-                                    }}
-                                    className="w-full px-3 py-1 border border-gray-200 rounded text-[11px] font-mono"
-                                  />
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-extrabold text-gray-700 block">이미지 슬라이드 리스트 (최대 4개 - 3개 이상 등록 가능)</label>
+                                  {[0, 1, 2, 3].map((imgIdx) => (
+                                    <div key={imgIdx} className="flex items-center gap-2">
+                                      <span className="text-[10px] font-bold text-gray-400 w-16 shrink-0">이미지 #{imgIdx + 1}</span>
+                                      <input
+                                        type="text"
+                                        placeholder="이미지 복사 URL 입력"
+                                        value={item.images && item.images[imgIdx] ? item.images[imgIdx] : ""}
+                                        onChange={(e) => {
+                                          const updated = [...customAnalysis];
+                                          if (!updated[idx].images) {
+                                            updated[idx].images = [];
+                                          }
+                                          updated[idx].images[imgIdx] = e.target.value;
+                                          setCustomAnalysis(updated);
+                                        }}
+                                        className="flex-1 px-3 py-1.5 border border-gray-200 rounded text-[11px] font-mono"
+                                      />
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
                             ))}
                           </div>
                         )}
 
-                        {/* 2.3 Commercial Spot Recommendations */}
+                        {/* 2.4 Project Overview & Officetel Sizing Settings */}
+                        {activeSubEdit === 'overview' && (
+                          <div className="space-y-8 animate-fade-in">
+                            <div>
+                              <h4 className="text-sm font-extrabold text-gray-900 border-b pb-2 mb-2">사업개요 및 오피스텔 공급안내 편집</h4>
+                              <p className="text-xs text-gray-400 mb-4">건축 토지 면적 개요 리스트와 오피스텔 주요 타입별 전용/계약면적 및 룸 공급비율 등을 가공합니다.</p>
+                            </div>
+
+                            {/* Project Overview Details */}
+                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-4">
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs font-extrabold text-[#002C5F] uppercase block">건축 사업개요 기술표</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = [...(customProjectInfo.overview || [])];
+                                    updated.push({ label: "신규 항목", value: "신내용 입력" });
+                                    setCustomProjectInfo({ ...customProjectInfo, overview: updated });
+                                  }}
+                                  className="px-2.5 py-1 bg-[#002C5F] hover:bg-[#002C5F]/90 text-white text-[10px] font-bold rounded-lg transition-all"
+                                >
+                                  + 행 추가
+                                </button>
+                              </div>
+
+                              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                                {(customProjectInfo.overview || []).map((item: any, idx: number) => (
+                                  <div key={idx} className="flex gap-2 items-center bg-white p-2 border border-gray-150 rounded-lg">
+                                    <input
+                                      type="text"
+                                      placeholder="분류명 (예: 대지위치)"
+                                      value={item.label || ""}
+                                      onChange={(e) => {
+                                        const updated = [...(customProjectInfo.overview || [])];
+                                        updated[idx].label = e.target.value;
+                                        setCustomProjectInfo({ ...customProjectInfo, overview: updated });
+                                      }}
+                                      className="w-1/4 px-2 py-1.5 border border-gray-200 rounded text-xs font-bold"
+                                    />
+                                    <input
+                                      type="text"
+                                      placeholder="대지 고색동 894-125... 기재내용"
+                                      value={item.value || ""}
+                                      onChange={(e) => {
+                                        const updated = [...(customProjectInfo.overview || [])];
+                                        updated[idx].value = e.target.value;
+                                        setCustomProjectInfo({ ...customProjectInfo, overview: updated });
+                                      }}
+                                      className="flex-1 px-2 py-1.5 border border-gray-200 rounded text-xs"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const updated = (customProjectInfo.overview || []).filter((_: any, i: number) => i !== idx);
+                                        setCustomProjectInfo({ ...customProjectInfo, overview: updated });
+                                      }}
+                                      className="text-red-500 hover:text-red-700 p-1.5 text-xs font-extrabold shrink-0"
+                                    >
+                                      삭제
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Officetel Type Details */}
+                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-4">
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs font-extrabold text-[#002C5F] uppercase block">오피스텔 공급 주택형 타입 세부평정</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = [...(customProjectInfo.unitTypes || [])];
+                                    updated.push({
+                                      type: '84A-New',
+                                      units: '100',
+                                      ratio: '25%',
+                                      areaM2: '84.00',
+                                      areaPy: '25.4',
+                                      totalAreaM2: '180.00',
+                                      totalAreaPy: '54.5',
+                                      efficiency: '46.5%'
+                                    });
+                                    setCustomProjectInfo({ ...customProjectInfo, unitTypes: updated });
+                                  }}
+                                  className="px-2.5 py-1 bg-[#002C5F] hover:bg-[#002C5F]/90 text-white text-[10px] font-bold rounded-lg transition-all"
+                                >
+                                  + 주택타입 추가
+                                </button>
+                              </div>
+
+                              <div className="space-y-4 max-h-[420px] overflow-y-auto pr-1">
+                                {(customProjectInfo.unitTypes || []).map((u: any, idx: number) => (
+                                  <div key={idx} className="p-4 bg-white border border-gray-200 rounded-xl space-y-3 relative">
+                                    <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-xs font-extrabold text-[#002C5F]">타입 규격명</span>
+                                        <input
+                                          type="text"
+                                          value={u.type || ""}
+                                          placeholder="예: 84A"
+                                          onChange={(e) => {
+                                            const updated = [...(customProjectInfo.unitTypes || [])];
+                                            updated[idx].type = e.target.value;
+                                            setCustomProjectInfo({ ...customProjectInfo, unitTypes: updated });
+                                          }}
+                                          className="w-20 px-2 py-0.5 border border-gray-300 rounded text-xs font-black text-center"
+                                        />
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const updated = (customProjectInfo.unitTypes || []).filter((_: any, i: number) => i !== idx);
+                                          setCustomProjectInfo({ ...customProjectInfo, unitTypes: updated });
+                                        }}
+                                        className="text-red-500 hover:text-red-700 text-xs font-extrabold"
+                                      >
+                                        타입 삭제
+                                      </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                                      <div>
+                                        <label className="text-[10px] font-bold text-gray-400 block mb-0.5">분양 세대수</label>
+                                        <input
+                                          type="text"
+                                          value={u.units || ""}
+                                          onChange={(e) => {
+                                            const updated = [...(customProjectInfo.unitTypes || [])];
+                                            updated[idx].units = e.target.value;
+                                            setCustomProjectInfo({ ...customProjectInfo, unitTypes: updated });
+                                          }}
+                                          className="w-full px-2 py-1 border border-gray-200 rounded text-xs font-medium"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-[10px] font-bold text-gray-400 block mb-0.5">공급 비율</label>
+                                        <input
+                                          type="text"
+                                          value={u.ratio || ""}
+                                          onChange={(e) => {
+                                            const updated = [...(customProjectInfo.unitTypes || [])];
+                                            updated[idx].ratio = e.target.value;
+                                            setCustomProjectInfo({ ...customProjectInfo, unitTypes: updated });
+                                          }}
+                                          className="w-full px-2 py-1 border border-gray-200 rounded text-xs"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-[10px] font-bold text-gray-400 block mb-0.5">전용면적 (㎡)</label>
+                                        <input
+                                          type="text"
+                                          value={u.areaM2 || ""}
+                                          onChange={(e) => {
+                                            const updated = [...(customProjectInfo.unitTypes || [])];
+                                            updated[idx].areaM2 = e.target.value;
+                                            setCustomProjectInfo({ ...customProjectInfo, unitTypes: updated });
+                                          }}
+                                          className="w-full px-2 py-1 border border-gray-200 rounded text-xs font-mono"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-[10px] font-bold text-gray-400 block mb-0.5">전용면적 (평)</label>
+                                        <input
+                                          type="text"
+                                          value={u.areaPy || ""}
+                                          onChange={(e) => {
+                                            const updated = [...(customProjectInfo.unitTypes || [])];
+                                            updated[idx].areaPy = e.target.value;
+                                            setCustomProjectInfo({ ...customProjectInfo, unitTypes: updated });
+                                          }}
+                                          className="w-full px-2 py-1 border border-gray-200 rounded text-xs font-mono"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-[10px] font-bold text-gray-400 block mb-0.5">계약면적 (㎡)</label>
+                                        <input
+                                          type="text"
+                                          value={u.totalAreaM2 || ""}
+                                          onChange={(e) => {
+                                            const updated = [...(customProjectInfo.unitTypes || [])];
+                                            updated[idx].totalAreaM2 = e.target.value;
+                                            setCustomProjectInfo({ ...customProjectInfo, unitTypes: updated });
+                                          }}
+                                          className="w-full px-2 py-1 border border-gray-200 rounded text-xs font-mono"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-[10px] font-bold text-gray-400 block mb-0.5">계약면적 (평)</label>
+                                        <input
+                                          type="text"
+                                          value={u.totalAreaPy || ""}
+                                          onChange={(e) => {
+                                            const updated = [...(customProjectInfo.unitTypes || [])];
+                                            updated[idx].totalAreaPy = e.target.value;
+                                            setCustomProjectInfo({ ...customProjectInfo, unitTypes: updated });
+                                          }}
+                                          className="w-full px-2 py-1 border border-gray-200 rounded text-xs font-mono"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-[10px] font-bold text-gray-400 block mb-0.5">전용률</label>
+                                        <input
+                                          type="text"
+                                          value={u.efficiency || ""}
+                                          onChange={(e) => {
+                                            const updated = [...(customProjectInfo.unitTypes || [])];
+                                            updated[idx].efficiency = e.target.value;
+                                            setCustomProjectInfo({ ...customProjectInfo, unitTypes: updated });
+                                          }}
+                                          className="w-full px-2 py-1 border border-gray-200 rounded text-xs"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 2.5 Commercial Spot Recommendations */}
                         {activeSubEdit === 'md' && (
                           <div className="space-y-8">
                             <div>
