@@ -6,15 +6,25 @@ import { PROJECT_INFO } from '../constants';
 
 export default function Hero() {
   const [currentImage, setCurrentImage] = useState(0);
-  const heroImages = PROJECT_INFO.heroImages;
+
+  // Filter out any empty URLs to cleanly support 3 or other custom counts of images
+  const rawImages = PROJECT_INFO.heroImages || [];
+  const heroImages = rawImages.filter((img: string) => img && img.trim() !== "");
+  
+  // Fallback if no images are specified
+  const finalHeroImages = heroImages.length > 0 ? heroImages : [
+    'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=2200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2200&auto=format&fit=crop',
+  ];
 
   const nextSlide = useCallback(() => {
-    setCurrentImage((prev) => (prev + 1) % heroImages.length);
-  }, [heroImages.length]);
+    setCurrentImage((prev) => (prev + 1) % finalHeroImages.length);
+  }, [finalHeroImages.length]);
 
   const prevSlide = useCallback(() => {
-    setCurrentImage((prev) => (prev - 1 + heroImages.length) % heroImages.length);
-  }, [heroImages.length]);
+    setCurrentImage((prev) => (prev - 1 + finalHeroImages.length) % finalHeroImages.length);
+  }, [finalHeroImages.length]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -37,17 +47,21 @@ export default function Hero() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.5, ease: "easeInOut" }}
-            className="absolute inset-0 bg-cover bg-center brightness-[0.85] contrast-[1.05]"
+            className="absolute inset-0 bg-cover bg-center brightness-[0.8] contrast-[1.03]"
             style={{ 
-              backgroundImage: `url('${heroImages[currentImage]}')`,
+              backgroundImage: `url('${finalHeroImages[currentImage]}')`,
               referrerPolicy: 'no-referrer' as any
             }}
           />
         </AnimatePresence>
         
-        {/* Transparent Overlay for Text Contrast */}
-        <div className="absolute inset-0 bg-black/20 z-[1]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 z-[2]" />
+        {/* Center-focused dark gradient: Lighter at top/bottom, highly readable in middle text-zone */}
+        <div 
+          className="absolute inset-0 z-[2]" 
+          style={{
+            background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.72) 40%, rgba(0, 0, 0, 0.72) 65%, rgba(0, 0, 0, 0.2) 100%)'
+          }}
+        />
       </div>
 
       {/* Main Content Layer */}
@@ -56,19 +70,19 @@ export default function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mb-8 md:mb-12 mt-8 md:mt-0"
+          className="mb-8 md:mb-12 mt-8 md:mt-0 max-w-4xl w-full"
         >
           {/* Brand Name on Top */}
-          <span className="text-accent text-sm sm:text-base md:text-xl font-black tracking-wider uppercase mb-3 block drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+          <span className="text-accent text-sm sm:text-base md:text-xl font-black tracking-wider uppercase mb-3 block drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
             {PROJECT_INFO.name} 상업시설 & 오피스텔
           </span>
           {/* Main Headline Below Name */}
-          <h1 className="text-2xl sm:text-3xl md:text-6xl lg:text-7xl font-extrabold text-white mb-4 md:mb-6 leading-snug md:leading-[1.1] drop-shadow-[0_4px_15px_rgba(0,0,0,0.4)]">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 md:mb-6 leading-snug md:leading-[1.1] drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)]">
             {PROJECT_INFO.heroTitleLine1 || '서수원 행정타운의 중심,'}<br />
             <span className="text-white">{PROJECT_INFO.heroTitleLine2 || '브랜드 프리미엄의 완성'}</span>
           </h1>
           {/* Secondary Slogan Below */}
-          <p className="text-xs sm:text-sm md:text-lg text-white/90 font-medium tracking-wide max-w-2xl mx-auto mb-6 md:mb-10 drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+          <p className="text-xs sm:text-sm md:text-base text-white/95 font-medium tracking-wide max-w-2xl mx-auto mb-6 md:mb-10 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
             {PROJECT_INFO.heroSubtitle || '서수원의 미래 가치를 선점하는 압도적 브랜드 파워'}
           </p>
           
@@ -131,7 +145,7 @@ export default function Hero() {
 
       {/* Pagination Layer */}
       <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-[10] flex gap-3">
-        {heroImages.map((_, idx) => (
+        {finalHeroImages.map((_, idx) => (
           <button
             key={idx}
             onClick={() => setCurrentImage(idx)}
