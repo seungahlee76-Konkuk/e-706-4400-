@@ -2,13 +2,8 @@ import { initializeApp } from 'firebase/app';
   import { getAuth, GoogleAuthProvider } from 'firebase/auth';
   import { getFirestore } from 'firebase/firestore';
   import firebaseConfig from '../../firebase-applet-config.json';
-// 넷플리파이 금고에서 진짜 열쇠를 꺼내와서 덮어씌우는 마법의 코드
-const finalConfig = {
-  ...firebaseConfig,
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY
-};
 
-  const app = initializeApp(finalConfig);
+  const app = initializeApp(firebaseConfig);
   export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId); /* CRITICAL: The app will break without this line */
   export const auth = getAuth(app);
   export const googleProvider = new GoogleAuthProvider();

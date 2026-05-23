@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, Table, Download, Trash2, ShieldCheck, Edit, Settings, Database, 
-  AlertTriangle, KeyRound, Eye, RefreshCw
+  AlertTriangle, KeyRound, Eye, RefreshCw, Upload
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/src/lib/utils';
@@ -23,6 +23,65 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
   const [isAdminVerified, setIsAdminVerified] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [securityLogs, setSecurityLogs] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Read local image file and compress it to fit Firestore/localStorage limitations
+  const compressAndConvertImage = (file: File, callback: (base64: string) => void) => {
+    setIsUploading(true);
+    const timestamp = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+    setSecurityLogs(prev => [`[${timestamp}] 📁 파일 분석 중: ${file.name} (${(file.size / 1024).toFixed(1)} KB)...`, ...prev]);
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1000; // Optimal size for high-def web views but lightweight base64
+        const MAX_HEIGHT = 1000;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          // Compress with 0.75 quality to dramatically reduce size while preserving excellent clarity
+          const compressed = canvas.toDataURL('image/jpeg', 0.75);
+          setIsUploading(false);
+          const compressedKb = Math.round((compressed.length * 0.75) / 1024);
+          const finalTs = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+          setSecurityLogs(prev => [`[${finalTs}] 🚀 이미지 가속 축소 완료: ${compressedKb} KB로 압축`, ...prev]);
+          callback(compressed);
+        } else {
+          setIsUploading(false);
+          callback(e.target?.result as string);
+        }
+      };
+      img.onerror = () => {
+        setIsUploading(false);
+        callback(reader.result as string);
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => {
+      setIsUploading(false);
+      alert('파일을 읽는 과정에서 오류가 발생했습니다.');
+    };
+    reader.readAsDataURL(file);
+  };
   
   // Mapping for existing markup references
   const isAuthenticated = isAdminVerified;
@@ -214,8 +273,11 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
 
   // Save Configurator Form
   const handleSaveConfig = async () => {
-    // Sanitizer helper
+    // Sanitizer helper - skips base64 and standard image URLs to prevent corruption
     const sanitizeHTML = (str: string) => {
+      if (str.startsWith('data:') || str.startsWith('http://') || str.startsWith('https://')) {
+        return str;
+      }
       return str
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -718,19 +780,40 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                               <span className="text-xs font-extrabold text-[#002C5F] uppercase block">배경 슬라이드 쇼 이미지 (최대 4장)</span>
                               <div className="space-y-2">
                                 {[0, 1, 2, 3].map((imgIdx) => (
-                                  <div key={imgIdx} className="flex items-center gap-2">
+                                  <div key={imgIdx} className="flex flex-col sm:flex-row sm:items-center gap-2">
                                     <span className="text-xs font-bold text-gray-400 w-16 shrink-0">배경 #{imgIdx + 1}</span>
-                                    <input
-                                      type="text"
-                                      placeholder="https://images.unsplash.com/... 이미지 URL 주소 복사 입력"
-                                      value={customProjectInfo.heroImages ? (customProjectInfo.heroImages[imgIdx] || "") : ""}
-                                      onChange={(e) => {
-                                        const updatedImages = [...(customProjectInfo.heroImages || [])];
-                                        updatedImages[imgIdx] = e.target.value;
-                                        setCustomProjectInfo({ ...customProjectInfo, heroImages: updatedImages });
-                                      }}
-                                      className="flex-1 px-3 py-1.5 border border-gray-200 rounded text-[11px] font-mono"
-                                    />
+                                    <div className="flex-1 flex gap-2">
+                                      <input
+                                        type="text"
+                                        placeholder="https://images.unsplash.com/... 이미지 URL 주소 혹은 우측 파일 업로드"
+                                        value={customProjectInfo.heroImages ? (customProjectInfo.heroImages[imgIdx] || "") : ""}
+                                        onChange={(e) => {
+                                          const updatedImages = [...(customProjectInfo.heroImages || [])];
+                                          updatedImages[imgIdx] = e.target.value;
+                                          setCustomProjectInfo({ ...customProjectInfo, heroImages: updatedImages });
+                                        }}
+                                        className="flex-1 px-3 py-1.5 border border-gray-200 rounded text-[11px] font-mono"
+                                      />
+                                      <label className="flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-gray-50 text-gray-700 text-[10px] font-bold rounded cursor-pointer border border-gray-300 shadow-sm transition-all shrink-0 whitespace-nowrap active:scale-[0.98]">
+                                        <Upload className="w-2.5 h-2.5" />
+                                        업로드
+                                        <input
+                                          type="file"
+                                          accept="image/*"
+                                          onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                              compressAndConvertImage(file, (base64) => {
+                                                const updatedImages = [...(customProjectInfo.heroImages || [])];
+                                                updatedImages[imgIdx] = base64;
+                                                setCustomProjectInfo({ ...customProjectInfo, heroImages: updatedImages });
+                                              });
+                                            }
+                                          }}
+                                          className="hidden"
+                                        />
+                                      </label>
+                                    </div>
                                   </div>
                                 ))}
                               </div>
@@ -832,22 +915,46 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                                 <div className="space-y-2">
                                   <label className="text-[10px] font-extrabold text-gray-700 block">이미지 슬라이드 리스트 (최대 4개 - 3개 이상 등록 가능)</label>
                                   {[0, 1, 2, 3].map((imgIdx) => (
-                                    <div key={imgIdx} className="flex items-center gap-2">
+                                    <div key={imgIdx} className="flex flex-col sm:flex-row sm:items-center gap-2">
                                       <span className="text-[10px] font-bold text-gray-400 w-16 shrink-0">이미지 #{imgIdx + 1}</span>
-                                      <input
-                                        type="text"
-                                        placeholder="이미지 복사 URL 입력"
-                                        value={item.images && item.images[imgIdx] ? item.images[imgIdx] : ""}
-                                        onChange={(e) => {
-                                          const updated = [...customAnalysis];
-                                          if (!updated[idx].images) {
-                                            updated[idx].images = [];
-                                          }
-                                          updated[idx].images[imgIdx] = e.target.value;
-                                          setCustomAnalysis(updated);
-                                        }}
-                                        className="flex-1 px-3 py-1.5 border border-gray-200 rounded text-[11px] font-mono"
-                                      />
+                                      <div className="flex-1 flex gap-2">
+                                        <input
+                                          type="text"
+                                          placeholder="이미지 복사 URL 또는 우측 파일 업로드"
+                                          value={item.images && item.images[imgIdx] ? item.images[imgIdx] : ""}
+                                          onChange={(e) => {
+                                            const updated = [...customAnalysis];
+                                            if (!updated[idx].images) {
+                                              updated[idx].images = [];
+                                            }
+                                            updated[idx].images[imgIdx] = e.target.value;
+                                            setCustomAnalysis(updated);
+                                          }}
+                                          className="flex-1 px-3 py-1.5 border border-gray-200 rounded text-[11px] font-mono bg-white"
+                                        />
+                                        <label className="flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-gray-50 text-gray-700 text-[10px] font-bold rounded cursor-pointer border border-gray-300 shadow-sm transition-all shrink-0 whitespace-nowrap active:scale-[0.98]">
+                                          <Upload className="w-2.5 h-2.5" />
+                                          업로드
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                              const file = e.target.files?.[0];
+                                              if (file) {
+                                                compressAndConvertImage(file, (base64) => {
+                                                  const updated = [...customAnalysis];
+                                                  if (!updated[idx].images) {
+                                                    updated[idx].images = [];
+                                                  }
+                                                  updated[idx].images[imgIdx] = base64;
+                                                  setCustomAnalysis(updated);
+                                                });
+                                              }
+                                            }}
+                                            className="hidden"
+                                          />
+                                        </label>
+                                      </div>
                                     </div>
                                   ))}
                                 </div>
@@ -1130,24 +1237,48 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                                       이미지 슬라이드 리스트 (최대 3장 등록 가능 - URL 형식)
                                     </label>
                                     {[0, 1, 2].map((imgIdx) => (
-                                      <div key={imgIdx} className="flex gap-2 items-center">
-                                        <span className="text-[10px] font-bold text-gray-400 w-16 shrink-0">
+                                      <div key={imgIdx} className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                        <span className="text-[10px] font-bold text-gray-400 w-16 shrink-0 font-sans">
                                           이미지 #{imgIdx + 1}
                                         </span>
-                                        <input
-                                          type="text"
-                                          placeholder="https://images.unsplash.com/... 이미지 복사 주소 입력"
-                                          value={item.images && item.images[imgIdx] ? item.images[imgIdx] : ""}
-                                          onChange={(e) => {
-                                            const updated = [...customOfficetel];
-                                            if (!updated[idx].images) {
-                                              updated[idx].images = [];
-                                            }
-                                            updated[idx].images[imgIdx] = e.target.value;
-                                            setCustomOfficetel(updated);
-                                          }}
-                                          className="flex-1 px-3 py-1.5 border border-gray-200 rounded text-[11px] font-mono bg-white"
-                                        />
+                                        <div className="flex-1 flex gap-2">
+                                          <input
+                                            type="text"
+                                            placeholder="https://images.unsplash.com/... 이미지 복사 주소 또는 우측 파일 업로드"
+                                            value={item.images && item.images[imgIdx] ? item.images[imgIdx] : ""}
+                                            onChange={(e) => {
+                                              const updated = [...customOfficetel];
+                                              if (!updated[idx].images) {
+                                                updated[idx].images = [];
+                                              }
+                                              updated[idx].images[imgIdx] = e.target.value;
+                                              setCustomOfficetel(updated);
+                                            }}
+                                            className="flex-1 px-3 py-1.5 border border-gray-200 rounded text-[11px] font-mono bg-white"
+                                          />
+                                          <label className="flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-gray-50 text-gray-750 text-[10px] font-bold rounded cursor-pointer border border-gray-300 shadow-sm transition-all shrink-0 whitespace-nowrap active:scale-[0.98]">
+                                            <Upload className="w-2.5 h-2.5" />
+                                            업로드
+                                            <input
+                                              type="file"
+                                              accept="image/*"
+                                              onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                  compressAndConvertImage(file, (base64) => {
+                                                    const updated = [...customOfficetel];
+                                                    if (!updated[idx].images) {
+                                                      updated[idx].images = [];
+                                                    }
+                                                    updated[idx].images[imgIdx] = base64;
+                                                    setCustomOfficetel(updated);
+                                                  });
+                                                }
+                                              }}
+                                              className="hidden"
+                                            />
+                                          </label>
+                                        </div>
                                       </div>
                                     ))}
                                   </div>
@@ -1227,17 +1358,39 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                                   </div>
 
                                   <div>
-                                    <label className="text-[10px] font-bold text-gray-500 block">대표 샵 홍보 이미지 URL</label>
-                                    <input
-                                      type="text"
-                                      value={item.image}
-                                      onChange={(e) => {
-                                        const updated = [...customMd];
-                                        updated[idx].image = e.target.value;
-                                        setCustomMd(updated);
-                                      }}
-                                      className="w-full px-2 py-1 border rounded text-[10px] font-mono"
-                                    />
+                                    <label className="text-[10px] font-bold text-gray-500 block mb-0.5">대표 샵 홍보 이미지 URL 또는 파일 업로드</label>
+                                    <div className="flex gap-2">
+                                      <input
+                                        type="text"
+                                        value={item.image}
+                                        placeholder="이미지 URL 주소 또는 우측 파일 업로드"
+                                        onChange={(e) => {
+                                          const updated = [...customMd];
+                                          updated[idx].image = e.target.value;
+                                          setCustomMd(updated);
+                                        }}
+                                        className="flex-1 px-2 py-1 border rounded text-[10px] font-mono"
+                                      />
+                                      <label className="flex items-center gap-1 px-2 py-1 bg-white hover:bg-gray-50 text-gray-700 text-[10px] font-bold rounded cursor-pointer border border-gray-300 shadow-sm transition-all shrink-0 whitespace-nowrap active:scale-[0.98]">
+                                        <Upload className="w-2.5 h-2.5" />
+                                        업로드
+                                        <input
+                                          type="file"
+                                          accept="image/*"
+                                          onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                              compressAndConvertImage(file, (base64) => {
+                                                const updated = [...customMd];
+                                                updated[idx].image = base64;
+                                                setCustomMd(updated);
+                                              });
+                                            }
+                                          }}
+                                          className="hidden"
+                                        />
+                                      </label>
+                                    </div>
                                   </div>
                                 </div>
                               ))}

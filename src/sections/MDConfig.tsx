@@ -4,7 +4,10 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { mdData, officetelData } from '../constants';
 
 export default function MDConfig() {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(() => {
+    const idx = mdData.findIndex(item => item.id === '118호');
+    return idx !== -1 ? idx : 0;
+  });
 
   const nextSlide = () => setActiveIndex((prev) => (prev + 1) % mdData.length);
   const prevSlide = () => setActiveIndex((prev) => (prev - 1 + mdData.length) % mdData.length);
@@ -83,10 +86,10 @@ export default function MDConfig() {
             </div>
           </div>
 
-          <div className="overflow-hidden bg-white border border-stone-250/50 p-6 sm:p-8 rounded-none">
+          <div className="overflow-hidden bg-white p-6 sm:p-8 rounded-none">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b-2 border-stone-900 pb-4">
+                <tr className="border-b border-stone-200 pb-4">
                   <th className="py-4 px-2 sm:px-4 font-black text-xs sm:text-sm md:text-[15px] uppercase tracking-[0.15em] text-stone-700 w-24 sm:w-28">호수</th>
                   <th className="py-4 px-3 sm:px-6 md:px-8 font-black text-xs sm:text-sm md:text-[15px] uppercase tracking-[0.15em] text-stone-700">추천 업종 및 상세 안내</th>
                   <th className="py-4 px-2 sm:px-4 font-black text-xs sm:text-sm md:text-[15px] uppercase tracking-[0.15em] text-stone-700 text-right w-24 sm:w-32">전용면적</th>
@@ -107,12 +110,20 @@ export default function MDConfig() {
                       }`}
                     >
                       <td className="py-5 px-2 sm:px-4 align-middle">
-                        {/* Enlarged Room Numbers as a Bold Architecture/Spec element */}
+                        {/* Enlarged Room Numbers as a Bold Architecture/Spec element with custom coloring */}
                         <div className="flex items-baseline">
-                          <span className="text-2xl sm:text-3.5xl font-black text-stone-300 group-hover:text-amber-800 transition-colors tracking-tighter block leading-none select-none">
+                          <span className={`text-2xl sm:text-3.5xl font-black transition-colors tracking-tighter block leading-none select-none ${
+                            index === activeIndex 
+                              ? 'text-accent' 
+                              : 'text-stone-350 group-hover:text-accent'
+                          }`}>
                             {item.id.replace('호', '')}
                           </span>
-                          <span className="text-[10px] sm:text-xs font-bold text-stone-400 tracking-normal ml-0.5">호</span>
+                          <span className={`text-[10px] sm:text-xs font-bold tracking-normal ml-0.5 transition-colors ${
+                            index === activeIndex 
+                              ? 'text-accent md:text-accent' 
+                              : 'text-stone-400 group-hover:text-accent'
+                          }`}>호</span>
                         </div>
                       </td>
                       <td className="py-5 px-3 sm:px-6 md:px-8 align-middle">
@@ -137,7 +148,7 @@ export default function MDConfig() {
                       <td className="py-5 px-2 sm:px-4 text-right align-middle">
                         <div className="flex flex-col justify-center">
                           <span className="text-[9px] text-stone-400 font-bold tracking-wider uppercase block mb-0.5">전용면적</span>
-                          <span className={`text-xs sm:text-sm font-black ${
+                          <span className={`text-sm sm:text-base md:text-[17px] font-black ${
                             isHighTarget ? 'text-accent' : 'text-stone-800'
                           }`}>
                             {item.area}
@@ -158,7 +169,7 @@ export default function MDConfig() {
             <span className="text-accent font-black tracking-[0.25em] text-[11px] uppercase block mb-3">PREMIUM RESIDENCE</span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-none mb-6">주거용 오피스텔 상품안내</h2>
             <div className="mt-4">
-              <span className="text-sm sm:text-base md:text-[17px] text-[#555555] font-semibold uppercase tracking-[0.25em] block sm:inline">
+              <span className="text-sm sm:text-base md:text-[17px] text-[#555555] font-semibold uppercase tracking-[0.08em] block sm:inline">
                 시행사 특별 보유분 한정 프리미엄 리저브 세대
               </span>
             </div>

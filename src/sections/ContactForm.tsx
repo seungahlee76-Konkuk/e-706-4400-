@@ -114,11 +114,11 @@ export default function ContactForm() {
                 <div className="space-y-8">
                   <div>
                     <label className="text-[10px] text-gray-500 font-black tracking-widest uppercase mb-1.5 block">대표번호</label>
-                    <p className="text-2xl font-black text-gray-900 tracking-tight">{PROJECT_INFO.representativeNumber}</p>
+                    <p className="text-lg sm:text-xl font-extrabold text-[#111111] tracking-tight">{PROJECT_INFO.representativeNumber}</p>
                   </div>
                   <div>
                     <label className="text-[10px] text-gray-500 font-black tracking-widest uppercase mb-1.5 block">운영시간</label>
-                    <p className="text-base font-bold text-gray-800">{PROJECT_INFO.businessHours}</p>
+                    <p className="text-base sm:text-lg font-bold text-stone-700 tracking-tight">{PROJECT_INFO.businessHours}</p>
                   </div>
                 </div>
               </div>
