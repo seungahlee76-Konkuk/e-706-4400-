@@ -22,6 +22,28 @@ export default function App() {
 
   // Sync customizations from Firestore to LocalStorage
   useEffect(() => {
+    const isSameObject = (a: any, b: any): boolean => {
+      if (a === b) return true;
+      if (!a || !b) return false;
+      if (typeof a !== 'object' || typeof b !== 'object') return false;
+      
+      const keysA = Object.keys(a);
+      const keysB = Object.keys(b);
+      if (keysA.length !== keysB.length) return false;
+      
+      for (const key of keysA) {
+        if (!keysB.includes(key)) return false;
+        const valA = a[key];
+        const valB = b[key];
+        if (typeof valA === 'object' && typeof valB === 'object') {
+          if (!isSameObject(valA, valB)) return false;
+        } else if (valA !== valB) {
+          return false;
+        }
+      }
+      return true;
+    };
+
     const syncDbConfig = async () => {
       try {
         const docRef = doc(db, 'site_config', 'current');
@@ -34,24 +56,43 @@ export default function App() {
           const currentMd = localStorage.getItem('site_custom_md_data');
           const currentOfficetel = localStorage.getItem('site_custom_officetel_data');
 
-          const serverProjectStr = data.projectInfo ? JSON.stringify(data.projectInfo) : null;
-          const serverAnalysisStr = data.analysisData ? JSON.stringify(data.analysisData) : null;
-          const serverMdStr = data.mdData ? JSON.stringify(data.mdData) : null;
-          const serverOfficetelStr = data.officetelData ? JSON.stringify(data.officetelData) : null;
+          let localProject = null;
+          let localAnalysis = null;
+          let localMd = null;
+          let localOfficetel = null;
 
-          const isProjectDifferent = serverProjectStr && currentProject !== serverProjectStr;
-          const isAnalysisDifferent = serverAnalysisStr && currentAnalysis !== serverAnalysisStr;
-          const isMdDifferent = serverMdStr && currentMd !== serverMdStr;
-          const isOfficetelDifferent = serverOfficetelStr && currentOfficetel !== serverOfficetelStr;
+          try { if (currentProject) localProject = JSON.parse(currentProject); } catch (e) {}
+          try { if (currentAnalysis) localAnalysis = JSON.parse(currentAnalysis); } catch (e) {}
+          try { if (currentMd) localMd = JSON.parse(currentMd); } catch (e) {}
+          try { if (currentOfficetel) localOfficetel = JSON.parse(currentOfficetel); } catch (e) {}
+
+          const serverProject = data.projectInfo || null;
+          const serverAnalysis = data.analysisData || null;
+          const serverMd = data.mdData || null;
+          const serverOfficetel = data.officetelData || null;
+
+          const isProjectDifferent = serverProject && !isSameObject(localProject, serverProject);
+          const isAnalysisDifferent = serverAnalysis && !isSameObject(localAnalysis, serverAnalysis);
+          const isMdDifferent = serverMd && !isSameObject(localMd, serverMd);
+          const isOfficetelDifferent = serverOfficetel && !isSameObject(localOfficetel, serverOfficetel);
 
           if (isProjectDifferent || isAnalysisDifferent || isMdDifferent || isOfficetelDifferent) {
-            if (serverProjectStr) localStorage.setItem('site_custom_project_info', serverProjectStr);
-            if (serverAnalysisStr) localStorage.setItem('site_custom_analysis_data', serverAnalysisStr);
-            if (serverMdStr) localStorage.setItem('site_custom_md_data', serverMdStr);
-            if (serverOfficetelStr) localStorage.setItem('site_custom_officetel_data', serverOfficetelStr);
+            // Check session reload rate-limiting (circuit-breaker) to fully block visual flickering pools
+            const now = Date.now();
+            const lastReloadStr = sessionStorage.getItem('site_last_automatic_reload');
+            const lastReload = lastReloadStr ? parseInt(lastReloadStr, 10) : 0;
             
-            // Clean soft reload to update components without visual flicker loops
-            window.location.reload();
+            if (now - lastReload > 6000) { // minimum 6 seconds cool-down between automatic reloads
+              if (serverProject) localStorage.setItem('site_custom_project_info', JSON.stringify(serverProject));
+              if (serverAnalysis) localStorage.setItem('site_custom_analysis_data', JSON.stringify(serverAnalysis));
+              if (serverMd) localStorage.setItem('site_custom_md_data', JSON.stringify(serverMd));
+              if (serverOfficetel) localStorage.setItem('site_custom_officetel_data', JSON.stringify(serverOfficetel));
+              
+              sessionStorage.setItem('site_last_automatic_reload', String(now));
+              window.location.reload();
+            } else {
+              console.warn('Prevented potentially recursive fast-reload loop.');
+            }
           }
         }
       } catch (err) {

@@ -27,7 +27,7 @@ export default function Hero() {
   }, [nextSlide]);
 
   return (
-    <section className="relative min-h-screen md:h-screen flex items-center justify-center overflow-hidden py-20 md:py-0">
+    <section className="relative bg-[#0f172a] min-h-screen md:h-screen flex items-center justify-center overflow-hidden py-20 md:py-0">
       {/* Background Slideshow - Pure & Responsive */}
       <div className="absolute inset-0 z-0">
         <AnimatePresence mode="wait">
