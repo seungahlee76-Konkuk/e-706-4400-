@@ -37,17 +37,17 @@ export default function Hero() {
   }, [nextSlide]);
 
   return (
-    <section className="relative bg-[#0f172a] min-h-screen md:h-screen flex items-center justify-center overflow-hidden py-20 md:py-0">
+    <section className="relative bg-stone-900 min-h-screen md:h-screen flex items-center justify-center overflow-hidden py-20 md:py-0">
       {/* Background Slideshow - Pure & Responsive */}
       <div className="absolute inset-0 z-0">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={currentImage}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.5, ease: "easeInOut" }}
-            className="absolute inset-0 bg-cover bg-center brightness-[0.8] contrast-[1.03]"
+            className="absolute inset-0 bg-cover bg-center brightness-[0.92] contrast-[1.01]"
             style={{ 
               backgroundImage: `url('${finalHeroImages[currentImage]}')`,
               referrerPolicy: 'no-referrer' as any
@@ -55,11 +55,11 @@ export default function Hero() {
           />
         </AnimatePresence>
         
-        {/* Center-focused dark gradient: Lighter at top/bottom, highly readable in middle text-zone */}
+        {/* Center-focused dark gradient: Bright at top/bottom, highly readable in middle text-zone */}
         <div 
           className="absolute inset-0 z-[2]" 
           style={{
-            background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.72) 40%, rgba(0, 0, 0, 0.72) 65%, rgba(0, 0, 0, 0.2) 100%)'
+            background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.52) 40%, rgba(0, 0, 0, 0.52) 65%, rgba(0, 0, 0, 0.04) 100%)'
           }}
         />
       </div>
