@@ -46,53 +46,72 @@ export default function App() {
 
     const syncDbConfig = async () => {
       try {
-        const docRef = doc(db, 'site_config', 'current');
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
+        const projectRef = doc(db, 'site_config', 'project_info');
+        const analysisRef = doc(db, 'site_config', 'analysis_data');
+        const mdRef = doc(db, 'site_config', 'md_data');
+        const officetelRef = doc(db, 'site_config', 'officetel_data');
+
+        const [projSnap, analSnap, mdSnap, offSnap] = await Promise.all([
+          getDoc(projectRef),
+          getDoc(analysisRef),
+          getDoc(mdRef),
+          getDoc(officetelRef)
+        ]);
+
+        let serverProject = projSnap.exists() ? projSnap.data().data : null;
+        let serverAnalysis = analSnap.exists() ? analSnap.data().data : null;
+        let serverMd = mdSnap.exists() ? mdSnap.data().data : null;
+        let serverOfficetel = offSnap.exists() ? offSnap.data().data : null;
+
+        // Fallback to legacy single document
+        if (!serverProject && !serverAnalysis && !serverMd && !serverOfficetel) {
+          const legacyRef = doc(db, 'site_config', 'current');
+          const legacySnap = await getDoc(legacyRef);
+          if (legacySnap.exists()) {
+            const legacyData = legacySnap.data();
+            serverProject = legacyData.projectInfo || null;
+            serverAnalysis = legacyData.analysisData || null;
+            serverMd = legacyData.mdData || null;
+            serverOfficetel = legacyData.officetelData || null;
+          }
+        }
           
-          const currentProject = localStorage.getItem('site_custom_project_info');
-          const currentAnalysis = localStorage.getItem('site_custom_analysis_data');
-          const currentMd = localStorage.getItem('site_custom_md_data');
-          const currentOfficetel = localStorage.getItem('site_custom_officetel_data');
+        const currentProject = localStorage.getItem('site_custom_project_info');
+        const currentAnalysis = localStorage.getItem('site_custom_analysis_data');
+        const currentMd = localStorage.getItem('site_custom_md_data');
+        const currentOfficetel = localStorage.getItem('site_custom_officetel_data');
 
-          let localProject = null;
-          let localAnalysis = null;
-          let localMd = null;
-          let localOfficetel = null;
+        let localProject = null;
+        let localAnalysis = null;
+        let localMd = null;
+        let localOfficetel = null;
 
-          try { if (currentProject) localProject = JSON.parse(currentProject); } catch (e) {}
-          try { if (currentAnalysis) localAnalysis = JSON.parse(currentAnalysis); } catch (e) {}
-          try { if (currentMd) localMd = JSON.parse(currentMd); } catch (e) {}
-          try { if (currentOfficetel) localOfficetel = JSON.parse(currentOfficetel); } catch (e) {}
+        try { if (currentProject) localProject = JSON.parse(currentProject); } catch (e) {}
+        try { if (currentAnalysis) localAnalysis = JSON.parse(currentAnalysis); } catch (e) {}
+        try { if (currentMd) localMd = JSON.parse(currentMd); } catch (e) {}
+        try { if (currentOfficetel) localOfficetel = JSON.parse(currentOfficetel); } catch (e) {}
 
-          const serverProject = data.projectInfo || null;
-          const serverAnalysis = data.analysisData || null;
-          const serverMd = data.mdData || null;
-          const serverOfficetel = data.officetelData || null;
+        const isProjectDifferent = serverProject && !isSameObject(localProject, serverProject);
+        const isAnalysisDifferent = serverAnalysis && !isSameObject(localAnalysis, serverAnalysis);
+        const isMdDifferent = serverMd && !isSameObject(localMd, serverMd);
+        const isOfficetelDifferent = serverOfficetel && !isSameObject(localOfficetel, serverOfficetel);
 
-          const isProjectDifferent = serverProject && !isSameObject(localProject, serverProject);
-          const isAnalysisDifferent = serverAnalysis && !isSameObject(localAnalysis, serverAnalysis);
-          const isMdDifferent = serverMd && !isSameObject(localMd, serverMd);
-          const isOfficetelDifferent = serverOfficetel && !isSameObject(localOfficetel, serverOfficetel);
-
-          if (isProjectDifferent || isAnalysisDifferent || isMdDifferent || isOfficetelDifferent) {
-            // Check session reload rate-limiting (circuit-breaker) to fully block visual flickering pools
-            const now = Date.now();
-            const lastReloadStr = sessionStorage.getItem('site_last_automatic_reload');
-            const lastReload = lastReloadStr ? parseInt(lastReloadStr, 10) : 0;
+        if (isProjectDifferent || isAnalysisDifferent || isMdDifferent || isOfficetelDifferent) {
+          // Check session reload rate-limiting (circuit-breaker) to fully block visual flickering pools
+          const now = Date.now();
+          const lastReloadStr = sessionStorage.getItem('site_last_automatic_reload');
+          const lastReload = lastReloadStr ? parseInt(lastReloadStr, 10) : 0;
+          
+          if (now - lastReload > 6000) { // minimum 6 seconds cool-down between automatic reloads
+            if (serverProject) localStorage.setItem('site_custom_project_info', JSON.stringify(serverProject));
+            if (serverAnalysis) localStorage.setItem('site_custom_analysis_data', JSON.stringify(serverAnalysis));
+            if (serverMd) localStorage.setItem('site_custom_md_data', JSON.stringify(serverMd));
+            if (serverOfficetel) localStorage.setItem('site_custom_officetel_data', JSON.stringify(serverOfficetel));
             
-            if (now - lastReload > 6000) { // minimum 6 seconds cool-down between automatic reloads
-              if (serverProject) localStorage.setItem('site_custom_project_info', JSON.stringify(serverProject));
-              if (serverAnalysis) localStorage.setItem('site_custom_analysis_data', JSON.stringify(serverAnalysis));
-              if (serverMd) localStorage.setItem('site_custom_md_data', JSON.stringify(serverMd));
-              if (serverOfficetel) localStorage.setItem('site_custom_officetel_data', JSON.stringify(serverOfficetel));
-              
-              sessionStorage.setItem('site_last_automatic_reload', String(now));
-              window.location.reload();
-            } else {
-              console.warn('Prevented potentially recursive fast-reload loop.');
-            }
+            sessionStorage.setItem('site_last_automatic_reload', String(now));
+            window.location.reload();
+          } else {
+            console.warn('Prevented potentially recursive fast-reload loop.');
           }
         }
       } catch (err) {
