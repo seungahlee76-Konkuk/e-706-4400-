@@ -36,8 +36,8 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 850; // High-def scaled size to keep base64 lightweight and highly compatible
-        const MAX_HEIGHT = 850;
+        const MAX_WIDTH = 1920; // Full HD 1080p standard for crystal clear architectural rendering
+        const MAX_HEIGHT = 1080;
         let width = img.width;
         let height = img.height;
 
@@ -58,8 +58,8 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
         const ctx = canvas.getContext('2d');
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
-          // Compress with 0.65 quality: cuts size by ~55% while visually identical on standard/retina displays
-          const compressed = canvas.toDataURL('image/jpeg', 0.65);
+          // Compress with 0.85 quality: keeps outstanding sharpness on retina/4K displays while compressing file size efficiently
+          const compressed = canvas.toDataURL('image/jpeg', 0.85);
           setIsUploading(false);
           const compressedKb = Math.round((compressed.length * 0.75) / 1024);
           const finalTs = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
