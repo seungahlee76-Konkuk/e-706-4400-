@@ -40,9 +40,9 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = options?.maxWidth || 1920; // Full HD 1080p standard for crystal clear architectural rendering
+        const MAX_WIDTH = options?.maxWidth || 1920; // Crisp Full HD resolution
         const MAX_HEIGHT = options?.maxHeight || 1080;
-        const quality = options?.quality || 0.85;
+        const quality = options?.quality || 0.8; // Clean balance of size and visual quality
         let width = img.width;
         let height = img.height;
 
@@ -355,6 +355,10 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
     localStorage.setItem('site_custom_last_saved', currentIsoString);
 
     let cloudSavedSuccessfully = true;
+    let cloudSaveError = '';
+
+    const timestampStart = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+    setSecurityLogs(prev => [`[${timestampStart}] ☁️ [클라우드] 원격 실시간 저장 진행 중...`, ...prev]);
 
     // Save to Firestore so everyone gets it (split documents to easily bypass individual 1MB limits)
     try {
@@ -365,9 +369,10 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
         setDoc(doc(db, 'site_config', 'officetel_data'), { data: sanitizedOfficetel, updatedAt: currentIsoString })
       ]);
       const timestamp = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
-      setSecurityLogs(prev => [`[${timestamp}] ☁️ 실시간 원격 설정 분할 저장 완료 (1MB 한계 극복)`, ...prev]);
+      setSecurityLogs(prev => [`[${timestamp}] ☁️ 실시간 원격 설정 분할 저장 완료`, ...prev]);
     } catch (fsErr) {
       console.error('Failed to save split config to Firestore, attempting fallback legacy save...', fsErr);
+      cloudSaveError = fsErr instanceof Error ? fsErr.message : String(fsErr);
       try {
         await setDoc(doc(db, 'site_config', 'current'), {
           projectInfo: sanitizedProject,
@@ -378,9 +383,11 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
         });
         const timestamp = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
         setSecurityLogs(prev => [`[${timestamp}] ☁️ 실시간 원격 설정 대체 저장 완료`, ...prev]);
+        cloudSavedSuccessfully = true; // Succeeded on fallback legacy save
       } catch (legacyErr) {
         console.error('Failed to save legacy config to Firestore:', legacyErr);
         cloudSavedSuccessfully = false;
+        cloudSaveError += '\n- Legacy Fallback Error: ' + (legacyErr instanceof Error ? legacyErr.message : String(legacyErr));
       }
       const timestamp = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
       setSecurityLogs(prev => [`[${timestamp}] ⚠️ 원격 백업 저장 경고: ${fsErr instanceof Error ? fsErr.message : String(fsErr)}`, ...prev]);
@@ -392,7 +399,15 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
     if (cloudSavedSuccessfully) {
       alert('모든 설정값이 브라우저 및 데이터베이스(Cloud)에 안전하게 저장되었습니다! 최신 수정내용을 적용하기 위해 페이지가 새로고침됩니다.');
     } else {
-      alert('설정값이 로컬 브라우저에 안전하게 임시 저장되었습니다.\n\n⚠️ 주의: 현재 Firebase에 권한이 없거나 오프라인 상태이므로, 다른 기기/동료들과 실시간 공유는 되지 않습니다.');
+      alert(
+        `설정값이 로컬 브라우저에 임시 저장되었습니다.\n\n` +
+        `⚠️ 주의: 현재 Firebase 원격 데이터베이스(Cloud) 저장에 실패하였습니다.\n\n` +
+        `▶ 상세 오류 원인/메시지:\n${cloudSaveError}\n\n` +
+        `💡 신속 해결 가이드:\n` +
+        `1. [가장 중요] 상단의 로그아웃 버튼을 누르고, 반드시 공식 관리자 구글 계정('seungahlee76@gmail.com')으로 다시 로그인 해주세요.\n` +
+        `2. 고해상도 이미지를 여러 개 추가하신 경우, 데이터 용량이 너무 거대하여 Firestore DB 규약(단일 문서 1MB 한도)에 의해 업로드가 거절될 수 있습니다. (가급적 1MB 미만의 가벼운 이미지나 CDN/정적 이미지 링크를 사용해주세요).\n` +
+        `3. Netlify 관리 페이지에서 'VITE_FIREBASE_API_KEY' 환경 변수가 세팅되어 있는지 확인해보세요.`
+      );
     }
     window.location.reload();
   };
@@ -840,7 +855,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                                                 const updatedImages = [...(customProjectInfo.heroImages || [])];
                                                 updatedImages[imgIdx] = base64;
                                                 setCustomProjectInfo({ ...customProjectInfo, heroImages: updatedImages });
-                                              }, { maxWidth: 2560, maxHeight: 1440, quality: 0.92 });
+                                              });
                                             }
                                           }}
                                           className="hidden"

@@ -89,9 +89,18 @@ export default function App() {
           }
         }
 
-        const serverProject = serverProjectRaw;
-        const serverAnalysis = serverAnalysisRaw;
-          
+        const isServerNewer = (serverTimeStr: any, localTimeStr: any): boolean => {
+          if (!serverTimeStr) return false;
+          if (!localTimeStr) return true; // If local timer doesn't exist, we must pull the database config
+          try {
+            const serverTime = new Date(serverTimeStr).getTime();
+            const localTime = new Date(localTimeStr).getTime();
+            return serverTime > localTime + 1000; // 1s threshold buffer
+          } catch (e) {
+            return false;
+          }
+        };
+
         const currentProject = localStorage.getItem('site_custom_project_info');
         const currentAnalysis = localStorage.getItem('site_custom_analysis_data');
         const currentMd = localStorage.getItem('site_custom_md_data');
@@ -108,20 +117,8 @@ export default function App() {
         try { if (currentMd) localMd = JSON.parse(currentMd); } catch (e) {}
         try { if (currentOfficetel) localOfficetel = JSON.parse(currentOfficetel); } catch (e) {}
 
-        const isServerNewer = (serverTimeStr: any, localTimeStr: any): boolean => {
-          if (!serverTimeStr) return false;
-          if (!localTimeStr) return true; // If local timer doesn't exist, we must pull the database config
-          try {
-            const serverTime = new Date(serverTimeStr).getTime();
-            const localTime = new Date(localTimeStr).getTime();
-            return serverTime > localTime + 1000; // 1s threshold buffer
-          } catch (e) {
-            return false;
-          }
-        };
-
-        const isProjectDifferent = serverProject && isServerNewer(serverProjectTime, localLastSaved) && !isSameObject(localProject, serverProject);
-        const isAnalysisDifferent = serverAnalysis && isServerNewer(serverAnalysisTime, localLastSaved) && !isSameObject(localAnalysis, serverAnalysis);
+        const isProjectDifferent = serverProjectRaw && isServerNewer(serverProjectTime, localLastSaved) && !isSameObject(localProject, serverProjectRaw);
+        const isAnalysisDifferent = serverAnalysisRaw && isServerNewer(serverAnalysisTime, localLastSaved) && !isSameObject(localAnalysis, serverAnalysisRaw);
         const isMdDifferent = serverMd && isServerNewer(serverMdTime, localLastSaved) && !isSameObject(localMd, serverMd);
         const isOfficetelDifferent = serverOfficetel && isServerNewer(serverOfficetelTime, localLastSaved) && !isSameObject(localOfficetel, serverOfficetel);
 
@@ -132,8 +129,8 @@ export default function App() {
           const lastReload = lastReloadStr ? parseInt(lastReloadStr, 10) : 0;
           
           if (now - lastReload > 6000) { // minimum 6 seconds cool-down between automatic reloads
-            if (serverProject) localStorage.setItem('site_custom_project_info', JSON.stringify(serverProject));
-            if (serverAnalysis) localStorage.setItem('site_custom_analysis_data', JSON.stringify(serverAnalysis));
+            if (serverProjectRaw) localStorage.setItem('site_custom_project_info', JSON.stringify(serverProjectRaw));
+            if (serverAnalysisRaw) localStorage.setItem('site_custom_analysis_data', JSON.stringify(serverAnalysisRaw));
             if (serverMd) localStorage.setItem('site_custom_md_data', JSON.stringify(serverMd));
             if (serverOfficetel) localStorage.setItem('site_custom_officetel_data', JSON.stringify(serverOfficetel));
             
