@@ -7,7 +7,7 @@ import { PROJECT_INFO } from '../constants';
 export default function Hero() {
   const [currentImage, setCurrentImage] = useState(0);
 
-  // Filter out any empty URLs to cleanly support 3 or other custom counts of images
+  // Filter out any empty URLs to cleanly support custom images
   const rawImages = PROJECT_INFO.heroImages || [];
   const heroImages = rawImages.filter((img: string) => img && img.trim() !== "");
   
@@ -47,7 +47,7 @@ export default function Hero() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.5, ease: "easeInOut" }}
-            className="absolute inset-0 bg-cover bg-center brightness-[0.92] contrast-[1.01]"
+            className="absolute inset-0 bg-cover bg-center brightness-[0.82] contrast-[1.01]"
             style={{ 
               backgroundImage: `url('${finalHeroImages[currentImage]}')`,
               referrerPolicy: 'no-referrer' as any
@@ -59,7 +59,7 @@ export default function Hero() {
         <div 
           className="absolute inset-0 z-[2]" 
           style={{
-            background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.52) 40%, rgba(0, 0, 0, 0.52) 65%, rgba(0, 0, 0, 0.04) 100%)'
+            background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 40%, rgba(0, 0, 0, 0.6) 65%, rgba(0, 0, 0, 0.4) 100%)'
           }}
         />
       </div>
@@ -107,7 +107,7 @@ export default function Hero() {
           {(PROJECT_INFO.heroFeatures || [
             { id: "01", label: "4,400세대 항아리 상권", desc: "고색 1·2지구 4,400여 세대의 중심 상업시설" },
             { id: "02", label: "706병상 메디컬 수요", desc: "수원덕산병원 바로 앞 메인 스트리트" },
-            { id: "03", label: "1군 브랜드 랜드마크", desc: "서수원의 가치를 리딩하는 e편한세상 상가" },
+            { id: "03", label: "1군 브랜드 프리미엄", desc: "e편한세상 브랜드 프리미엄의 가치" },
             { id: "04", label: "행정타운 365일 상권", desc: "권선구청 등 공공기관 500m 이내 직장인 수요" },
           ]).map((item: any, idx: number) => (
             <motion.div
@@ -153,6 +153,7 @@ export default function Hero() {
               "h-1 transition-all duration-300 rounded-full",
               idx === currentImage ? "bg-accent w-12" : "bg-white/30 w-3"
             )}
+            aria-label={`Go to slide ${idx + 1}`}
           />
         ))}
       </div>

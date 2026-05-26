@@ -59,9 +59,16 @@ export default function App() {
         ]);
 
         let serverProjectRaw = projSnap.exists() ? projSnap.data().data : null;
+        let serverProjectTime = projSnap.exists() ? projSnap.data().updatedAt : null;
+
         let serverAnalysisRaw = analSnap.exists() ? analSnap.data().data : null;
+        let serverAnalysisTime = analSnap.exists() ? analSnap.data().updatedAt : null;
+
         let serverMd = mdSnap.exists() ? mdSnap.data().data : null;
+        let serverMdTime = mdSnap.exists() ? mdSnap.data().updatedAt : null;
+
         let serverOfficetel = offSnap.exists() ? offSnap.data().data : null;
+        let serverOfficetelTime = offSnap.exists() ? offSnap.data().updatedAt : null;
 
         // Fallback to legacy single document
         if (!serverProjectRaw && !serverAnalysisRaw && !serverMd && !serverOfficetel) {
@@ -73,6 +80,12 @@ export default function App() {
             serverAnalysisRaw = legacyData.analysisData || null;
             serverMd = legacyData.mdData || null;
             serverOfficetel = legacyData.officetelData || null;
+            
+            const legacyTime = legacyData.updatedAt || null;
+            serverProjectTime = serverProjectTime || legacyTime;
+            serverAnalysisTime = serverAnalysisTime || legacyTime;
+            serverMdTime = serverMdTime || legacyTime;
+            serverOfficetelTime = serverOfficetelTime || legacyTime;
           }
         }
 
@@ -83,6 +96,7 @@ export default function App() {
         const currentAnalysis = localStorage.getItem('site_custom_analysis_data');
         const currentMd = localStorage.getItem('site_custom_md_data');
         const currentOfficetel = localStorage.getItem('site_custom_officetel_data');
+        const localLastSaved = localStorage.getItem('site_custom_last_saved');
 
         let localProject = null;
         let localAnalysis = null;
@@ -94,10 +108,22 @@ export default function App() {
         try { if (currentMd) localMd = JSON.parse(currentMd); } catch (e) {}
         try { if (currentOfficetel) localOfficetel = JSON.parse(currentOfficetel); } catch (e) {}
 
-        const isProjectDifferent = serverProject && !isSameObject(localProject, serverProject);
-        const isAnalysisDifferent = serverAnalysis && !isSameObject(localAnalysis, serverAnalysis);
-        const isMdDifferent = serverMd && !isSameObject(localMd, serverMd);
-        const isOfficetelDifferent = serverOfficetel && !isSameObject(localOfficetel, serverOfficetel);
+        const isServerNewer = (serverTimeStr: any, localTimeStr: any): boolean => {
+          if (!serverTimeStr) return false;
+          if (!localTimeStr) return true; // If local timer doesn't exist, we must pull the database config
+          try {
+            const serverTime = new Date(serverTimeStr).getTime();
+            const localTime = new Date(localTimeStr).getTime();
+            return serverTime > localTime + 1000; // 1s threshold buffer
+          } catch (e) {
+            return false;
+          }
+        };
+
+        const isProjectDifferent = serverProject && isServerNewer(serverProjectTime, localLastSaved) && !isSameObject(localProject, serverProject);
+        const isAnalysisDifferent = serverAnalysis && isServerNewer(serverAnalysisTime, localLastSaved) && !isSameObject(localAnalysis, serverAnalysis);
+        const isMdDifferent = serverMd && isServerNewer(serverMdTime, localLastSaved) && !isSameObject(localMd, serverMd);
+        const isOfficetelDifferent = serverOfficetel && isServerNewer(serverOfficetelTime, localLastSaved) && !isSameObject(localOfficetel, serverOfficetel);
 
         if (isProjectDifferent || isAnalysisDifferent || isMdDifferent || isOfficetelDifferent) {
           // Check session reload rate-limiting (circuit-breaker) to fully block visual flickering pools
@@ -111,6 +137,13 @@ export default function App() {
             if (serverMd) localStorage.setItem('site_custom_md_data', JSON.stringify(serverMd));
             if (serverOfficetel) localStorage.setItem('site_custom_officetel_data', JSON.stringify(serverOfficetel));
             
+            // Also store the updated newest server timestamp locally to keep them in sync
+            const newestServerTime = [serverProjectTime, serverAnalysisTime, serverMdTime, serverOfficetelTime]
+              .filter(Boolean)
+              .sort()
+              .pop() || new Date().toISOString();
+            localStorage.setItem('site_custom_last_saved', newestServerTime);
+
             sessionStorage.setItem('site_last_automatic_reload', String(now));
             window.location.reload();
           } else {
