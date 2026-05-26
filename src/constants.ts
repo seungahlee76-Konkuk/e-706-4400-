@@ -15,10 +15,10 @@ export const DEFAULT_PROJECT_INFO = {
     { label: '주차대수', value: '608대 (근린생활시설 포함)' },
   ],
   heroImages: [
-    '/images/hero_aerial.png',
-    '/images/hero_entrance.png',
-    '/images/hero_courtyard.png',
-    '/images/hospital_view.png',
+    'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=2200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2200&auto=format&fit=crop',
   ],
   heroTitleLine1: '서수원 행정타운의 중심',
   heroTitleLine2: '브랜드 프리미엄의 완성',
@@ -42,25 +42,23 @@ export const DEFAULT_ANALYSIS_DATA = [
     title: '수원덕산병원 프리미엄',
     desc: '약 706병상 규모의 대형 종합병원 바로 앞 입지로 안정적인 의료수요 및 관련 종사자 배후수요를 확보합니다.',
     images: [
-      '/images/hospital_view.png',
-      '/images/location_map.png',
-      'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=800'
     ]
   },
   {
     title: '행정타운 배후수요',
     desc: '권선구청, 우체국, 보건소 등 공공기관이 밀집한 서수원 행정타운의 중심지로 공무원 및 방문객의 유입이 활발합니다.',
     images: [
-      '/images/district_office.png',
-      '/images/police_office.png',
-      '/images/city_hall.png'
+      'https://images.unsplash.com/photo-1577416414929-7a4c9f17f6b4?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800'
     ]
   },
   {
     title: '고색역 역세권 입지',
     desc: '수인분당선 고색역 역세권으로 지하철 이용객의 풍부한 유동인구는 물론, 편리한 교통환경을 자랑합니다.',
     images: [
-      '/images/location_map.png',
       'https://images.unsplash.com/photo-1556388158-158ea5ccacbd?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&q=80&w=800'
     ]
@@ -69,7 +67,6 @@ export const DEFAULT_ANALYSIS_DATA = [
     title: '탑동 이노베이션 밸리',
     desc: '인근 탑동 일대에 조성되는 첨단 산업 및 연구 단지로 대규모 기업 유입에 따른 고소득 배후수요 증대가 기대됩니다.',
     images: [
-      '/images/location_map.png',
       'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=800'
     ]

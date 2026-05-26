@@ -58,23 +58,26 @@ export default function App() {
           getDoc(officetelRef)
         ]);
 
-        let serverProject = projSnap.exists() ? projSnap.data().data : null;
-        let serverAnalysis = analSnap.exists() ? analSnap.data().data : null;
+        let serverProjectRaw = projSnap.exists() ? projSnap.data().data : null;
+        let serverAnalysisRaw = analSnap.exists() ? analSnap.data().data : null;
         let serverMd = mdSnap.exists() ? mdSnap.data().data : null;
         let serverOfficetel = offSnap.exists() ? offSnap.data().data : null;
 
         // Fallback to legacy single document
-        if (!serverProject && !serverAnalysis && !serverMd && !serverOfficetel) {
+        if (!serverProjectRaw && !serverAnalysisRaw && !serverMd && !serverOfficetel) {
           const legacyRef = doc(db, 'site_config', 'current');
           const legacySnap = await getDoc(legacyRef);
           if (legacySnap.exists()) {
             const legacyData = legacySnap.data();
-            serverProject = legacyData.projectInfo || null;
-            serverAnalysis = legacyData.analysisData || null;
+            serverProjectRaw = legacyData.projectInfo || null;
+            serverAnalysisRaw = legacyData.analysisData || null;
             serverMd = legacyData.mdData || null;
             serverOfficetel = legacyData.officetelData || null;
           }
         }
+
+        const serverProject = serverProjectRaw;
+        const serverAnalysis = serverAnalysisRaw;
           
         const currentProject = localStorage.getItem('site_custom_project_info');
         const currentAnalysis = localStorage.getItem('site_custom_analysis_data');
