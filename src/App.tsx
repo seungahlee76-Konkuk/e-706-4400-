@@ -176,6 +176,10 @@ export default function App() {
       const hasModifiers = e.ctrlKey || e.altKey || e.metaKey;
       
       if (hasModifiers && e.shiftKey && isTargetKey) {
+        // Prevent action on mobile screens
+        if (window.innerWidth < 1024) {
+          return;
+        }
         // Prevent action when user is typing inside an input/textarea
         const activeEl = document.activeElement;
         if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
@@ -193,7 +197,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#F5F5F0] font-sans text-gray-900 overflow-x-hidden">
+    <div className="min-h-screen bg-[#F5F5F0] font-sans text-gray-900 overflow-x-hidden pb-36 lg:pb-0">
       <Navbar />
       
       <main className="bg-[#F5F5F0]">
@@ -208,7 +212,11 @@ export default function App() {
         <ContactForm />
       </main>
 
-      <Footer onAdminOpen={() => setIsAdminOpen(true)} />
+      <Footer onAdminOpen={() => {
+        if (window.innerWidth >= 1024) {
+          setIsAdminOpen(true);
+        }
+      }} />
       <QuickMenu />
       <StickyBottomForm />
 

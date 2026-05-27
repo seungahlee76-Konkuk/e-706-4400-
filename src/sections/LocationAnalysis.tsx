@@ -173,7 +173,7 @@ export default function LocationAnalysis() {
               hidden: { opacity: 0, y: 35 },
               visible: { opacity: 1, y: 0, transition: { duration: 1.1, ease: [0.16, 1, 0.3, 1] } }
             }}
-            className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mt-4 tracking-tight"
+            className="text-2xl sm:text-4xl md:text-5xl font-black text-gray-900 mt-4 tracking-tight leading-tight break-keep"
           >
             입지분석 및 프리미엄
           </motion.h2>

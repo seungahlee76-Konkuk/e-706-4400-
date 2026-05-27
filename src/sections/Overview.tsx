@@ -17,7 +17,7 @@ export default function Overview() {
           className="mb-16 text-center md:text-left"
         >
           <span className="text-accent font-bold tracking-[0.2em] text-[11px] uppercase">PROJECT OVERVIEW</span>
-          <h2 className="text-3xl md:text-5xl font-black text-gray-900 mt-4 tracking-tight">사업개요</h2>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-gray-900 mt-4 tracking-tight leading-tight break-keep">사업개요</h2>
           <div className="w-16 h-1 bg-accent mt-6 rounded-full hidden md:block" />
         </motion.div>
 
@@ -58,12 +58,17 @@ export default function Overview() {
           transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
           className="bg-white p-5 sm:p-8 md:p-12 rounded-none border border-gray-100/90 shadow-[0_30px_70px_-20px_rgba(0,0,0,0.04)]"
         >
-          <div className="flex items-center gap-3.5 mb-10">
-            <div className="w-1.5 h-6 bg-accent rounded-full" />
-            <h3 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">오피스텔 공급면적</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-10 border-b border-gray-100 pb-5">
+            <div className="flex items-center gap-3.5">
+              <div className="w-1.5 h-6 bg-accent rounded-full" />
+              <h3 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">오피스텔 공급면적</h3>
+            </div>
+            <span className="text-xs text-stone-500 lg:hidden flex items-center gap-1 bg-stone-50 border border-stone-200/40 px-2.5 py-1 font-semibold rounded shrink-0 self-start sm:self-center shadow-sm">
+              <span className="animate-pulse">👉</span> 좌우로 스크롤하여 확인하세요
+            </span>
           </div>
           
-          <div className="overflow-x-auto rounded-none border border-gray-100 shadow-sm">
+          <div className="overflow-x-auto rounded-none border border-gray-100 shadow-sm [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <table className="min-w-[800px] w-full text-xs md:text-sm border-collapse">
               <thead>
                 <tr className="bg-[#0f1d2d] text-white">
@@ -72,7 +77,7 @@ export default function Overview() {
                   <th rowSpan={2} className="p-4 font-bold border-r border-[#1e2d3d] text-center tracking-wider">비율</th>
                   <th colSpan={2} className="p-3 font-bold border-b border-[#1e2d3d] border-r border-[#1e2d3d] text-center tracking-widest text-[11px] uppercase opacity-90">전용면적</th>
                   <th colSpan={2} className="p-3 font-bold border-b border-[#1e2d3d] border-r border-[#1e2d3d] text-center tracking-widest text-[11px] uppercase opacity-90">계약면적</th>
-                  <th rowSpan={2} className="p-4 font-bold text-center tracking-wider">전용률</th>
+                  <th rowSpan={2} className="p-4 font-bold text-center tracking-wider pr-24 lg:pr-4">전용률</th>
                 </tr>
                 <tr className="bg-[#0f1d2d] text-white">
                   <th className="p-2.5 font-bold border-r border-[#1e2d3d] text-center text-xs">m²</th>
@@ -91,14 +96,14 @@ export default function Overview() {
                     <td className="p-4 border-r border-gray-100 text-gray-900 font-bold text-accent">{unit.areaPy}</td>
                     <td className="p-4 border-r border-gray-100 text-gray-900 font-bold">{unit.totalAreaM2}</td>
                     <td className="p-4 border-r border-gray-100 text-gray-900 font-bold text-gray-500">{unit.totalAreaPy}</td>
-                    <td className="p-4 text-gray-900 font-bold">{unit.efficiency}</td>
+                    <td className="p-4 text-gray-900 font-bold pr-24 lg:pr-4">{unit.efficiency}</td>
                   </tr>
                 ))}
                 <tr className="bg-slate-50/80 font-extrabold text-[#002C5F] divide-y divide-gray-100">
                   <td className="p-4 border-r border-gray-100 bg-slate-100/50">합  계</td>
                   <td className="p-4 border-r border-gray-100 text-[#002C5F]">430</td>
                   <td className="p-4 border-r border-gray-100 text-[#002C5F]/70">100.0%</td>
-                  <td colSpan={5} className="p-4 bg-slate-50/40"></td>
+                  <td colSpan={5} className="p-4 bg-slate-50/40 pr-24 lg:pr-4"></td>
                 </tr>
               </tbody>
             </table>

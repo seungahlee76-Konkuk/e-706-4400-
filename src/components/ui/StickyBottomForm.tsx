@@ -78,12 +78,12 @@ export default function StickyBottomForm() {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ y: 100 }}
+          initial={{ y: 150 }}
           animate={{ y: 0 }}
-          exit={{ y: 100 }}
-          className="fixed bottom-0 left-0 right-0 h-24 bg-white border-t border-slate-200 z-[40] hidden lg:flex items-center px-8 gap-6 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]"
+          exit={{ y: 150 }}
+          className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200/80 z-[50] shadow-[0_-5px_15px_-1px_rgba(0,0,0,0.08)] lg:shadow-[0_-10px_40px_rgba(0,0,0,0.1)] px-4 py-3 pb-4 lg:py-0 lg:h-24 flex flex-col lg:flex-row items-center lg:px-8 lg:gap-6"
         >
-          <div className="text-primary whitespace-nowrap flex items-center gap-4">
+          <div className="text-primary whitespace-nowrap hidden lg:flex items-center gap-4 shrink-0">
             <div>
               <span className="text-[10px] block text-slate-500 font-normal uppercase tracking-widest">Special Consultation</span>
               <span className="font-bold">분양 상담 예약</span>
@@ -97,49 +97,74 @@ export default function StickyBottomForm() {
             </a>
           </div>
           
-          <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex gap-4 items-center">
-            <input 
-              {...register('name', { required: true })}
-              type="text" 
-              placeholder="성함" 
-              className="flex-1 h-12 px-4 border border-slate-200 rounded text-slate-900 text-sm focus:outline-none focus:border-primary"
-            />
-            <input 
-              {...register('phone', { required: true })}
-              type="text" 
-              placeholder="연락처" 
-              className="flex-1 h-12 px-4 border border-slate-200 rounded text-slate-900 text-sm focus:outline-none focus:border-primary"
-            />
-            <select 
-              {...register('interest', { required: true })}
-              className="flex-1 h-12 px-4 border border-slate-200 rounded text-slate-600 text-sm focus:outline-none"
-            >
-              <option value="">관심호실 선택</option>
-              <optgroup label="상업시설 (1F)">
-                <option value="상업시설-117호">117호 (라멘/필라테스)</option>
-                <option value="상업시설-118호">118호 (브런치/베이커리)</option>
-                <option value="상업시설-119호">119호 (문전약국)</option>
-                <option value="상업시설-126호">126호 (한식/샤브샤브)</option>
-                <option value="상업시설-127호">127호 (한식/샤브샤브)</option>
-                <option value="상업시설-128호">128호 (국밥/육개장)</option>
-                <option value="상업시설-129호">129호 (맥주전문점)</option>
-              </optgroup>
-              <optgroup label="오피스텔">
-                <option value="오피스텔-3룸">3룸 평면</option>
-                <option value="오피스텔-기타">일반문의</option>
-              </optgroup>
-            </select>
-            
-            <div className="flex items-center gap-4">
-              <label className="flex items-center gap-2 text-[10px] text-slate-500 cursor-pointer whitespace-nowrap">
-                <input {...register('privacy', { required: true })} type="checkbox" className="rounded text-primary" /> 개인정보동의
+          <form onSubmit={handleSubmit(onSubmit)} className="w-full flex-1 flex flex-col lg:flex-row gap-2 lg:gap-4 lg:items-center relative pt-5 lg:pt-0">
+            {/* Agreement Checkbox: absolute on mobile, static on desktop */}
+            <div className="absolute top-0 left-0 right-0 lg:static flex items-center justify-between gap-1.5 text-[10.5px] lg:text-[11px] text-zinc-500 cursor-pointer select-none">
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input 
+                  {...register('privacy', { required: true })} 
+                  type="checkbox" 
+                  className="rounded text-[#002C5F] focus:ring-[#002C5F] w-3.5 h-3.5 lg:text-primary lg:focus:ring-primary" 
+                />
+                <span className="font-medium">개인정보 수집 및 동의 [필수]</span>
               </label>
+              <a 
+                href="tel:01033708602"
+                className="text-xs text-primary font-black tracking-tighter lg:hidden flex items-center gap-1 shrink-0 hover:opacity-85 transition-opacity"
+              >
+                <div className="w-5 h-5 rounded-full bg-primary/5 flex items-center justify-center text-primary">
+                  <Phone className="w-2.5 h-2.5 shrink-0" />
+                </div>
+                <span>010-3370-8602</span>
+              </a>
+            </div>
+
+            {/* Row 1: Name & Phone (50:50 grid on mobile, flex on desktop) */}
+            <div className="grid grid-cols-2 gap-2 w-full lg:flex lg:flex-1 lg:gap-4">
+              <input 
+                {...register('name', { required: true })}
+                type="text" 
+                placeholder="성함 입력" 
+                className="w-full lg:flex-1 h-10 lg:h-12 px-3 lg:px-4 bg-stone-50 lg:bg-white border border-slate-200 rounded text-slate-900 text-sm focus:outline-none focus:border-[#002C5F] lg:focus:border-primary"
+              />
+              <input 
+                {...register('phone', { required: true })}
+                type="text" 
+                placeholder="연락처 입력" 
+                className="w-full lg:flex-1 h-10 lg:h-12 px-3 lg:px-4 bg-stone-50 lg:bg-white border border-slate-200 rounded text-slate-900 text-sm focus:outline-none focus:border-[#002C5F] lg:focus:border-primary"
+              />
+            </div>
+
+            {/* Row 2 on mobile: Select (60%) & Button (40%) */}
+            <div className="flex gap-2 w-full lg:contents">
+              <select 
+                {...register('interest', { required: true })}
+                className="w-[60%] shrink-0 lg:w-auto lg:flex-1 h-10 lg:h-12 px-2.5 lg:px-4 bg-stone-50 lg:bg-white border border-slate-200 rounded text-slate-700 text-sm focus:outline-none focus:border-[#002C5F] lg:focus:border-primary"
+              >
+                <option value="">관심호실 선택</option>
+                <optgroup label="상업시설 (1F)">
+                  <option value="상업시설-117호">117호 (라멘/필라테스)</option>
+                  <option value="상업시설-118호">118호 (브런치/베이커리)</option>
+                  <option value="상업시설-119호">119호 (문전약국)</option>
+                  <option value="상업시설-126호">126호 (한식/샤브샤브)</option>
+                  <option value="상업시설-127호">127호 (한식/샤브샤브)</option>
+                  <option value="상업시설-128호">128호 (국밥/육개장)</option>
+                  <option value="상업시설-129호">129호 (맥주전문점)</option>
+                </optgroup>
+                <optgroup label="오피스텔">
+                  <option value="오피스텔-3룸">3룸 평면</option>
+                  <option value="오피스텔-기타">일반문의</option>
+                </optgroup>
+              </select>
+
               <button 
                 disabled={isSubmitting}
-                className="bg-accent hover:bg-[#e66400] text-white px-8 h-12 rounded font-bold transition-colors whitespace-nowrap shadow-lg shadow-orange-500/20 flex items-center gap-2"
+                type="submit"
+                className="w-[40%] flex-1 lg:w-auto lg:px-8 h-10 lg:h-12 bg-[#002C5F] lg:bg-accent hover:bg-[#001D3F] lg:hover:bg-[#e66400] text-white rounded font-black lg:font-bold text-sm lg:text-base transition-colors whitespace-nowrap shadow-md lg:shadow-lg shadow-[#002C5F]/15 lg:shadow-orange-500/20 flex items-center justify-center gap-1.5 shrink-0"
               >
-                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                상담 예약하기
+                {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                <span className="lg:hidden">상담 예약</span>
+                <span className="hidden lg:inline">상담 예약하기</span>
               </button>
             </div>
           </form>

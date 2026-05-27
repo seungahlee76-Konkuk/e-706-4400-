@@ -80,7 +80,7 @@ export default function ContactForm() {
           className="text-center mb-20"
         >
           <span className="text-accent font-bold tracking-[0.2em] text-[11px] uppercase">Consultation</span>
-          <h2 className="text-3xl md:text-5xl font-black text-gray-900 mt-4 tracking-tight">상담 신청 및 예약</h2>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-gray-900 mt-4 tracking-tight leading-tight break-keep">상담 신청 및 예약</h2>
           <p className="mt-5 text-gray-500 font-semibold break-keep text-base max-w-lg mx-auto">{"정보를 입력해주시면 전문 상담원이 빠르고 정확하게 안내해 드리겠습니다."}</p>
           <div className="w-16 h-1.5 bg-accent mx-auto mt-8 rounded-full" />
         </motion.div>

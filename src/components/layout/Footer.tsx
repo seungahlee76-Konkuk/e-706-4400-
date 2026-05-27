@@ -38,15 +38,17 @@ export default function Footer({ onAdminOpen }: { onAdminOpen: () => void }) {
         
         <div className="pt-10 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-6 text-xs italic">
           <p 
-            onClick={onAdminOpen}
-            className="cursor-pointer hover:text-primary transition-colors select-none"
-            title="관리자 모드 열기"
+            onClick={() => {
+              if (window.innerWidth >= 1024) {
+                onAdminOpen();
+              }
+            }}
+            className="text-gray-400 lg:cursor-pointer lg:hover:text-primary transition-colors select-none"
           >
             © 2026 e편한세상시티 고색 홍보센터. All rights reserved.
           </p>
           <p className="max-w-xl text-center md:text-right text-gray-400">
-            ※ 본 웹사이트에 사용된 CG, 이미지, 기재 사항 등은 소비자의 이해를 돕기 위한 것으로 실제와 다를 수 있으며, 
-            인허가 과정 및 시공 단계에서 변경될 수 있습니다. 반드시 현장 및 분양 홍보관을 통해 상세 내용을 확인하시기 바랍니다.
+            ※ 본 웹사이트에 사용된 CG, 이미지, 기재 사항 등은 소비자의 이해를 돕기 위한 것으로 실제와 다를 수 있습니다. 반드시 현장 및 분양 홍보관을 통해 상세 내용을 확인하시기 바랍니다.
           </p>
         </div>
       </div>

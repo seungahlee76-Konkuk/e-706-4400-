@@ -27,7 +27,7 @@ export default function QuickMenu() {
   };
 
   return (
-    <div className="fixed right-6 top-1/3 z-50 flex flex-col gap-3">
+    <div className="fixed right-6 top-1/3 z-50 hidden lg:flex flex-col gap-3">
       {/* Phone Inquiry */}
       <motion.a
         href={`tel:${PROJECT_INFO.representativeNumber.replace(/[^0-9]/g, '')}`}

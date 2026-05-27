@@ -12,6 +12,8 @@
 @layer base {
   html, body {
     scroll-behavior: smooth;
+    font-family: var(--font-sans);
+    letter-spacing: -0.025em;
   }
   body {
     @apply text-gray-900;
