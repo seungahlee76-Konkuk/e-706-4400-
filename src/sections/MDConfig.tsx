@@ -9,13 +9,13 @@ interface StoreUnit {
   type: string;
   desc: string;
   recommendation: string;
-  image: string;
+  images: string[];
   coords: { x: number; y: number };
   category: string;
   categoryStyle: string;
 }
 
-// 2. 데이터 객체 배열 (전체 호실의 확정된 카피라이팅 배치)
+// 2. 데이터 객체 배열 (전체 호실의 확정된 카피라이팅 배치 - 호실별 3~5개 다각화 이미지 연동)
 const STORE_UNITS_BASE: StoreUnit[] = [
   {
     id: '117호',
@@ -23,7 +23,12 @@ const STORE_UNITS_BASE: StoreUnit[] = [
     type: '라멘집 / 개인 필라테스',
     desc: '[1인 타겟 컴팩트 상가] 바쁜 일상 속 가볍고 트렌디한 한 끼',
     recommendation: '돈코츠 라멘 전문점, 키토 김밥 델리, 수제 디저트 공방, 1:1 기구 필라테스 클래스',
-    image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&q=80&w=800',
+    images: [
+      'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80&w=800'
+    ],
     coords: { x: 41, y: 36 },
     category: 'F&B/스포츠',
     categoryStyle: 'bg-orange-50 text-orange-600 border border-orange-100/60'
@@ -34,7 +39,12 @@ const STORE_UNITS_BASE: StoreUnit[] = [
     type: '브런치 / 베이커리 카페',
     desc: '[프리미엄 F&B 공간] 면회객과 대기 손님의 발길이 머무는 필수 방문 코스',
     recommendation: '올데이 브런치 플레이트, 페이스트리 전문 베이커리 카페, 스페셜티 커피 로스터리',
-    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=800',
+    images: [
+      'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1513442542250-854d436a73f2?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=800'
+    ],
     coords: { x: 26, y: 30 },
     category: 'F&B/디저트',
     categoryStyle: 'bg-amber-50 text-amber-700 border border-amber-100/60'
@@ -45,7 +55,12 @@ const STORE_UNITS_BASE: StoreUnit[] = [
     type: '의료 문전약국',
     desc: '[상권의 중심] 처방전 동선이 모이는 독점적 입지',
     recommendation: '소아과/내과/정형외과 병동 처방 중심 메디컬 대형 약국, 올리브영 타입 드로그스토어',
-    image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?auto=format&fit=crop&q=80&w=800',
+    images: [
+      'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?auto=format&fit=crop&q=80&w=800'
+    ],
     coords: { x: 28, y: 45 },
     category: '독점 메디컬',
     categoryStyle: 'bg-teal-50 text-teal-700 border border-teal-100/60'
@@ -56,7 +71,12 @@ const STORE_UNITS_BASE: StoreUnit[] = [
     type: '국밥 / 설렁탕 전문점',
     desc: '[빠른 회전율] 주문하면 5분 만에 나오는 든든한 식사',
     recommendation: '전통 명품 곰탕·설렁탕 전문점, 남녀노소 집객력이 높은 든든한 한식 가마솥 국밥',
-    image: 'https://images.unsplash.com/photo-1547928500-4722231facb3?auto=format&fit=crop&q=80&w=800',
+    images: [
+      'https://images.unsplash.com/photo-1547928500-4722231facb3?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1616166311666-8805f6e87a28?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1594911773177-3e4b77f10fc1?auto=format&fit=crop&q=80&w=800'
+    ],
     coords: { x: 48, y: 88 },
     category: 'F&B/한식',
     categoryStyle: 'bg-red-50 text-red-600 border border-red-100/60'
@@ -67,7 +87,11 @@ const STORE_UNITS_BASE: StoreUnit[] = [
     type: '1인 샤브샤브 / 찜닭',
     desc: '[트렌디 다이닝] 혼자서도, 여럿이도 부담 없는 든든한 한 끼',
     recommendation: '회전식 1인 팟 샤브샤브 식당, 모던 안동찜닭 패밀리 레스토랑, 정갈한 캐주얼 한식 정찬',
-    image: 'https://images.unsplash.com/photo-1634047462615-ca805e243956?auto=format&fit=crop&q=80&w=800',
+    images: [
+      'https://images.unsplash.com/photo-1634047462615-ca805e243956?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80&w=800'
+    ],
     coords: { x: 52, y: 88 },
     category: '웰빙 다이닝',
     categoryStyle: 'bg-rose-50 text-rose-600 border border-rose-100/60'
@@ -78,7 +102,12 @@ const STORE_UNITS_BASE: StoreUnit[] = [
     type: '포장 · 배달 피자 / 에그 샌드위치',
     desc: '[포장·배달 특화] 병원 상권의 필수, 끊기지 않는 테이크아웃',
     recommendation: '수제 화덕 피자 픽업 전문점, 프리미엄 토스트 & 에그 브랜드, 아웃백/가구수제 도시락 전문점',
-    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=800',
+    images: [
+      'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&q=80&w=800'
+    ],
     coords: { x: 56, y: 88 },
     category: '테이크아웃',
     categoryStyle: 'bg-emerald-50 text-emerald-600 border border-emerald-100/60'
@@ -89,7 +118,12 @@ const STORE_UNITS_BASE: StoreUnit[] = [
     type: '생활맥주 / 프랜차이즈 맥주',
     desc: '[시선 집중 코너] 낮부터 밤까지 발길을 끄는 간판 자리',
     recommendation: '퇴근길 유도를 위한 수제 맥주 다이닝 펍, 역전할머니맥주식 스몰비어 프랜차이즈',
-    image: 'https://images.unsplash.com/photo-1518176258769-f227c798150e?auto=format&fit=crop&q=80&w=800',
+    images: [
+      'https://images.unsplash.com/photo-1518176258769-f227c798150e?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1532634922-8fe0b757fb13?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&q=80&w=800'
+    ],
     coords: { x: 60, y: 88 },
     category: 'F&B/주류',
     categoryStyle: 'bg-indigo-50 text-indigo-600 border border-indigo-100/60'
@@ -106,13 +140,18 @@ const STORE_UNITS: StoreUnit[] = STORE_UNITS_BASE.map(base => {
     const isEditedArea = defaultItem && custom.area !== defaultItem.area;
     const isEditedImage = defaultItem && custom.image !== defaultItem.image;
 
+    let mergedImages = base.images;
+    if (isEditedImage && custom.image) {
+      mergedImages = [custom.image, ...base.images.slice(1)];
+    }
+
     return {
       ...base,
       id: custom.id || base.id,
       area: isEditedArea ? custom.area : base.area,
       type: isEditedType ? custom.type : base.type,
       desc: isEditedDesc ? custom.desc : base.desc,
-      image: isEditedImage ? custom.image : base.image,
+      images: mergedImages,
       recommendation: isEditedType ? custom.type : base.recommendation
     };
   }
@@ -201,6 +240,94 @@ function buildPathData(points: { x: number; y: number }[]): string {
   return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
 }
 
+interface MDImageSliderProps {
+  images: string[];
+  title: string;
+  badgeText: string;
+  isMobile?: boolean;
+}
+
+function MDImageSlider({ images, title, badgeText, isMobile = false }: MDImageSliderProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const prevSlide = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const nextSlide = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+  };
+
+  return (
+    <div className="w-full h-full relative group/slider overflow-hidden bg-stone-100">
+      <img
+        src={images[currentIndex]}
+        alt={`${title} view ${currentIndex + 1}`}
+        className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+        referrerPolicy="no-referrer"
+      />
+      {/* Dark overlay gradient only on PC view */}
+      {!isMobile && <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent pointer-events-none" />}
+
+      {/* Badge / Indicator overlays */}
+      <div className={`absolute top-2.5 bg-accent text-white px-2 py-0.5 text-[9px] font-black tracking-widest uppercase z-10 ${isMobile ? 'left-5' : 'left-4'}`}>
+        {badgeText}
+      </div>
+
+      {!isMobile && (
+        <div className="absolute bottom-3 left-4 flex items-center gap-1.5 text-white pointer-events-none z-10">
+          <MapPin className="w-3.5 h-3.5 text-accent" />
+          <span className="text-xs font-black tracking-widest uppercase">추천 업종 실사 분위기 ({currentIndex + 1}/{images.length})</span>
+        </div>
+      )}
+
+      {/* Chevron down with 90/-90 degree rotation for sliders */}
+      {images.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={prevSlide}
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-20"
+            aria-label="Previous slide"
+          >
+            <ChevronDown className="w-4 h-4 rotate-90" />
+          </button>
+          <button
+            type="button"
+            onClick={nextSlide}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-20"
+            aria-label="Next slide"
+          >
+            <ChevronDown className="w-4 h-4 -rotate-90" />
+          </button>
+        </>
+      )}
+
+      {/* Slide tiny dot indicators at the bottom */}
+      {images.length > 1 && (
+        <div className={`absolute bottom-3 flex gap-1.5 z-20 ${isMobile ? 'left-1/2 -translate-x-1/2' : 'right-4'}`}>
+          {images.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentIndex(idx);
+              }}
+              className={`h-[3px] rounded-full transition-all duration-300 ${
+                currentIndex === idx ? 'bg-accent w-5' : 'bg-white/50 w-1.5'
+              }`}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function MDConfig() {
   // 기본적으로 119호를 활성화
   const [activeUnit, setActiveUnit] = useState<string>('119호');
@@ -251,13 +378,6 @@ export default function MDConfig() {
         {/* 모바일 (md 미만) 전용 고급스러운 프롭테크 대시보드 리스트 뷰 */}
         <div className="block md:hidden mb-12 md:mb-20 -mx-6 w-[calc(100%+3rem)]">
           <div className="bg-transparent">
-            {/* 상단 탭/헤더 느낌의 프리미엄 영역 */}
-            <div className="bg-transparent py-4 px-5 border-b border-stone-200/60 flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-bold text-stone-900 tracking-tight">호실별 공식 MD 매칭 리스트</h3>
-              </div>
-            </div>
-
             <div className="flex flex-col">
               {STORE_UNITS.map((unit) => (
                 <div key={unit.id} className="bg-transparent py-8 border-b border-stone-200/60 last:border-b-0 flex flex-col">
@@ -279,15 +399,12 @@ export default function MDConfig() {
 
                   {/* 3. 이미지 (좌우 여백 없이 화면에 꽉 찬 와이드 레이아웃) */}
                   <div className="w-full aspect-[16/9] bg-stone-100 overflow-hidden relative mb-4">
-                    <img 
-                      src={unit.image} 
-                      alt={unit.type} 
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
+                    <MDImageSlider 
+                      images={unit.images} 
+                      title={unit.type} 
+                      badgeText="MD REAL-VIEW" 
+                      isMobile={true} 
                     />
-                    <div className="absolute top-2.5 left-5 bg-accent text-white px-2 py-0.5 text-[9px] font-black tracking-widest uppercase">
-                      MD REAL-VIEW
-                    </div>
                   </div>
 
                   {/* 4. 입지 공학적 데이터 분석 정보 (차분한 아티클 스타일) */}
@@ -370,28 +487,50 @@ export default function MDConfig() {
                   );
                 })}
 
-                {/* 2. 보행 동선 역추적 애니메이션 그리기 (지정된 퍼센트 꺾임 정밀 경로 시뮬레이션) */}
+                {/* 2. 보행 동선 역추적 애니메이션 그리기 (프리미엄 동선 광선 이펙트) */}
                 {getFlowPaths(selectedUnit.id).map((flow) => {
                   const pathD = buildPathData(flow.points);
                   return (
                     <g key={`flow-${flow.startId}-${selectedUnit.id}`}>
-                      {/* 가이드 백그라운드 라인 */}
-                      <path 
-                        d={pathD} 
-                        fill="none" 
-                        stroke="#CEAE8E" 
-                        strokeWidth="0.4" 
-                        opacity="0.35" 
-                      />
-                      {/* 역추적 역동 점선 빔 (병원 정문/통행로에서 목적 호실로 흘러감) */}
+                      {/* 1단계: 선명하고 도톰한 유도 트랙 (가시성 극대화) */}
                       <path 
                         d={pathD} 
                         fill="none" 
                         stroke={flow.color} 
-                        strokeWidth="0.8" 
+                        strokeWidth="2.2" 
                         strokeLinecap="round"
-                        className="animate-reverse-flow" 
+                        strokeLinejoin="round"
+                        opacity="0.18" 
                       />
+                      {/* 2단계: 실루엣 중심 파선 (가이드 형태 파악 최적화) */}
+                      <path 
+                        d={pathD} 
+                        fill="none" 
+                        stroke={flow.color} 
+                        strokeWidth="0.6" 
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeDasharray="1.2 1.5"
+                        opacity="0.65" 
+                      />
+                      {/* 3단계: 흐르는 광선 입자 1 (원류 게이트에서 목적 호실로의 부드러운 유동 전송 효과) */}
+                      <g>
+                        <circle r="1.3" fill={flow.color} opacity="0.35">
+                          <animateMotion dur="3.5s" repeatCount="indefinite" path={pathD} begin="0s" />
+                        </circle>
+                        <circle r="0.6" fill="#FFFFFF" opacity="0.95">
+                          <animateMotion dur="3.5s" repeatCount="indefinite" path={pathD} begin="0s" />
+                        </circle>
+                      </g>
+                      {/* 4단계: 흐르는 광선 입자 2 (지연 분사로 연속적인 흐름감 부여) */}
+                      <g>
+                        <circle r="1.3" fill={flow.color} opacity="0.35">
+                          <animateMotion dur="3.5s" repeatCount="indefinite" path={pathD} begin="1.75s" />
+                        </circle>
+                        <circle r="0.6" fill="#FFFFFF" opacity="0.95">
+                          <animateMotion dur="3.5s" repeatCount="indefinite" path={pathD} begin="1.75s" />
+                        </circle>
+                      </g>
                     </g>
                   );
                 })}
@@ -587,17 +726,12 @@ export default function MDConfig() {
                         >
                           {/* 16:9 꽉 차는 추천 이미지 */}
                           <div className="w-full aspect-[16/9] overflow-hidden relative">
-                            <img 
-                              src={unit.image} 
-                              alt={unit.type} 
-                              className="w-full h-full object-cover"
-                              referrerPolicy="no-referrer"
+                            <MDImageSlider 
+                              images={unit.images} 
+                              title={unit.type} 
+                              badgeText="MD REAL-VIEW" 
+                              isMobile={false} 
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                            <div className="absolute bottom-3 left-4 flex items-center gap-1.5 text-white">
-                              <MapPin className="w-3.5 h-3.5 text-accent" />
-                              <span className="text-xs font-black tracking-widest uppercase">추천 업종 실사 분위기</span>
-                            </div>
                           </div>
 
                           {/* 상세 카피라이팅 & 추천 텍스트 리스트 */}
@@ -609,10 +743,10 @@ export default function MDConfig() {
                             </p>
                             
                             <div className="pt-4 border-t border-slate-200/60 lg:border-stone-200/40">
-                              <span className="text-[10px] font-black tracking-wider uppercase text-slate-400 block mb-2">권장 테넌트(MD) 리스트</span>
-                              <div className="p-3.5 bg-white lg:bg-stone-50/50 border border-slate-200/50 lg:border-stone-200/30 rounded-lg lg:rounded-none shadow-inner">
-                                {/* 추천 업종 텍스트를 크게 키움 */}
-                                <p className="text-sm sm:text-base lg:text-xs font-semibold text-slate-800 lg:text-stone-800 leading-relaxed text-wrap break-keep">
+                              <span className="text-[11px] font-black tracking-wider uppercase text-stone-900 block mb-2 font-sans">권장 테넌트(MD) 리스트</span>
+                              <div className="p-3.5 bg-white lg:bg-stone-50/50 border border-slate-200/60 lg:border-stone-200/40 rounded-lg lg:rounded-none shadow-sm">
+                                {/* 추천 업종 텍스트를 크게 키우고 색감 진하게 세팅 */}
+                                <p className="text-sm sm:text-base lg:text-[14px] font-black text-stone-950 leading-relaxed text-wrap break-keep font-sans antialiased">
                                   {unit.recommendation}
                                 </p>
                               </div>
@@ -635,8 +769,10 @@ export default function MDConfig() {
             <span className="text-accent font-black tracking-[0.25em] text-[11px] uppercase block mb-3">PREMIUM RESIDENCE</span>
             <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-tight mb-6 break-keep">주거용 오피스텔 상품안내</h2>
             <div className="mt-4">
-              <span className="text-sm sm:text-base md:text-[17px] text-[#555555] font-semibold uppercase tracking-[0.08em] block sm:inline">
-                시행사 특별 보유분 한정 프리미엄 리저브 세대
+              <span className="text-sm sm:text-base md:text-[17px] text-[#555555] font-semibold uppercase tracking-[0.08em] block leading-relaxed">
+                시행사 특별 보유분 한정
+                <br />
+                프리미엄 리저브 세대
               </span>
             </div>
           </div>

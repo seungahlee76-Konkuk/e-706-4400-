@@ -99,24 +99,26 @@ export default function StickyBottomForm() {
           
           <form onSubmit={handleSubmit(onSubmit)} className="w-full flex-1 flex flex-col lg:flex-row gap-2 lg:gap-4 lg:items-center relative pt-5 lg:pt-0">
             {/* Agreement Checkbox: absolute on mobile, static on desktop */}
-            <div className="absolute top-0 left-0 right-0 lg:static flex items-center justify-between gap-1.5 text-[10.5px] lg:text-[11px] text-zinc-500 cursor-pointer select-none">
-              <label className="flex items-center gap-1.5 cursor-pointer">
+            <div className="absolute top-0 left-0 right-0 lg:static grid grid-cols-2 gap-2 lg:flex lg:items-center lg:justify-between text-[10.5px] lg:text-[11px] text-zinc-500 cursor-pointer select-none">
+              <label className="flex items-center gap-1.5 cursor-pointer min-w-0">
                 <input 
                   {...register('privacy', { required: true })} 
                   type="checkbox" 
-                  className="rounded text-[#002C5F] focus:ring-[#002C5F] w-3.5 h-3.5 lg:text-primary lg:focus:ring-primary" 
+                  className="rounded text-[#002C5F] focus:ring-[#002C5F] w-3.5 h-3.5 lg:text-primary lg:focus:ring-primary shrink-0" 
                 />
-                <span className="font-medium">개인정보 수집 및 동의 [필수]</span>
+                <span className="font-medium truncate">개인정보 수집 및 동의 [필수]</span>
               </label>
-              <a 
-                href="tel:01033708602"
-                className="text-xs text-primary font-black tracking-tighter lg:hidden flex items-center gap-1 shrink-0 hover:opacity-85 transition-opacity"
-              >
-                <div className="w-5 h-5 rounded-full bg-primary/5 flex items-center justify-center text-primary">
-                  <Phone className="w-2.5 h-2.5 shrink-0" />
-                </div>
-                <span>010-3370-8602</span>
-              </a>
+              <div className="flex items-center justify-start">
+                <a 
+                  href="tel:01033708602"
+                  className="text-xs text-primary font-black tracking-tighter lg:hidden flex items-center gap-1 shrink-0 hover:opacity-85 transition-opacity"
+                >
+                  <div className="w-5 h-5 rounded-full bg-primary/5 flex items-center justify-center text-primary">
+                    <Phone className="w-2.5 h-2.5 shrink-0" />
+                  </div>
+                  <span>010-3370-8602</span>
+                </a>
+              </div>
             </div>
 
             {/* Row 1: Name & Phone (50:50 grid on mobile, flex on desktop) */}
