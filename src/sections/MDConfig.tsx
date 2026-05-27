@@ -14,7 +14,7 @@ export default function MDConfig() {
 
   return (
     <section id="md" className="py-28 px-6 border-b border-gray-100 bg-[#FAF8F5]">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1600px] mx-auto w-full">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -34,11 +34,11 @@ export default function MDConfig() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          className="grid lg:grid-cols-2 gap-12 sm:gap-16 items-start mb-28 w-full"
+          className="grid lg:grid-cols-12 gap-10 sm:gap-12 lg:items-stretch mb-28 w-full"
         >
           {/* 상업시설 캐러셀 */}
-          <div className="relative group">
-            <div className="rounded-none overflow-hidden border border-stone-200/60 aspect-[4/5] relative bg-stone-50">
+          <div className="lg:col-span-5 relative group w-full flex flex-col justify-between self-stretch">
+            <div className="rounded-none overflow-hidden border border-stone-200/60 aspect-[4/5] lg:aspect-auto lg:flex-1 relative bg-stone-50 min-h-[450px]">
               <AnimatePresence mode="wait">
                 <motion.img
                   key={activeIndex}
@@ -58,7 +58,7 @@ export default function MDConfig() {
                 <p className="text-accent font-black text-[10px] mb-1.5 uppercase tracking-widest leading-none">RECOMMENDED UNIT</p>
                 <h3 className="text-3.5xl font-black tracking-tight">{mdData[activeIndex].id}</h3>
               </div>
-
+              
               <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 flex justify-between">
                 <button 
                   onClick={prevSlide}
@@ -75,7 +75,7 @@ export default function MDConfig() {
               </div>
             </div>
             
-            <div className="mt-4 flex gap-2 justify-center">
+            <div className="mt-4 flex gap-2 justify-center shrink-0">
               {mdData.map((_, idx) => (
                 <button
                   key={idx}
@@ -86,13 +86,13 @@ export default function MDConfig() {
             </div>
           </div>
 
-          <div className="overflow-hidden bg-white p-6 sm:p-8 rounded-none">
+          <div className="lg:col-span-7 overflow-hidden bg-white p-5 sm:p-8 rounded-none border border-stone-200/50 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-stone-200 pb-4">
-                  <th className="py-4 px-2 sm:px-4 font-black text-xs sm:text-sm md:text-[15px] uppercase tracking-[0.15em] text-stone-700 w-24 sm:w-28">호수</th>
-                  <th className="py-4 px-3 sm:px-6 md:px-8 font-black text-xs sm:text-sm md:text-[15px] uppercase tracking-[0.15em] text-stone-700">추천 업종 및 상세 안내</th>
-                  <th className="py-4 px-2 sm:px-4 font-black text-xs sm:text-sm md:text-[15px] uppercase tracking-[0.15em] text-stone-700 text-right w-24 sm:w-32">전용면적</th>
+                <tr className="border-b border-stone-200">
+                  <th className="py-3.5 px-2 sm:px-4 font-black text-xs sm:text-sm uppercase tracking-[0.12em] text-stone-700 w-20 sm:w-24">호수</th>
+                  <th className="py-3.5 px-3 sm:px-5 md:px-6 font-black text-xs sm:text-sm uppercase tracking-[0.12em] text-stone-700">추천 업종 및 상세 안내</th>
+                  <th className="py-3.5 px-2 sm:px-4 font-black text-xs sm:text-sm uppercase tracking-[0.12em] text-stone-700 text-right w-24 sm:w-28">전용면적</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
@@ -109,7 +109,7 @@ export default function MDConfig() {
                           : 'hover:bg-[#EBEBE4]/30 border-b border-stone-100'
                       }`}
                     >
-                      <td className="py-5 px-2 sm:px-4 align-middle">
+                      <td className="py-4 px-2 sm:px-4 align-middle">
                         {/* Enlarged Room Numbers as a Bold Architecture/Spec element with custom coloring */}
                         <div className="flex items-baseline">
                           <span className={`text-2xl sm:text-3.5xl font-black transition-colors tracking-tighter block leading-none select-none ${
@@ -126,9 +126,9 @@ export default function MDConfig() {
                           }`}>호</span>
                         </div>
                       </td>
-                      <td className="py-5 px-3 sm:px-6 md:px-8 align-middle">
-                        <div className="flex flex-col gap-1.5">
-                          <div className="flex flex-wrap items-center gap-1.5 md:gap-3">
+                      <td className="py-4 px-3 sm:px-5 md:px-6 align-middle">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex flex-wrap items-center gap-1.5 md:gap-2.5">
                             <h4 className={`text-sm sm:text-base font-extrabold tracking-tight transition-colors ${
                               isHighTarget ? 'text-accent' : 'text-gray-900 group-hover:text-accent'
                             }`}>
@@ -145,10 +145,10 @@ export default function MDConfig() {
                           </p>
                         </div>
                       </td>
-                      <td className="py-5 px-2 sm:px-4 text-right align-middle">
+                      <td className="py-4 px-2 sm:px-4 text-right align-middle">
                         <div className="flex flex-col justify-center">
                           <span className="text-[9px] text-stone-400 font-bold tracking-wider uppercase block mb-0.5">전용면적</span>
-                          <span className={`text-sm sm:text-base md:text-[17px] font-black ${
+                          <span className={`text-sm sm:text-base md:text-[16px] font-black ${
                             isHighTarget ? 'text-accent' : 'text-stone-800'
                           }`}>
                             {item.area}
