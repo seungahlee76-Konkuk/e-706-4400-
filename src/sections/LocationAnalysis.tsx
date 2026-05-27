@@ -143,7 +143,7 @@ const AnalysisCard: React.FC<AnalysisCardProps> = ({ item, index }) => {
 
 export default function LocationAnalysis() {
   return (
-    <section id="location" className="py-28 px-6 overflow-hidden bg-[#FAF8F5] border-t border-b border-stone-200/40">
+    <section id="location" className="py-14 md:py-28 px-6 overflow-hidden bg-[#FAF8F5] border-t border-b border-stone-200/40">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial="hidden"
@@ -157,7 +157,7 @@ export default function LocationAnalysis() {
               }
             }
           }}
-          className="text-center mb-28 md:mb-36"
+          className="text-center mb-12 md:mb-36"
         >
           <motion.span 
             variants={{

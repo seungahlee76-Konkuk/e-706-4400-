@@ -3,7 +3,7 @@ import { PROJECT_INFO } from '../constants';
 
 export default function Overview() {
   return (
-    <section id="overview" className="relative py-28 px-6 overflow-hidden bg-gradient-to-b from-slate-50/50 via-white to-slate-50/30">
+    <section id="overview" className="relative py-14 md:py-28 px-6 overflow-hidden bg-gradient-to-b from-slate-50/50 via-white to-slate-50/30">
       {/* Premium Ambient Background Orbs */}
       <div className="absolute top-1/4 left-0 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-1/3 right-0 w-[500px] h-[500px] bg-sky-200/10 rounded-full blur-[120px] pointer-events-none" />
@@ -14,7 +14,7 @@ export default function Overview() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="mb-16 text-center md:text-left"
+          className="mb-10 md:mb-16 text-center md:text-left"
         >
           <span className="text-accent font-bold tracking-[0.2em] text-[11px] uppercase">PROJECT OVERVIEW</span>
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-gray-900 mt-4 tracking-tight leading-tight break-keep">사업개요</h2>
@@ -22,7 +22,7 @@ export default function Overview() {
         </motion.div>
 
         {/* Top Section: Premium Bento Overview Cards */}
-        <div className="mb-24">
+        <div className="mb-14 md:mb-24">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {PROJECT_INFO.overview.map((item, idx) => (
               <motion.div

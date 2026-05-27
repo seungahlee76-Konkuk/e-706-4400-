@@ -68,7 +68,7 @@ export default function ContactForm() {
   };
 
   return (
-    <section id="contact" className="relative py-28 text-gray-905 px-6 bg-gradient-to-b from-white to-slate-50/70 overflow-hidden">
+    <section id="contact" className="relative py-14 md:py-28 text-gray-905 px-6 bg-gradient-to-b from-white to-slate-50/70 overflow-hidden">
       {/* Decorative Blur BG Orb */}
       <div className="absolute bottom-0 left-0 w-[450px] h-[450px] bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
 
@@ -77,12 +77,12 @@ export default function ContactForm() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          className="text-center mb-20"
+          className="text-center mb-10 md:mb-20"
         >
           <span className="text-accent font-bold tracking-[0.2em] text-[11px] uppercase">Consultation</span>
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-gray-900 mt-4 tracking-tight leading-tight break-keep">상담 신청 및 예약</h2>
           <p className="mt-5 text-gray-500 font-semibold break-keep text-base max-w-lg mx-auto">{"정보를 입력해주시면 전문 상담원이 빠르고 정확하게 안내해 드리겠습니다."}</p>
-          <div className="w-16 h-1.5 bg-accent mx-auto mt-8 rounded-full" />
+          <div className="w-16 h-1.5 bg-accent mx-auto mt-4 md:mt-8 rounded-full" />
         </motion.div>
  
         {isSuccess ? (

@@ -208,7 +208,7 @@ export default function MDConfig() {
   const selectedUnit = STORE_UNITS.find(u => u.id === activeUnit) || STORE_UNITS[0];
 
   return (
-    <section id="md" className="py-28 px-6 border-b border-gray-100 bg-[#FAF8F5]">
+    <section id="md" className="py-14 md:py-28 px-6 border-b border-gray-100 bg-[#FAF8F5]">
       {/* 선 애니메이션용 CSS 인젝션 */}
       <style>{`
         @keyframes reverse-dotted-flow {
@@ -240,16 +240,16 @@ export default function MDConfig() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          className="text-center mb-20"
+          className="text-center mb-10 md:mb-20"
         >
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-gray-900 mt-4 tracking-tight leading-tight break-keep">
             수원덕산병원 상가 동선 분석 및 MD 연동 대시보드
           </h2>
-          <div className="w-20 h-1.5 bg-accent mx-auto mt-8 rounded-full" />
+          <div className="w-20 h-1.5 bg-accent mx-auto mt-4 md:mt-8 rounded-full" />
         </motion.div>
 
         {/* 모바일 (md 미만) 전용 고급스러운 프롭테크 대시보드 리스트 뷰 */}
-        <div className="block md:hidden mb-20 -mx-6 w-[calc(100%+3rem)]">
+        <div className="block md:hidden mb-12 md:mb-20 -mx-6 w-[calc(100%+3rem)]">
           <div className="bg-transparent">
             {/* 상단 탭/헤더 느낌의 프리미엄 영역 */}
             <div className="bg-transparent py-4 px-5 border-b border-stone-200/60 flex justify-between items-center">
@@ -630,8 +630,8 @@ export default function MDConfig() {
         </div>
 
         {/* 오피스텔 섹션 유지 - Refined to match modern design guides */}
-        <div className="pt-24 border-t border-stone-200/50">
-          <div className="text-center mb-20">
+        <div className="pt-12 md:pt-24 border-t border-stone-200/50">
+          <div className="text-center mb-10 md:mb-20">
             <span className="text-accent font-black tracking-[0.25em] text-[11px] uppercase block mb-3">PREMIUM RESIDENCE</span>
             <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-tight mb-6 break-keep">주거용 오피스텔 상품안내</h2>
             <div className="mt-4">
