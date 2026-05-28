@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronDown, MapPin, Sparkles, Building, ArrowRight } from 'lucide-react';
+import { ChevronDown, MapPin, Sparkles, Building, ArrowRight, Settings, Upload } from 'lucide-react';
 import { officetelData, mdData, DEFAULT_MD_DATA } from '../constants';
 
 interface StoreUnit {
@@ -29,7 +29,7 @@ const STORE_UNITS_BASE: StoreUnit[] = [
       'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80&w=800'
     ],
-    coords: { x: 41, y: 36 },
+    coords: { x: 39, y: 38 },
     category: 'F&B/스포츠',
     categoryStyle: 'bg-orange-50 text-orange-600 border border-orange-100/60'
   },
@@ -45,14 +45,14 @@ const STORE_UNITS_BASE: StoreUnit[] = [
       'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=800'
     ],
-    coords: { x: 26, y: 30 },
+    coords: { x: 28, y: 33 },
     category: 'F&B/디저트',
     categoryStyle: 'bg-amber-50 text-amber-700 border border-amber-100/60'
   },
   {
     id: '119호',
     area: '58.81평',
-    type: '의료 문전약국',
+    type: '1번 약국',
     desc: '[상권의 중심] 처방전 동선이 모이는 독점적 입지',
     recommendation: '소아과/내과/정형외과 병동 처방 중심 메디컬 대형 약국, 올리브영 타입 드로그스토어',
     images: [
@@ -62,7 +62,7 @@ const STORE_UNITS_BASE: StoreUnit[] = [
       'https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?auto=format&fit=crop&q=80&w=800'
     ],
     coords: { x: 28, y: 45 },
-    category: '독점 메디컬',
+    category: '1번 약국',
     categoryStyle: 'bg-teal-50 text-teal-700 border border-teal-100/60'
   },
   {
@@ -77,7 +77,7 @@ const STORE_UNITS_BASE: StoreUnit[] = [
       'https://images.unsplash.com/photo-1616166311666-8805f6e87a28?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1594911773177-3e4b77f10fc1?auto=format&fit=crop&q=80&w=800'
     ],
-    coords: { x: 48, y: 88 },
+    coords: { x: 44, y: 88 },
     category: 'F&B/한식',
     categoryStyle: 'bg-red-50 text-red-600 border border-red-100/60'
   },
@@ -92,8 +92,8 @@ const STORE_UNITS_BASE: StoreUnit[] = [
       'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80&w=800'
     ],
-    coords: { x: 52, y: 88 },
-    category: '웰빙 다이닝',
+    coords: { x: 48, y: 88 },
+    category: '퍼스널다이닝',
     categoryStyle: 'bg-rose-50 text-rose-600 border border-rose-100/60'
   },
   {
@@ -108,8 +108,8 @@ const STORE_UNITS_BASE: StoreUnit[] = [
       'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&q=80&w=800'
     ],
-    coords: { x: 56, y: 88 },
-    category: '테이크아웃',
+    coords: { x: 51, y: 88 },
+    category: '테이크아웃/배달',
     categoryStyle: 'bg-emerald-50 text-emerald-600 border border-emerald-100/60'
   },
   {
@@ -124,7 +124,7 @@ const STORE_UNITS_BASE: StoreUnit[] = [
       'https://images.unsplash.com/photo-1532634922-8fe0b757fb13?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&q=80&w=800'
     ],
-    coords: { x: 60, y: 88 },
+    coords: { x: 54, y: 88 },
     category: 'F&B/주류',
     categoryStyle: 'bg-indigo-50 text-indigo-600 border border-indigo-100/60'
   }
@@ -152,7 +152,10 @@ const STORE_UNITS: StoreUnit[] = STORE_UNITS_BASE.map(base => {
       type: isEditedType ? custom.type : base.type,
       desc: isEditedDesc ? custom.desc : base.desc,
       images: mergedImages,
-      recommendation: isEditedType ? custom.type : base.recommendation
+      recommendation: isEditedType ? custom.type : base.recommendation,
+      coords: base.coords, // coords는 무조건 최신 고정밀 소스값 유지
+      category: base.category, // category 무조건 최신 소스값 유지
+      categoryStyle: base.categoryStyle // categoryStyle 무조건 최신 소스값 유지
     };
   }
   return base;
@@ -160,8 +163,8 @@ const STORE_UNITS: StoreUnit[] = STORE_UNITS_BASE.map(base => {
 
 // SVG 앵커 포인트 정의 (보행 동선 역추적 시작점)
 const TRAFFIC_ANCHORS = [
-  { id: 'gate2', label: '병원 통행로 진입로', x: 20, y: 30, color: '#6B8E23' },
-  { id: 'gate1', label: '병원 정문 진입로', x: 20, y: 90, color: '#CE9F6F' }
+  { id: 'gate2', label: '후문 동선 (후문 약국행)', x: 22, y: 35, color: '#0D9488' },
+  { id: 'gate1', label: '정문 동선', x: 6, y: 85, color: '#F43F5E' }
 ];
 
 interface FlowPath {
@@ -176,65 +179,101 @@ function getFlowPaths(unitId: string): FlowPath[] {
     case '117호':
       return [{
         startId: 'gate2',
-        label: '병원 통행로 진입로',
-        color: '#6B8E23',
-        points: [{ x: 20, y: 30 }, { x: 26, y: 30 }, { x: 41, y: 36 }]
+        label: '후문 동선 (후문 약국행)',
+        color: '#0D9488',
+        points: [{ x: 22, y: 35 }, { x: 39, y: 42 }, { x: 39, y: 38 }]
       }];
     case '118호':
       return [{
         startId: 'gate2',
-        label: '병원 통행로 진입로',
-        color: '#6B8E23',
-        points: [{ x: 20, y: 30 }, { x: 26, y: 30 }]
+        label: '후문 동선 (후문 약국행)',
+        color: '#0D9488',
+        points: [{ x: 22, y: 35 }, { x: 28, y: 33 }]
       }];
     case '119호':
       return [
         {
           startId: 'gate2',
-          label: '병원 통행로 진입로',
-          color: '#6B8E23',
-          points: [{ x: 20, y: 30 }, { x: 28, y: 45 }]
-        },
-        {
-          startId: 'gate1',
-          label: '병원 정문 진입로',
-          color: '#CE9F6F',
-          points: [{ x: 20, y: 90 }, { x: 28, y: 45 }]
+          label: '후문 동선 (후문 약국행)',
+          color: '#0D9488',
+          points: [{ x: 22, y: 35 }, { x: 22, y: 45 }, { x: 28, y: 45 }]
         }
       ];
     case '126호':
-      return [{
-        startId: 'gate1',
-        label: '병원 정문 진입로',
-        color: '#CE9F6F',
-        points: [{ x: 20, y: 90 }, { x: 48, y: 88 }]
-      }];
+      return [
+        {
+          startId: 'gate1',
+          label: '정문 동선',
+          color: '#F43F5E',
+          points: [{ x: 6, y: 85 }, { x: 6, y: 95 }, { x: 44, y: 95 }, { x: 44, y: 88 }]
+        },
+        {
+          startId: 'gate2',
+          label: '후문 동선',
+          color: '#0D9488',
+          points: [{ x: 22, y: 35 }, { x: 22, y: 95 }, { x: 44, y: 95 }, { x: 44, y: 88 }]
+        }
+      ];
     case '127호':
-      return [{
-        startId: 'gate1',
-        label: '병원 정문 진입로',
-        color: '#CE9F6F',
-        points: [{ x: 20, y: 90 }, { x: 48, y: 88 }, { x: 52, y: 88 }]
-      }];
+      return [
+        {
+          startId: 'gate1',
+          label: '정문 동선',
+          color: '#F43F5E',
+          points: [{ x: 6, y: 85 }, { x: 6, y: 95 }, { x: 48, y: 95 }, { x: 48, y: 88 }]
+        },
+        {
+          startId: 'gate2',
+          label: '후문 동선',
+          color: '#0D9488',
+          points: [{ x: 22, y: 35 }, { x: 22, y: 95 }, { x: 48, y: 95 }, { x: 48, y: 88 }]
+        }
+      ];
     case '128호':
-      return [{
-        startId: 'gate1',
-        label: '병원 정문 진입로',
-        color: '#CE9F6F',
-        points: [{ x: 20, y: 90 }, { x: 48, y: 88 }, { x: 52, y: 88 }, { x: 56, y: 88 }]
-      }];
+      return [
+        {
+          startId: 'gate1',
+          label: '정문 동선',
+          color: '#F43F5E',
+          points: [{ x: 6, y: 85 }, { x: 6, y: 95 }, { x: 51, y: 95 }, { x: 51, y: 88 }]
+        },
+        {
+          startId: 'gate2',
+          label: '후문 동선',
+          color: '#0D9488',
+          points: [{ x: 22, y: 35 }, { x: 22, y: 95 }, { x: 51, y: 95 }, { x: 51, y: 88 }]
+        }
+      ];
     case '129호':
-      return [{
-        startId: 'gate1',
-        label: '병원 정문 진입로',
-        color: '#CE9F6F',
-        points: [{ x: 20, y: 90 }, { x: 48, y: 88 }, { x: 52, y: 88 }, { x: 56, y: 88 }, { x: 60, y: 88 }]
-      }];
+      return [
+        {
+          startId: 'gate1',
+          label: '정문 동선',
+          color: '#F43F5E',
+          points: [{ x: 6, y: 85 }, { x: 6, y: 95 }, { x: 54, y: 95 }, { x: 54, y: 88 }]
+        },
+        {
+          startId: 'gate2',
+          label: '후문 동선',
+          color: '#0D9488',
+          points: [{ x: 22, y: 35 }, { x: 22, y: 95 }, { x: 54, y: 95 }, { x: 54, y: 88 }]
+        }
+      ];
     default:
       return [];
   }
 }
-
+{/* 후문 -> 126~129호 방향 서브 동선 */}
+<path
+  // M: 시작점(후문 X, Y 좌표) / L: 도착점(후문 X 좌표 그대로, Y좌표만 126호 라인으로)
+  d="M 22 35 L 22 88"
+  fill="none"
+  stroke="#0D9488"
+  strokeWidth="2"
+  strokeLinecap="round"
+  strokeLinejoin="round"
+  opacity={0.85}
+/>
 function buildPathData(points: { x: number; y: number }[]): string {
   if (points.length === 0) return '';
   return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
@@ -331,21 +370,118 @@ function MDImageSlider({ images, title, badgeText, isMobile = false }: MDImageSl
 export default function MDConfig() {
   // 기본적으로 119호를 활성화
   const [activeUnit, setActiveUnit] = useState<string>('119호');
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [sectionTitle, setSectionTitle] = useState<string>(() => {
+    return localStorage.getItem('site_custom_md_section_title') || '수원덕산병원 상가 입점 가이드';
+  });
+  const [blueprintImg, setBlueprintImg] = useState<string>(() => {
+    return localStorage.getItem('site_custom_md_blueprint_img') || 'https://i.ibb.co/pjDBc2bh/image.png';
+  });
 
-  const selectedUnit = STORE_UNITS.find(u => u.id === activeUnit) || STORE_UNITS[0];
+  const [units, setUnits] = useState<StoreUnit[]>(() => {
+    const savedFull = localStorage.getItem('site_custom_md_units');
+    if (savedFull) {
+      try {
+        return JSON.parse(savedFull);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return STORE_UNITS;
+  });
+
+  const selectedUnit = units.find(u => u.id === activeUnit) || units[0];
+
+  const updateUnitValue = (id: string, field: keyof StoreUnit, value: any) => {
+    const updated = units.map(u => {
+      if (u.id === id) {
+        return { ...u, [field]: value };
+      }
+      return u;
+    });
+    setUnits(updated);
+    localStorage.setItem('site_custom_md_units', JSON.stringify(updated));
+
+    // Sync to sitewise mdData for Admin panel compatibility
+    const adminFormat = updated.map(u => ({
+      id: u.id,
+      type: u.type,
+      area: u.area,
+      desc: u.desc,
+      image: u.images[0] || ''
+    }));
+    localStorage.setItem('site_custom_md_data', JSON.stringify(adminFormat));
+  };
+
+  const handleImageUpload = (file: File, callback: (base64: string) => void) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', 0.7);
+          callback(compressed);
+        } else {
+          callback(e.target?.result as string);
+        }
+      };
+      img.onerror = () => {
+        callback(reader.result as string);
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
 
   return (
     <section id="md" className="py-14 md:py-28 px-6 border-b border-gray-100 bg-[#FAF8F5]">
       {/* 선 애니메이션용 CSS 인젝션 */}
       <style>{`
-        @keyframes reverse-dotted-flow {
+        @keyframes dash-flow {
+          from {
+            stroke-dashoffset: 0;
+          }
           to {
-            stroke-dashoffset: -30;
+            stroke-dashoffset: -120;
           }
         }
-        .animate-reverse-flow {
-          stroke-dasharray: 6, 4;
-          animation: reverse-dotted-flow 1.2s linear infinite;
+        .animate-dash-flow {
+          animation: dash-flow 4.2s linear infinite;
+        }
+        @keyframes path-draw {
+          from {
+            stroke-dashoffset: 1000;
+          }
+          to {
+            stroke-dashoffset: 0;
+          }
+        }
+        .animate-path-draw {
+          stroke-dasharray: 1000;
+          stroke-dashoffset: 1000;
+          animation: path-draw 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
         @keyframes locator-pulse {
           0%, 100% {
@@ -367,38 +503,56 @@ export default function MDConfig() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          className="text-center mb-10 md:mb-20"
+          className="text-center mb-6 md:mb-10"
         >
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-gray-900 mt-4 tracking-tight leading-tight break-keep">
-            수원덕산병원 상가 동선 분석 및 MD 연동 대시보드
-          </h2>
-          <div className="w-20 h-1.5 bg-accent mx-auto mt-4 md:mt-8 rounded-full" />
+          <span className="text-accent font-bold tracking-[0.2em] text-[11px] uppercase block">Premium MD Curation</span>
+          {isEditMode ? (
+            <div className="max-w-2xl mx-auto mb-4 px-6">
+              <label className="block text-[10px] font-bold text-accent mb-1 uppercase tracking-wider">대시보드 메인 타이틀 편집</label>
+              <input 
+                type="text" 
+                className="w-full text-center text-xl sm:text-2xl md:text-3xl font-bold border border-accent/40 bg-white px-4 py-2 text-stone-900 rounded-md focus:outline-none focus:ring-1 focus:ring-accent"
+                value={sectionTitle} 
+                onChange={(e) => {
+                  setSectionTitle(e.target.value);
+                  localStorage.setItem('site_custom_md_section_title', e.target.value);
+                }} 
+              />
+            </div>
+          ) : (
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-stone-900 mt-4 tracking-tight leading-tight break-keep">
+              {sectionTitle}
+            </h2>
+          )}
+          <div className="w-16 h-1 bg-accent mx-auto mt-4 rounded-full" />
         </motion.div>
+
+        <div className="mb-8 md:mb-12" />
 
         {/* 모바일 (md 미만) 전용 고급스러운 프롭테크 대시보드 리스트 뷰 */}
         <div className="block md:hidden mb-12 md:mb-20 -mx-6 w-[calc(100%+3rem)]">
           <div className="bg-transparent">
             <div className="flex flex-col">
-              {STORE_UNITS.map((unit) => (
+              {units.map((unit) => (
                 <div key={unit.id} className="bg-transparent py-8 border-b border-stone-200/60 last:border-b-0 flex flex-col">
                   
                   {/* 1. 카탈로그 메타데이터 상단 배치 */}
-                  <div className="flex items-center justify-between mb-3 px-5">
-                    <span className="text-xs font-bold text-stone-500 tracking-wider uppercase">
+                  <div className="flex items-center justify-between mb-3.5 px-5">
+                    <span className="text-sm font-bold text-stone-500 tracking-wider uppercase">
                       {unit.id} <span className="mx-1.5 text-stone-300">|</span> 전용 {unit.area}
                     </span>
-                    <span className={`px-2.5 py-0.5 text-[10px] font-semibold tracking-wider rounded ${unit.categoryStyle}`}>
+                    <span className={`px-3 py-1 text-xs font-bold tracking-wider rounded ${unit.categoryStyle}`}>
                       {unit.category}
                     </span>
                   </div>
 
-                  {/* 2. 에셋 타이틀 (차분하고 묵직한 프리미엄 진회색) */}
-                  <h4 className="text-[17px] font-black text-stone-950 leading-snug mb-3.5 tracking-tight break-keep px-5">
+                  {/* 2. 에셋 타이틀 */}
+                  <h4 className="text-[18px] sm:text-[20px] font-bold text-stone-950 leading-snug mb-4 tracking-tight break-keep px-5">
                     {unit.desc}
                   </h4>
 
-                  {/* 3. 이미지 (좌우 여백 없이 화면에 꽉 찬 와이드 레이아웃) */}
-                  <div className="w-full aspect-[16/9] bg-stone-100 overflow-hidden relative mb-4">
+                  {/* 3. 이미지 */}
+                  <div className="w-full aspect-[16/9] bg-stone-100 overflow-hidden relative mb-5">
                     <MDImageSlider 
                       images={unit.images} 
                       title={unit.type} 
@@ -407,20 +561,108 @@ export default function MDConfig() {
                     />
                   </div>
 
-                  {/* 4. 입지 공학적 데이터 분석 정보 (차분한 아티클 스타일) */}
-                  <div className="text-[13.5px] text-stone-600 leading-relaxed break-keep px-5">
-                    <p className="mb-4">
+                  {/* 4. 입지 공학적 데이터 분석 정보 */}
+                  <div className="text-[15px] text-stone-700 leading-relaxed break-keep px-5">
+                    <p className="mb-4 font-normal">
                       수원덕산병원 인접 최고 보행 집객구역에 위치한 {unit.id}호는 가시성이 뛰어나며 안정적인 점포 활성화 지표를 보유하고 있습니다. 정밀 동선 및 시뮬레이션에 매칭된 MD 상세 리스트는 아래와 같습니다.
                     </p>
                     
-                    {/* 권장 MD 기프트 박스 */}
-                    <div className="p-4 bg-stone-50 border border-stone-200/40 flex items-start gap-2">
-                      <span className="text-xs font-bold text-accent shrink-0 mt-0.5">▷ 권장:</span>
-                      <p className="text-xs font-bold text-stone-800 leading-normal">
+                    {/* 권장 MD 디스플레이 */}
+                    <div className="p-4.5 bg-accent/5 border border-accent/20 rounded-xl flex items-start gap-2.5 mb-5 shadow-sm">
+                      <span className="text-[15px] font-bold text-accent shrink-0 mt-0.5 font-sans">▷ 권장 테넌트:</span>
+                      <p className="text-[15px] font-bold text-stone-950 leading-relaxed font-sans antialiased">
                         {unit.recommendation}
                       </p>
                     </div>
                   </div>
+
+                  {/* 모바일 실시간 편집 폼 */}
+                  {isEditMode && (
+                    <div className="mx-5 p-4 bg-white border border-accent/20 rounded-xl space-y-4 shadow-sm mb-4">
+                      <h5 className="text-xs font-semibold text-accent flex items-center gap-1">
+                        <Sparkles className="w-3.5 h-3.5" /> {unit.id} 정보 및 미디어 실시간 수정
+                      </h5>
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">전용면적</label>
+                          <input 
+                            type="text" 
+                            value={unit.area} 
+                            onChange={(e) => updateUnitValue(unit.id, 'area', e.target.value)}
+                            className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2 py-1"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">대표 샵 업종</label>
+                          <input 
+                            type="text" 
+                            value={unit.type} 
+                            onChange={(e) => updateUnitValue(unit.id, 'type', e.target.value)}
+                            className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2 py-1"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">상가 비주얼 카피라이팅</label>
+                        <input 
+                          type="text" 
+                          value={unit.desc} 
+                          onChange={(e) => updateUnitValue(unit.id, 'desc', e.target.value)}
+                          className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2 py-1"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">권장 테넌트(MD) 리스트</label>
+                        <textarea 
+                          rows={2}
+                          value={unit.recommendation} 
+                          onChange={(e) => updateUnitValue(unit.id, 'recommendation', e.target.value)}
+                          className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2 py-1"
+                        />
+                      </div>
+
+                      {/* 이미지 관리 */}
+                      <div className="space-y-1.5 border-t border-stone-100 pt-3">
+                        <span className="block text-[10px] font-semibold text-stone-500">📸 실사 분위기 슬라이더 업로드 (최대 4장)</span>
+                        {unit.images.map((imgUrl, imgIdx) => (
+                          <div key={imgIdx} className="flex gap-2 items-center">
+                            <span className="text-[10px] font-semibold text-stone-400 w-3">#{imgIdx + 1}</span>
+                            <input 
+                              type="text" 
+                              value={imgUrl} 
+                              onChange={(e) => {
+                                const newImages = [...unit.images];
+                                newImages[imgIdx] = e.target.value;
+                                updateUnitValue(unit.id, 'images', newImages);
+                              }}
+                              className="flex-1 text-[10px] font-mono border border-stone-300 rounded px-2 py-1 bg-white"
+                            />
+                            <label className="flex items-center gap-1 px-2.5 py-1 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded text-[10px] font-bold cursor-pointer whitespace-nowrap">
+                              <Upload className="w-3 h-3 text-stone-600" />
+                              <input 
+                                type="file" 
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    handleImageUpload(file, (base64) => {
+                                      const newImages = [...unit.images];
+                                      newImages[imgIdx] = base64;
+                                      updateUnitValue(unit.id, 'images', newImages);
+                                    });
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                 </div>
               ))}
@@ -428,228 +670,252 @@ export default function MDConfig() {
           </div>
         </div>
 
-        {/* 1. 레이아웃 분할 Grid (좌측 7칸, 우측 5칸 - PC 대시보드 전용) */}
-        <div className="hidden md:grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch w-full mb-32">
+        {/* 1. 최상위 부모 컨테이너 (★ items-start가 핵심입니다) */}
+        <div className="hidden md:flex flex-col md:flex-row items-start gap-6 lg:gap-8 w-full relative mb-32">
           
-          {/* 좌측 7칸: 도면 이미지 및 SVG 보행 동선 역추적 애니메이션 맵 */}
-          <div className="lg:col-span-7 flex flex-col justify-between bg-white border border-stone-200/60 p-4 sm:p-6 shadow-[0_4px_30px_rgba(0,0,0,0.015)] relative min-h-[500px]">
-            <div className="mb-4">
-              <span className="text-accent font-black text-[10px] tracking-widest uppercase block mb-1">INTERACTIVE DIGITAL TWIN</span>
-              <h3 className="text-xl font-black text-gray-900 tracking-tight flex items-center gap-1.5">
-                실시간 보행자 유입 역추적(Reverse-Tracking) 동선 맵
-              </h3>
-            </div>
+          {/* 2. 왼쪽 도면 영역 (★ sticky와 top-24를 줍니다) */}
+          <div className="w-full lg:w-[45%] sticky top-24 z-10 transition-all duration-300">
+            
+            {/* 고급스러운 카드 UI 적용 (p-0 w-full overflow-hidden) */}
+            <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-0 w-full overflow-hidden flex flex-col">
+              <div className="flex justify-between items-start p-5 pb-4">
+                <div>
+                  <span className="text-accent font-semibold text-[10px] tracking-widest uppercase block mb-1">COMMERCIAL FLOW</span>
+                  <h2 className="text-xl font-bold text-slate-800 leading-none">
+                    실시간 보행자 유입 동선 맵
+                  </h2>
+                </div>
 
-            {/* 도면 캔버스 컨테이너 - 가로가 긴 직사각형을 유지하도록 aspect-[4/3] 또는 aspect-[16/10] 적용 */}
-            <div 
-              className="relative flex-1 bg-[#FBFBFA] border border-stone-200 rounded-md overflow-hidden w-full aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/3] min-h-[360px] sm:min-h-[420px] md:min-h-[480px] shadow-inner"
-              style={{
-                backgroundImage: `
-                  linear-gradient(to right, rgba(165, 156, 144, 0.08) 1px, transparent 1px),
-                  linear-gradient(to bottom, rgba(165, 156, 144, 0.08) 1px, transparent 1px),
-                  linear-gradient(to right, rgba(165, 156, 144, 0.03) 1px, transparent 1px),
-                  linear-gradient(to bottom, rgba(165, 156, 144, 0.03) 1px, transparent 1px)
-                `,
-                backgroundSize: '40px 40px, 40px 40px, 8px 8px, 8px 8px',
-                backgroundPosition: 'center center'
-              }}
-            >
-              
-              {/* 실제 사용자가 올린 1층 도면 평면도 이미지 경로 적용 */}
-              <img 
-                src="https://storage.googleapis.com/aistudio-user-uploads-production/5fe17d12-db63-496d-9524-8ba440072715/input_file_0.png" 
-                alt="1F Blueprint Map Layout" 
-                className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none filter contrast-[1.05]"
-              />
-
-              {/* 실제 레이아웃 도드라지게 실선 구획 가이드라인 도색 */}
-              <div className="absolute inset-0 bg-[#EFECE8]/10 pointer-events-none" />
-
-              {/* SVG 오버레이 애니메이션 레이어 (viewBox 0 0 100 100 백분율 상대좌표 동기화) */}
-              <svg 
-                viewBox="0 0 100 100" 
-                className="absolute inset-0 w-full h-full z-10 select-none pointer-events-auto"
-              >
-                {/* 1. 보행 유도 앵커 포인트 그리기 */}
-                {TRAFFIC_ANCHORS.map((anchor) => {
-                  const activeFlows = getFlowPaths(selectedUnit.id);
-                  const isAnchorActive = activeFlows.some(f => f.startId === anchor.id);
-                  return (
-                    <g key={anchor.id} className="cursor-help">
-                      <circle cx={anchor.x} cy={anchor.y} r="2.5" fill={anchor.color} opacity="0.15" />
-                      <circle cx={anchor.x} cy={anchor.y} r="0.8" fill={anchor.color} />
-                      <circle cx={anchor.x} cy={anchor.y} r="0.1" fill="#fff" />
-                      {/* 펄스 웨이브 퍼짐 효과 (현재 선택된 동선에 유입되는 앵커만 활성화) */}
-                      {isAnchorActive && (
-                        <circle cx={anchor.x} cy={anchor.y} r="2.0" stroke={anchor.color} strokeWidth="0.3" fill="none" opacity="0.6" className="origin-center scale-100 animate-ping" />
-                      )}
-                    </g>
-                  );
-                })}
-
-                {/* 2. 보행 동선 역추적 애니메이션 그리기 (프리미엄 동선 광선 이펙트) */}
-                {getFlowPaths(selectedUnit.id).map((flow) => {
-                  const pathD = buildPathData(flow.points);
-                  return (
-                    <g key={`flow-${flow.startId}-${selectedUnit.id}`}>
-                      {/* 1단계: 선명하고 도톰한 유도 트랙 (가시성 극대화) */}
-                      <path 
-                        d={pathD} 
-                        fill="none" 
-                        stroke={flow.color} 
-                        strokeWidth="2.2" 
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        opacity="0.18" 
-                      />
-                      {/* 2단계: 실루엣 중심 파선 (가이드 형태 파악 최적화) */}
-                      <path 
-                        d={pathD} 
-                        fill="none" 
-                        stroke={flow.color} 
-                        strokeWidth="0.6" 
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeDasharray="1.2 1.5"
-                        opacity="0.65" 
-                      />
-                      {/* 3단계: 흐르는 광선 입자 1 (원류 게이트에서 목적 호실로의 부드러운 유동 전송 효과) */}
-                      <g>
-                        <circle r="1.3" fill={flow.color} opacity="0.35">
-                          <animateMotion dur="3.5s" repeatCount="indefinite" path={pathD} begin="0s" />
-                        </circle>
-                        <circle r="0.6" fill="#FFFFFF" opacity="0.95">
-                          <animateMotion dur="3.5s" repeatCount="indefinite" path={pathD} begin="0s" />
-                        </circle>
-                      </g>
-                      {/* 4단계: 흐르는 광선 입자 2 (지연 분사로 연속적인 흐름감 부여) */}
-                      <g>
-                        <circle r="1.3" fill={flow.color} opacity="0.35">
-                          <animateMotion dur="3.5s" repeatCount="indefinite" path={pathD} begin="1.75s" />
-                        </circle>
-                        <circle r="0.6" fill="#FFFFFF" opacity="0.95">
-                          <animateMotion dur="3.5s" repeatCount="indefinite" path={pathD} begin="1.75s" />
-                        </circle>
-                      </g>
-                    </g>
-                  );
-                })}
-
-                {/* 3. 모든 호실의 원형 핀 노드 표기 (정밀 백분율 좌표 연동) */}
-                {STORE_UNITS.map((unit) => {
-                  const isActive = unit.id === activeUnit;
-                  const isBottomRow = ['126호', '127호', '128호', '129호'].includes(unit.id);
-                  
-                  // 스태거(Stagger) 설정을 적용하여 밀집된 126~129호 라벨 겹침 방지
-                  let labelYOffset = isActive ? 5.2 : 4.4;
-                  if (isBottomRow) {
-                    if (unit.id === '126호' || unit.id === '128호') {
-                      labelYOffset = isActive ? 7.2 : 6.2; // 126, 128호는 위로 스태거
-                    } else {
-                      labelYOffset = isActive ? 3.4 : 2.6; // 127, 129호는 아래로 스태거
-                    }
-                  }
-
-                  const rectWidth = isActive ? 5.8 : 4.6;
-                  const rectHeight = isActive ? 2.1 : 1.7;
-                  const rectX = unit.coords.x - rectWidth / 2;
-                  const rectY = unit.coords.y - labelYOffset;
-                  const textY = rectY + (isActive ? 1.55 : 1.25);
-                  
-                  return (
-                    <g 
-                      key={`pin-${unit.id}`} 
-                      className="cursor-pointer group"
-                      onClick={() => setActiveUnit(unit.id)}
-                    >
-                      {/* 가느다란 스태거 커넥터 선 (밀집 구역 y축 이동 시 연결선 시각화) */}
-                      {isBottomRow && (
-                        <line 
-                          x1={unit.coords.x} 
-                          y1={unit.coords.y} 
-                          x2={unit.coords.x} 
-                          y2={rectY + (labelYOffset > 4 ? rectHeight : 0)} 
-                          stroke={isActive ? "#CE9F6F" : "#CEAE8E"} 
-                          strokeWidth="0.1" 
-                          strokeDasharray="0.3 0.3"
-                          opacity="0.65"
+                {/* 도면 도색 관리 퀵 컨트롤 */}
+                {isEditMode && (
+                  <div className="bg-amber-50/50 border border-accent/20 p-2.5 rounded-lg flex items-center gap-2 max-w-xs shrink-0 z-20">
+                    <div className="text-[10px] text-stone-700 leading-none">
+                      <span className="font-bold text-accent block mb-1">🗺️ 1층 도면 평면도 교체</span>
+                      <label className="flex items-center gap-1 px-2 py-1 bg-white hover:bg-stone-50 border border-stone-300 rounded text-[9px] font-bold cursor-pointer transition-colors">
+                        <Upload className="w-2.5 h-2.5 text-stone-600" />
+                        파일 선택
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              handleImageUpload(file, (base64) => {
+                                setBlueprintImg(base64);
+                                localStorage.setItem('site_custom_md_blueprint_img', base64);
+                              });
+                            }
+                          }}
                         />
-                      )}
-
-                      {/* 위치 마커 */}
-                      {isActive && (
-                        <circle cx={unit.coords.x} cy={unit.coords.y} r="2.2" fill="#9F2B2B" opacity="0.25" className="animate-pulse-locator" />
-                      )}
-                      
-                      <circle 
-                        cx={unit.coords.x} 
-                        cy={unit.coords.y} 
-                        r={isActive ? "1.2" : "0.8"} 
-                        fill={isActive ? "#CE9F6F" : "#7A6F62"} 
-                        stroke="#FFF" 
-                        strokeWidth={isActive ? "0.3" : "0.15"}
-                        className="transition-all duration-300 group-hover:fill-accent"
-                      />
-                      
-                      {/* 인포 칩 라벨 (잘림 방지 및 세련된 패딩 설정) */}
-                      <rect 
-                        x={rectX} 
-                        y={rectY} 
-                        width={rectWidth} 
-                        height={rectHeight} 
-                        rx="0.3" 
-                        fill={isActive ? "#272522" : "#FFFFFF"} 
-                        stroke={isActive ? "#CE9F6F" : "#D3C2AF"} 
-                        strokeWidth="0.15" 
-                        opacity="0.98"
-                      />
-                      <text 
-                        x={unit.coords.x} 
-                        y={textY} 
-                        fill={isActive ? "#CE9F6F" : "#272522"} 
-                        fontSize={isActive ? "1.4" : "1.1"} 
-                        fontWeight="900" 
-                        textAnchor="middle"
-                        className="select-none font-sans"
-                      >
-                        {unit.id.replace('호', '')}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
-            </div>
-
-            {/* 하단 범례 */}
-            <div className="mt-4 pt-3 border-t border-stone-100 flex flex-wrap justify-between items-center gap-3">
-              <div className="flex gap-4 flex-wrap">
-                {TRAFFIC_ANCHORS.map((anchor) => (
-                  <div key={anchor.id} className="flex items-center gap-1.5 text-xs font-semibold text-stone-600">
-                    <span className="w-2.5 h-2.5 rounded-full block" style={{ backgroundColor: anchor.color }} />
-                    <span>{anchor.label}</span>
+                      </label>
+                    </div>
                   </div>
-                ))}
+                )}
               </div>
-              <div className="text-[10px] font-black text-accent flex items-center gap-1 uppercase select-none">
-                <Sparkles className="w-3.5 h-3.5" /> 
-                호실 마커 클릭 시 개별 동선 역추적
+
+              {/* 이미지와 SVG 애니메이션 코드가 들어가는 영역 */}
+              <div className="relative w-full h-auto">
+                {/* 도면 캔버스 컨테이너 - 원본 이미지의 비율(Aspect Ratio)이 유지되고 높이가 밀착되도록 h-auto 적용 */}
+                <div 
+                  className="relative bg-[#FBFBFA] border-y border-stone-100 w-full shadow-inner h-auto md:h-max"
+                  style={{
+                    backgroundImage: `
+                      linear-gradient(to right, rgba(165, 156, 144, 0.08) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(165, 156, 144, 0.08) 1px, transparent 1px),
+                      linear-gradient(to right, rgba(165, 156, 144, 0.03) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(165, 156, 144, 0.03) 1px, transparent 1px)
+                    `,
+                    backgroundSize: '40px 40px, 40px 40px, 8px 8px, 8px 8px',
+                    backgroundPosition: 'center center'
+                  }}
+                >
+                  
+                  {/* 이미지의 원본 비율과 100% 투명도 수치를 복원하고 기본 여백이 없도록 block 적용 */}
+                  <img 
+                    src="https://i.ibb.co/pjDBc2bh/image.png" 
+                    alt="1F Blueprint Map Layout" 
+                    className="w-full h-auto pointer-events-none select-none opacity-100 block object-cover"
+                  />
+
+                  {/* SVG 오버레이 애니메이션 레이어 (viewBox 0 0 100 100 백분율 상대좌표 동기화 및 찌그러짐 방지 잠금) */}
+                  <svg 
+                    viewBox="0 0 100 100" 
+                    preserveAspectRatio="none"
+                    className="absolute inset-0 w-full h-full z-10 select-none pointer-events-auto"
+                  >
+                    {/* 1. 보행 유도 앵커 포인트 그리기 */}
+                    {TRAFFIC_ANCHORS.map((anchor) => {
+                      return (
+                        <g key={anchor.id} className="cursor-help">
+                          <circle cx={anchor.x} cy={anchor.y} r="2.5" fill={anchor.color} opacity="0.15" />
+                          <circle cx={anchor.x} cy={anchor.y} r="0.8" fill={anchor.color} />
+                          <circle cx={anchor.x} cy={anchor.y} r="0.1" fill="#fff" />
+                        </g>
+                      );
+                    })}
+
+                    {/* 2. 보행 동선 그리기 (고정밀 단일 레이어 직교 직선 & 출발지->목적지 실선 드로잉 흐름 모션 연동) */}
+                    {getFlowPaths(selectedUnit.id).map((flow) => {
+                      const pathD = buildPathData(flow.points);
+                      return (
+                        <g key={`flow-grp-${flow.startId}-${selectedUnit.id}`}>
+                          <style>{`
+                            @keyframes flowMovement {
+                              to {
+                                stroke-dashoffset: -20;
+                              }
+                            }
+                            .flow-active-dash {
+                              stroke-dasharray: 6 4;
+                              animation: flowMovement 1s linear infinite;
+                            }
+                          `}</style>
+                          {/* Quiet base trail */}
+                          <path 
+                            key={`flow-path-base-${flow.startId}-${selectedUnit.id}`}
+                            d={pathD} 
+                            fill="none" 
+                            stroke={flow.color} 
+                            strokeWidth="1.0" 
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            opacity="0.15" 
+                          />
+                          {/* Active traveling flow segment */}
+                          <path 
+                            key={`flow-path-${flow.startId}-${selectedUnit.id}`}
+                            d={pathD} 
+                            fill="none" 
+                            stroke={flow.color} 
+                            strokeWidth="1.0" 
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            opacity="0.85" 
+                            className="flow-active-dash"
+                          />
+                        </g>
+                      );
+                    })}
+
+                    {/* 3. 모든 호실의 원형 핀 노드 표기 (정밀 백분율 좌표 연동) */}
+                    {units.map((unit) => {
+                      const isActive = unit.id === activeUnit;
+                      const isBottomRow = ['126호', '127호', '128호', '129호'].includes(unit.id);
+                      
+                      // 스태거(Stagger) 설정을 적용하여 밀집된 126~129호 라벨 겹침 방지
+                      let labelYOffset = isActive ? 5.2 : 4.4;
+                      if (isBottomRow) {
+                        if (unit.id === '126호' || unit.id === '128호') {
+                          labelYOffset = isActive ? 7.2 : 6.2; // 126, 128호는 위로 스태거
+                        } else {
+                          labelYOffset = isActive ? 3.4 : 2.6; // 127, 129호는 아래로 스태거
+                        }
+                      }
+
+                      const rectWidth = isActive ? 5.8 : 4.6;
+                      const rectHeight = isActive ? 2.1 : 1.7;
+                      const rectX = unit.coords.x - rectWidth / 2;
+                      const rectY = unit.coords.y - labelYOffset;
+                      const textY = rectY + (isActive ? 1.55 : 1.25);
+                      
+                      return (
+                        <g 
+                          key={`pin-${unit.id}`} 
+                          className="cursor-pointer group"
+                          onClick={() => setActiveUnit(unit.id)}
+                        >
+                          {/* 가느다란 스태거 커넥터 선 (밀집 구역 y축 이동 시 연결선 시각화) */}
+                          {isBottomRow && (
+                            <line 
+                              x1={unit.coords.x} 
+                              y1={unit.coords.y} 
+                              x2={unit.coords.x} 
+                              y2={rectY + (labelYOffset > 4 ? rectHeight : 0)} 
+                              stroke={isActive ? "#CE9F6F" : "#CEAE8E"} 
+                              strokeWidth="0.1" 
+                              strokeDasharray="0.3 0.3"
+                              opacity="0.65"
+                            />
+                          )}
+
+                          {/* 위치 마커 */}
+                          <circle 
+                            cx={unit.coords.x} 
+                            cy={unit.coords.y} 
+                            r={isActive ? "1.2" : "0.8"} 
+                            fill={isActive ? "#CE9F6F" : "#7A6F62"} 
+                            stroke="#FFF" 
+                            strokeWidth={isActive ? "0.3" : "0.15"}
+                            className="transition-all duration-300 group-hover:fill-accent"
+                          />
+                          
+                          {/* 인포 칩 라벨 (잘림 방지 및 세련된 패딩 설정) */}
+                          <rect 
+                            x={rectX} 
+                            y={rectY} 
+                            width={rectWidth} 
+                            height={rectHeight} 
+                            rx="0.3" 
+                            fill={isActive ? "#272522" : "#FFFFFF"} 
+                            stroke={isActive ? "#CE9F6F" : "#D3C2AF"} 
+                            strokeWidth="0.15" 
+                            opacity="0.98"
+                          />
+                          <text 
+                            x={unit.coords.x} 
+                            y={textY} 
+                            fill={isActive ? "#CE9F6F" : "#272522"} 
+                            fontSize={isActive ? "1.4" : "1.1"} 
+                            fontWeight="700" 
+                            textAnchor="middle"
+                            className="select-none font-sans"
+                          >
+                            {unit.id.replace('호', '')}
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </svg>
+                </div>
+              </div>
+
+              {/* 하단 범례 */}
+              <div className="p-5 flex flex-wrap justify-between items-center gap-3">
+                <div className="flex gap-4 flex-wrap">
+                  {TRAFFIC_ANCHORS.map((anchor) => (
+                    <div key={anchor.id} className="flex items-center gap-1.5 text-xs font-semibold text-stone-600">
+                      <span className="w-2.5 h-2.5 rounded-full block" style={{ backgroundColor: anchor.color }} />
+                      <span>{anchor.label}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="text-[10px] font-bold text-accent flex items-center gap-1 uppercase select-none">
+                  <Sparkles className="w-3.5 h-3.5" /> 
+                  호실 마커 클릭시 개별 동선 표시
+                </div>
               </div>
             </div>
+
           </div>
 
-          {/* 우측 5칸: 전체 확장형 아코디언 표(Accordion Table) 하나로 단정하게 채움 */}
-          <div className="lg:col-span-5 flex flex-col bg-slate-50 md:bg-slate-50 lg:bg-transparent md:border md:border-stone-200/60 lg:border-none md:rounded-3xl lg:rounded-none overflow-hidden md:shadow-[0_4px_30px_rgba(0,0,0,0.015)] lg:shadow-none relative h-full">
+          {/* 3. 오른쪽 리스트 영역 (전체 55% 공간) */}
+          {/* ★ flex와 justify-start를 주어 내부 박스가 시작 지점에 부드럽게 밀착하도록 합니다 */}
+          <div className="w-full lg:w-[55%] flex justify-start pb-32">
+            
+            {/* ★ 진짜 콘텐츠가 담기는 이너 박스 (가로 폭을 너무 넓지 않게 max-w-xl로 정돈합니다) */}
+            <div className="w-full max-w-xl flex flex-col gap-6">
             <div className="py-5 px-5 lg:px-1 bg-white lg:bg-transparent border-b border-stone-100 lg:border-stone-900 pb-4 lg:pb-3 flex justify-between items-end">
               <div>
-                <span className="text-accent font-black text-[10px] tracking-widest uppercase block mb-1">UNIT EXPANSION DASHBOARD</span>
-                <h3 className="text-xl font-bold text-stone-900 tracking-tight">호실별 최적 권장업종 연동 표</h3>
+                <span className="text-accent font-semibold text-[10px] tracking-widest uppercase block mb-1">TARGET CATEGORY</span>
+                <h3 className="text-xl font-bold text-stone-900 tracking-tight">호실별 최적 권장업종</h3>
               </div>
               <span className="text-[10px] font-bold tracking-wider text-slate-400 select-none pb-0.5">전용면적 기준</span>
             </div>
 
             {/* 아코디언 컨테이너 (부드러운 열기/닫기 상호배타 구조) */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-0 flex flex-col gap-3.5 sm:gap-4 lg:gap-0 bg-slate-50 lg:bg-transparent divide-y divide-stone-200/60">
-              {STORE_UNITS.map((unit) => {
+            <div className="flex-1 p-4 sm:p-5 lg:p-0 flex flex-col gap-3.5 sm:gap-4 lg:gap-0 bg-slate-50 lg:bg-transparent divide-y divide-stone-200/60 lg:divide-y">
+              {units.map((unit) => {
                 const isOpen = unit.id === activeUnit;
                 return (
                   <div 
@@ -664,35 +930,35 @@ export default function MDConfig() {
                     {/* 아코디언 헤더 (클릭 가능한 행) */}
                     <button
                       onClick={() => setActiveUnit(activeUnit === unit.id ? '' : unit.id)}
-                      className={`w-full text-left py-4 px-4 sm:px-5 lg:px-2 flex items-center justify-between transition-all duration-300 group ${
+                      className={`w-full text-left py-5 px-4 sm:px-5 lg:px-3 flex items-center justify-between transition-all duration-300 group ${
                         isOpen ? 'bg-amber-50/10 lg:bg-stone-50/80' : 'bg-white lg:bg-transparent hover:bg-slate-50/40 lg:hover:bg-stone-50/40'
                       }`}
                     >
                       <div className="flex items-center gap-4 sm:gap-6 lg:gap-5">
-                        {/* 호실 번호 강조 (더 작고 또렷한 진회색, 완벽한 세로 중앙 정렬) */}
+                        {/* 호실 번호 강조 */ }
                         <div className="flex items-center leading-none shrink-0 border-r border-stone-200/60 pr-4">
-                          <span className={`text-xl sm:text-2xl font-bold tracking-tight transition-colors ${
+                          <span className={`text-2xl sm:text-3xl lg:text-[22px] font-extrabold tracking-tight transition-colors ${
                             isOpen ? 'text-accent' : 'text-slate-800 lg:text-slate-800 group-hover:text-accent'
                           }`}>
                             {unit.id.replace('호', '')}
                           </span>
-                          <span className={`text-xs font-semibold ml-0.5 mt-0.5 transition-colors ${
-                            isOpen ? 'text-accent' : 'text-slate-400 group-hover:text-slate-600'
+                          <span className={`text-base sm:text-lg lg:text-[15px] font-extrabold ml-0.5 mt-1 transition-colors ${
+                            isOpen ? 'text-accent' : 'text-slate-500 group-hover:text-slate-700'
                           }`}>호</span>
                         </div>
 
                         <div>
-                          <div className="flex items-center flex-wrap gap-2 lg:gap-2.5">
-                            <p className={`text-base sm:text-lg lg:text-[15px] font-black tracking-tight text-wrap break-keep transition-colors ${
-                              isOpen ? 'text-accent' : 'text-slate-900 group-hover:text-accent'
+                          <div className="flex items-center flex-wrap gap-2 lg:gap-3">
+                            <p className={`text-xl sm:text-2xl lg:text-[19px] font-extrabold tracking-tight text-wrap break-keep transition-colors ${
+                              isOpen ? 'text-accent' : 'text-stone-900 group-hover:text-accent'
                             }`}>
                               {unit.type}
                             </p>
-                            <span className={`px-2.5 py-0.5 text-xs lg:text-[9px] font-medium rounded-full lg:rounded select-none transition-all duration-300 ${unit.categoryStyle}`}>
+                            <span className={`px-3 py-1 text-xs sm:text-sm font-extrabold rounded select-none transition-all duration-300 ${unit.categoryStyle}`}>
                               {unit.category}
                             </span>
                           </div>
-                          <span className="text-[11px] text-stone-400 font-bold block mt-1">
+                          <span className="text-sm sm:text-base text-stone-600 font-extrabold block mt-1.5">
                             실평수: {unit.area}
                           </span>
                         </div>
@@ -700,7 +966,7 @@ export default function MDConfig() {
 
                       <div className="flex items-center gap-2 ml-auto shrink-0 pl-4">
                         {isOpen && (
-                          <span className="text-[8px] bg-accent text-white px-1.5 py-0.5 font-bold tracking-widest uppercase">
+                          <span className="text-[9px] bg-accent text-white px-2 py-0.5 font-bold tracking-widest uppercase">
                             ACTIVE
                           </span>
                         )}
@@ -724,35 +990,127 @@ export default function MDConfig() {
                           transition={{ duration: 0.35, ease: 'easeInOut' }}
                           className="overflow-hidden bg-slate-50/50 lg:bg-stone-50/20 border-t border-slate-100 lg:border-stone-100"
                         >
-                          {/* 16:9 꽉 차는 추천 이미지 */}
-                          <div className="w-full aspect-[16/9] overflow-hidden relative">
-                            <MDImageSlider 
-                              images={unit.images} 
-                              title={unit.type} 
-                              badgeText="MD REAL-VIEW" 
-                              isMobile={false} 
-                            />
-                          </div>
-
-                          {/* 상세 카피라이팅 & 추천 텍스트 리스트 */}
-                          <div className="py-5 px-4 sm:px-5 lg:px-4">
-                            {/* 타이틀을 text-lg 이상 크기로 더욱 진하게 설정 */}
-                            <p className="text-base sm:text-lg lg:text-[15px] font-bold text-stone-900 leading-relaxed mb-4 flex gap-1.5 items-start text-wrap break-keep">
-                              <span className="text-accent shrink-0 font-extrabold">▶</span>
-                              <span>{unit.desc}</span>
-                            </p>
-                            
-                            <div className="pt-4 border-t border-slate-200/60 lg:border-stone-200/40">
-                              <span className="text-[11px] font-black tracking-wider uppercase text-stone-900 block mb-2 font-sans">권장 테넌트(MD) 리스트</span>
-                              <div className="p-3.5 bg-white lg:bg-stone-50/50 border border-slate-200/60 lg:border-stone-200/40 rounded-lg lg:rounded-none shadow-sm">
-                                {/* 추천 업종 텍스트를 크게 키우고 색감 진하게 세팅 */}
-                                <p className="text-sm sm:text-base lg:text-[14px] font-black text-stone-950 leading-relaxed text-wrap break-keep font-sans antialiased">
-                                  {unit.recommendation}
-                                </p>
-                              </div>
+                          <div className="flex flex-col p-5 sm:p-6 gap-6">
+                            {/* 풀 와이드 시네마틱 이미지 (직사각형 16:9 비율) */}
+                            <div className="w-full aspect-video overflow-hidden relative rounded-xl shadow-md bg-stone-100">
+                              <MDImageSlider 
+                                images={unit.images} 
+                                title={unit.type} 
+                                badgeText="MD REAL-VIEW" 
+                                isMobile={false} 
+                              />
                             </div>
+
+                            {/* 상세 카피라이팅 & 추천 텍스트 리스트 */}
+                            <div className="w-full mt-4 flex flex-col gap-4">
+                              <div>
+                                {/* 타이틀을 콤팩트하고 조화로운 굵기로 전개 */}
+                                <p className="text-base sm:text-lg lg:text-[15px] font-extrabold text-stone-950 leading-relaxed mb-3 flex gap-1.5 items-start text-wrap break-keep">
+                                  <span className="text-accent shrink-0 font-bold">▶</span>
+                                  <span>{unit.desc}</span>
+                                </p>
+                                
+                                <div className="pt-3 border-t border-stone-200/60">
+                                  <span className="text-xs font-bold tracking-wider uppercase text-stone-500 block mb-1.5 font-sans">권장 테넌트(MD) 리스트</span>
+                                  <div className="p-3 bg-accent/5 border border-accent/20 rounded-lg shadow-sm">
+                                    {/* 추천 업종 텍스트의 폰트 두께 및 컬러를 desc와 일치하도록 최적화 */}
+                                    <p className="text-sm sm:text-[15px] lg:text-[14px] font-extrabold text-stone-950 leading-relaxed text-wrap break-keep font-sans antialiased">
+                                      {unit.recommendation}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* PC 실시간 편집 폼 */}
+                              {isEditMode && (
+                              <div className="p-4 bg-white border border-accent/20 rounded-xl mt-4 space-y-4 shadow-inner">
+                                <h5 className="text-xs font-semibold text-accent flex items-center gap-1">
+                                  <Sparkles className="w-3.5 h-3.5" /> {unit.id} 정보 및 미디어 실시간 수정
+                                </h5>
+                                
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <label className="block text-[10px] font-semibold text-stone-500 mb-1">전용면적</label>
+                                    <input 
+                                      type="text" 
+                                      value={unit.area} 
+                                      onChange={(e) => updateUnitValue(unit.id, 'area', e.target.value)}
+                                      className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2.5 py-1.5"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-semibold text-stone-500 mb-1">대표 샵 업종</label>
+                                    <input 
+                                      type="text" 
+                                      value={unit.type} 
+                                      onChange={(e) => updateUnitValue(unit.id, 'type', e.target.value)}
+                                      className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2.5 py-1.5"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <label className="block text-[10px] font-semibold text-stone-500 mb-1">상가 비주얼 카피라이팅</label>
+                                  <input 
+                                    type="text" 
+                                    value={unit.desc} 
+                                    onChange={(e) => updateUnitValue(unit.id, 'desc', e.target.value)}
+                                    className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2.5 py-1.5"
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="block text-[10px] font-semibold text-stone-500 mb-1">권장 테넌트(MD) 리스트</label>
+                                  <textarea 
+                                    rows={2}
+                                    value={unit.recommendation} 
+                                    onChange={(e) => updateUnitValue(unit.id, 'recommendation', e.target.value)}
+                                    className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2.5 py-1.5"
+                                  />
+                                </div>
+
+                                {/* 이미지 업로드 */}
+                                <div className="space-y-1.5 border-t border-stone-100 pt-3">
+                                  <span className="block text-[10px] font-semibold text-stone-500">📸 실사 분위기 슬라이더 업로드 (최대 4장)</span>
+                                  {unit.images.map((imgUrl, imgIdx) => (
+                                    <div key={imgIdx} className="flex gap-2 items-center">
+                                      <span className="text-[10px] font-semibold text-stone-400 w-3">#{imgIdx + 1}</span>
+                                      <input 
+                                        type="text" 
+                                        value={imgUrl} 
+                                        onChange={(e) => {
+                                          const newImages = [...unit.images];
+                                          newImages[imgIdx] = e.target.value;
+                                          updateUnitValue(unit.id, 'images', newImages);
+                                        }}
+                                        className="flex-1 text-[10px] font-mono border border-stone-300 rounded px-2 py-1 bg-white"
+                                      />
+                                      <label className="flex items-center gap-1 px-2.5 py-1 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded text-[10px] font-bold cursor-pointer whitespace-nowrap">
+                                        <Upload className="w-3 h-3 text-stone-600" />
+                                        <input 
+                                          type="file" 
+                                          accept="image/*"
+                                          className="hidden"
+                                          onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                              handleImageUpload(file, (base64) => {
+                                                const newImages = [...unit.images];
+                                                newImages[imgIdx] = base64;
+                                                updateUnitValue(unit.id, 'images', newImages);
+                                              });
+                                            }
+                                          }}
+                                        />
+                                      </label>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        </motion.div>
+                        </div>
+                      </motion.div>
                       )}
                     </AnimatePresence>
                   </div>
@@ -760,6 +1118,7 @@ export default function MDConfig() {
               })}
             </div>
           </div>
+        </div>
 
         </div>
 

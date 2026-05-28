@@ -22,6 +22,60 @@ const AnalysisCard: React.FC<AnalysisCardProps> = ({ item, index }) => {
     setCurrentImage((prev) => (prev - 1 + item.images.length) % item.images.length);
   };
 
+  const renderStructuredDesc = (desc: string) => {
+    // Check if it's a numbered list or has paragraphs
+    if (!desc.includes('1. ') && !desc.includes('1차 ')) {
+      return <p className="text-[#555555] leading-relaxed sm:leading-[1.85] text-sm sm:text-[16px] md:text-[17px] font-medium tracking-wide break-keep whitespace-pre-line">{desc}</p>;
+    }
+
+    // Split by empty lines or double newlines to isolate blocks
+    const blocks = desc.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
+    const groups: { title: string; body: string }[] = [];
+    let currentGroup: { title: string; body: string } | null = null;
+
+    blocks.forEach(block => {
+      const isNumberedHeader = /^\d+\./.test(block);
+      if (isNumberedHeader) {
+        if (currentGroup) {
+          groups.push(currentGroup);
+        }
+        currentGroup = { title: block, body: '' };
+      } else {
+        if (currentGroup) {
+          currentGroup.body = currentGroup.body ? currentGroup.body + '\n' + block : block;
+        } else {
+          groups.push({ title: '', body: block });
+        }
+      }
+    });
+    if (currentGroup) {
+      groups.push(currentGroup);
+    }
+
+    if (groups.length === 0) {
+      return <p className="text-[#555555] leading-relaxed sm:leading-[1.85] text-sm sm:text-[16px] md:text-[17px] font-medium tracking-wide break-keep whitespace-pre-line">{desc}</p>;
+    }
+
+    return (
+      <div className="space-y-8 sm:space-y-10">
+        {groups.map((group, idx) => (
+          <div key={idx} className="space-y-2">
+            {group.title && (
+              <h4 className="text-gray-900 font-black text-[15px] sm:text-[17px] md:text-[18px] tracking-tight leading-snug">
+                {group.title}
+              </h4>
+            )}
+            {group.body && (
+              <p className="text-stone-500/90 font-normal text-[13px] sm:text-[14px] md:text-[15px] leading-relaxed break-keep whitespace-pre-line">
+                {group.body}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div
       className={cn(
@@ -116,15 +170,14 @@ const AnalysisCard: React.FC<AnalysisCardProps> = ({ item, index }) => {
             </motion.h3>
           </div>
           
-          <motion.p 
+          <motion.div 
             variants={{
               hidden: { opacity: 0, y: 30 },
               visible: { opacity: 1, y: 0, transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } }
             }}
-            className="text-[#555555] leading-relaxed sm:leading-[1.85] text-sm sm:text-lg md:text-[18px] font-semibold tracking-wide break-keep"
           >
-            {item.desc}
-          </motion.p>
+            {renderStructuredDesc(item.desc)}
+          </motion.div>
  
           <motion.div 
             variants={{

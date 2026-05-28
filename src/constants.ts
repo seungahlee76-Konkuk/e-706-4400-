@@ -40,7 +40,17 @@ export const DEFAULT_PROJECT_INFO = {
 export const DEFAULT_ANALYSIS_DATA = [
   {
     title: '수원덕산병원 프리미엄',
-    desc: '약 706병상 규모의 대형 종합병원 바로 앞 입지로 안정적인 의료수요 및 관련 종사자 배후수요를 확보합니다.',
+    desc: `1. 수원 TOP 3 메머드급 규모 및 원스톱 진료 체계
+
+1차 457병상, 최종 706병상 규모로 30여 개의 다양한 진료과를 운영합니다. 내과, 외과, 응급의학과 등 필수 진료과가 한곳에 집결되어 수술부터 재활까지 완벽한 원스톱 진료가 가능합니다.
+
+2. 존스홉킨스·빅5 출신 등 최상위 의료진 포진
+
+해외 유수 의료기관 및 국내 빅5 출신 전문의가 상주합니다. 고난도 심장 수술 및 심폐·간이식 마취를 전담하는 고숙련 의료진이 대거 합류해 수도권 최고 수준의 진료 역량을 자랑합니다.
+
+3. 경기 남부 중증 질환 치료의 거점 (고부가가치 창출)
+
+심뇌혈관, 중증외상 등 특화 센터를 통해 경기 남부권 의료의 새 지평을 엽니다. 장기 복약과 정기 검진이 필수적인 중증 환자 비중이 압도적으로 높아 메디컬 연계 상가의 안정적인 수익 창출을 견인합니다.`,
     images: [
       'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=800',
@@ -83,42 +93,42 @@ export const DEFAULT_MD_DATA = [
   },
   { 
     id: '118호', 
-    type: '브런치 / 베이커리카페', 
+    type: '브런치 / 베이커리 카페', 
     area: '36.35평', 
     desc: '모던한 감성의 세련된 공간 구성 가능',
     image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=800'
   },
   { 
     id: '119호', 
-    type: '문전약국', 
+    type: '1번 약국', 
     area: '58.81평', 
     desc: '병원/의원 이용객 동선 확보 최적 입지',
     image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?auto=format&fit=crop&q=80&w=800'
   },
   { 
     id: '126호', 
-    type: '한식 / 샤브샤브전문점', 
+    type: '국밥 / 설렁탕 전문점', 
     area: '23.44평', 
     desc: '대로변 노출이 우수하여 집객력이 높은 곳',
     image: 'https://images.unsplash.com/photo-1634047462615-ca805e243956?auto=format&fit=crop&q=80&w=800'
   },
   { 
     id: '127호', 
-    type: '한식 / 샤브샤브전문점', 
+    type: '1인 샤브샤브 / 찜닭', 
     area: '25.47평', 
     desc: '가족 단위 고객 및 단체 방문 최적화',
     image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=800'
   },
   { 
     id: '128호', 
-    type: '국밥집 / 육개장', 
+    type: '포장 · 배달 피자 / 에그 샌드위치', 
     area: '16.5평', 
     desc: '유동인구가 많은 동선의 생활 밀착형 업종',
     image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&q=80&w=800'
   },
   { 
     id: '129호', 
-    type: '프랜차이즈 맥주전문점', 
+    type: '생활맥주 / 프랜차이즈 맥주', 
     area: '18.47평', 
     desc: '퇴근길이나 여가를 즐기기에 좋은 코너 입지',
     image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800'
@@ -160,7 +170,15 @@ const loadFromLocalStorage = (key: string, defaultValue: any) => {
     const saved = localStorage.getItem(key);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        // Smart data migration: automatically overwrite legacy placeholder description with the new detailed block
+        if (key === 'site_custom_analysis_data' && Array.isArray(parsed) && parsed[0]) {
+          if (parsed[0].desc && (parsed[0].desc.startsWith('약 706') || parsed[0].desc.includes('배후수요를 확보합니다.'))) {
+            parsed[0].desc = defaultValue[0].desc;
+            localStorage.setItem('site_custom_analysis_data', JSON.stringify(parsed));
+          }
+        }
+        return parsed;
       } catch (e) {
         console.error('Error loading config from localStorage:', e);
       }

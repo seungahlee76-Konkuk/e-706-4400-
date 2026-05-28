@@ -197,7 +197,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#F5F5F0] font-sans text-gray-900 overflow-x-hidden pb-36 lg:pb-0">
+    <div className="min-h-screen bg-[#F5F5F0] font-sans text-gray-900 overflow-x-clip pb-36 lg:pb-0">
       <Navbar />
       
       <main className="bg-[#F5F5F0]">
