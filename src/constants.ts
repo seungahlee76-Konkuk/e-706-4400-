@@ -34,7 +34,8 @@ export const DEFAULT_PROJECT_INFO = {
     { type: '84B', units: '89', ratio: '20.7%', areaM2: '84.51', areaPy: '25.56', totalAreaM2: '181.64', totalAreaPy: '54.94', efficiency: '46.5%' },
     { type: '84C', units: '26', ratio: '6.0%', areaM2: '84.16', areaPy: '25.45', totalAreaM2: '181.67', totalAreaPy: '54.95', efficiency: '46.3%' },
     { type: '84D', units: '13', ratio: '3.0%', areaM2: '84.52', areaPy: '25.57', totalAreaM2: '181.66', totalAreaPy: '54.95', efficiency: '46.5%' },
-  ]
+  ],
+  updatedAt: '2026-05-29T06:00:00Z'
 };
 
 export const DEFAULT_ANALYSIS_DATA = [
@@ -55,133 +56,381 @@ export const DEFAULT_ANALYSIS_DATA = [
       'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=800'
-    ]
-  },
-  {
-    title: '행정타운 배후수요',
-    desc: '권선구청, 우체국, 보건소 등 공공기관이 밀집한 서수원 행정타운의 중심지로 공무원 및 방문객의 유입이 활발합니다.',
-    images: [
-      'https://images.unsplash.com/photo-1577416414929-7a4c9f17f6b4?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800'
-    ]
+    ],
+    updatedAt: '2026-05-29T06:05:00Z'
   },
   {
     title: '고색역 역세권 입지',
-    desc: '수인분당선 고색역 역세권으로 지하철 이용객의 풍부한 유동인구는 물론, 편리한 교통환경을 자랑합니다.',
+    desc: `1. 수인분당선 고색역 직접 역세권
+
+강남, 분당, 인천을 관통하는 수인분당선 고색역이 인접해 있어, 수도권 남부 전역에서 병원 및 상가로 유입되는 접근성이 탁월합니다.
+
+2. 수원역 1정거장 (GTX-C·KTX 광역망)
+
+고색역에서 단 한 정거장 거리인 거대 교통 허브 '수원역'을 통해 KTX 및 2028년 개통 예정인 GTX-C 노선의 전국구 광역 교통 프리미엄을 그대로 공유합니다.
+GTX-C노선이 개통될 경우 덕정에서 삼성역, 수원에서 삼성역까지 20분대로 주파가 가능해, 수도권 도심 출퇴근 시간이 30분 내로 대폭 줄어들 전망입니다.
+
+3. 신분당선 연장선 (구운역 신설 확정)
+
+인근에 신분당선 구운역 신설이 확정되며, 향후 강남권 및 판교 테크노밸리와의 물리적 거리가 획기적으로 단축되는 거대한 폭발력을 지녔습니다.`,
     images: [
-      'https://images.unsplash.com/photo-1556388158-158ea5ccacbd?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&q=80&w=800'
-    ]
+      'https://i.ibb.co/S4VygwN5/400-250.jpg',
+      'https://i.ibb.co/SGYJfXb/2026-05-29-150925.png',
+      'https://i.ibb.co/gFwLkKnv/2026-05-29-152645.png'
+    ],
+    updatedAt: '2026-05-29T08:00:00Z'
+  },
+  {
+    title: '의료·교통·행정을 아우르는 복합 상권',
+    desc: `수원덕산병원(의료)과 고색역(교통)의 광역 수요에 이어, 서수원 권선행정타운(행정)의 탄탄한 지역 수요까지 완벽하게 품었습니다.
+권선구청, 우체국, 보건소 등 공공기관이 밀집한 서수원 행정타운의 중심지로 공무원 및 방문객의 유입이 활발합니다.`,
+    images: [
+      'https://images.unsplash.com/photo-1577416414929-7a4c9f17f6b4?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800'
+    ],
+    updatedAt: '2026-05-29T08:00:00Z'
   },
   {
     title: '탑동 이노베이션 밸리',
-    desc: '인근 탑동 일대에 조성되는 첨단 산업 및 연구 단지로 대규모 기업 유입에 따른 고소득 배후수요 증대가 기대됩니다.',
+    desc: `1. 1만 8천 평 첨단업무블록과 직결되는 핵심 동선 입지
+
+탑동 이노베이션밸리 전체 8만 평 중에서도 첨단업무용지 A2·A3 블록(약 1만 8천 평)과 물리적 경계를 완벽하게 맞대고 있습니다. 수만 명의 첨단산업 상주인력이 쏟아져 나오는 메인 동선 최전선에 위치하여 압도적인 배후수요를 가장 먼저 흡수합니다.
+
+2. 엄격한 용도 제한에 따른 내부 상업시설의 구조적 희소성
+
+수원시 인허가 고시문에 따라 이노베이션밸리 내부 상가(근린생활시설)는 기숙사 등을 포함한 30% 이하의 지원시설 한도 내에서도, 오직 지상 1층과 2층에만 입점하도록 엄격히 규제됩니다. 수직으로 밀집한 수만 명의 상주인구 대비 식음(F&B) 공간이 절대적으로 부족해 필연적인 상권 낙수효과가 발생합니다.
+
+3. 대형 F&B 및 외식 수요를 흡수하는 대체 불가 상권
+
+밸리 내부에서 해소되지 못하는 다이닝, 비즈니스 미팅, 여가 수요가 보행 동선이 자연스럽게 이어지는 당 사업지로 집중됩니다. 특히 대규모 면적이 필요한 베이커리 카페 및 전문 프랜차이즈 식당 입점 시, 수만 명의 상주인구를 흔들림 없는 고정 수요로 확보할 수 있습니다.`,
     images: [
       'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=800'
-    ]
+    ],
+    updatedAt: '2026-05-29T07:58:00Z'
   }
 ];
 
 export const DEFAULT_MD_DATA = [
   { 
     id: '117호', 
-    type: '라멘집 / 개인 필라테스', 
+    type: '1인 타겟 컴팩트 상가(라멘집 / 개인 필라테스)', 
     area: '15.99평', 
-    desc: '입구 초입 가시성이 우수한 특화 호실',
-    image: 'https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&q=80&w=800'
+    desc: '[1인 타겟 컴팩트 상가] 바쁜 일상 속 가볍고 트렌디한 한 끼',
+    image: 'https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&q=80&w=800',
+    images: [
+      'https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80&w=800'
+    ],
+    recommendation: '돈코츠 라멘 전문점, 키토 김밥 델리, 수제 디저트 공방, 1:1 기구 필라테스 클래스',
+    coords: { x: 39, y: 38 },
+    category: 'F&B/스포츠',
+    categoryStyle: 'bg-orange-50 text-orange-600 border border-orange-100/60',
+    updatedAt: '2026-05-29T09:30:00Z'
   },
   { 
     id: '118호', 
-    type: '브런치 / 베이커리 카페', 
+    type: '[대형 휴식 공간] 면회객과 대기 손님의 필수 방문 코스(브런치 / 베이커리 카페)', 
     area: '36.35평', 
-    desc: '모던한 감성의 세련된 공간 구성 가능',
-    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=800'
+    desc: '[프리미엄 F&B 공간] 면회객과 대기 손님의 발길이 머무는 필수 방문 코스',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=800',
+    images: [
+      'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1513442542250-854d436a73f2?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=800'
+    ],
+    recommendation: '올데이 브런치 플레이트, 페이스트리 전문 베이커리 카페, 스페셜티 커피 로스터리',
+    coords: { x: 28, y: 33 },
+    category: 'F&B/디저트',
+    categoryStyle: 'bg-amber-50 text-amber-700 border border-amber-100/60',
+    updatedAt: '2026-05-29T09:30:00Z'
   },
   { 
     id: '119호', 
     type: '1번 약국', 
     area: '58.81평', 
-    desc: '병원/의원 이용객 동선 확보 최적 입지',
-    image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?auto=format&fit=crop&q=80&w=800'
+    desc: '[상권의 중심] 처방전 동선이 모이는 독점적 입지',
+    image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?auto=format&fit=crop&q=80&w=800',
+    images: [
+      'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?auto=format&fit=crop&q=80&w=800'
+    ],
+    recommendation: '소아과/내과/정형외과 병동 처방 중심 메디컬 대형 약국, 올리브영 타입 드로그스토어',
+    coords: { x: 28, y: 45 },
+    category: '1번 약국',
+    categoryStyle: 'bg-teal-50 text-teal-700 border border-teal-100/60',
+    updatedAt: '2026-05-29T09:30:00Z'
   },
   { 
     id: '126호', 
-    type: '국밥 / 설렁탕 전문점', 
+    type: '[빠른 회전율] 주문하면 5분 만에 나오는 든든한 한 끼(국밥 / 설렁탕 전문점)', 
     area: '23.44평', 
-    desc: '대로변 노출이 우수하여 집객력이 높은 곳',
-    image: 'https://images.unsplash.com/photo-1634047462615-ca805e243956?auto=format&fit=crop&q=80&w=800'
+    desc: '[빠른 회전율] 주문하면 5분 만에 나오는 든든한 식사',
+    image: 'https://images.unsplash.com/photo-1634047462615-ca805e243956?auto=format&fit=crop&q=80&w=800',
+    images: [
+      'https://images.unsplash.com/photo-1634047462615-ca805e243956?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1616166311666-8805f6e87a28?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1594911773177-3e4b77f10fc1?auto=format&fit=crop&q=80&w=800'
+    ],
+    recommendation: '전통 명품 곰탕·설렁탕 전문점, 남녀노소 집객력이 높은 든든한 한식 가마솥 국밥',
+    coords: { x: 44, y: 88 },
+    category: 'F&B/한식',
+    categoryStyle: 'bg-red-50 text-red-600 border border-red-100/60',
+    updatedAt: '2026-05-29T09:30:00Z'
   },
   { 
     id: '127호', 
-    type: '1인 샤브샤브 / 찜닭', 
+    type: '[가족 맞춤 식당] 여유로운 식사와 모임이 있는 곳(중소형 샤브샤브 / 찜닭)', 
     area: '25.47평', 
-    desc: '가족 단위 고객 및 단체 방문 최적화',
-    image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=800'
+    desc: '[트렌디 다이닝] 혼자서도, 여럿이도 부담 없는 든든한 한 끼',
+    image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=800',
+    images: [
+      'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80&w=800'
+    ],
+    recommendation: '회전식 1인 팟 샤브샤브 식당, 모던 안동찜닭 패밀리 레스토랑, 정갈한 캐주얼 한식 정찬',
+    coords: { x: 48, y: 88 },
+    category: '퍼스널다이닝',
+    categoryStyle: 'bg-rose-50 text-rose-600 border border-rose-100/60',
+    updatedAt: '2026-05-29T09:30:00Z'
   },
   { 
     id: '128호', 
-    type: '포장 · 배달 피자 / 에그 샌드위치', 
+    type: '[포장·배달 특화] 병원 상권의 필수, 끊기지 않는 테이크아웃(피자 / 에그 샌드위치)', 
     area: '16.5평', 
-    desc: '유동인구가 많은 동선의 생활 밀착형 업종',
-    image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&q=80&w=800'
+    desc: '[포장·배달 특화] 병원 상권의 필수, 끊기지 않는 테이크아웃',
+    image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&q=80&w=800',
+    images: [
+      'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&q=80&w=800'
+    ],
+    recommendation: '수제 화덕 피자 픽업 전문점, 프리미엄 토스트 & 에그 브랜드, 아웃백/가구수제 도시락 전문점',
+    coords: { x: 51, y: 88 },
+    category: '테이크아웃/배달',
+    categoryStyle: 'bg-emerald-50 text-emerald-600 border border-emerald-100/60',
+    updatedAt: '2026-05-29T09:30:00Z'
   },
   { 
     id: '129호', 
-    type: '생활맥주 / 프랜차이즈 맥주', 
+    type: '[시선 집중 코너] 낮부터 밤까지 발길을 끄는 코너 자리(생활맥주 / 프랜차이즈 맥주)', 
     area: '18.47평', 
-    desc: '퇴근길이나 여가를 즐기기에 좋은 코너 입지',
-    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800'
+    desc: '[시선 집중 코너] 낮부터 밤까지 발길을 끄는 간판 자리',
+    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800',
+    images: [
+      'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1532634922-8fe0b757fb13?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&q=80&w=800'
+    ],
+    recommendation: '퇴근길 유도를 위한 수제 맥주 다이닝 펍, 역전할머니맥주식 스몰비어 프랜차이즈',
+    coords: { x: 54, y: 88 },
+    category: 'F&B/주류',
+    categoryStyle: 'bg-indigo-50 text-indigo-600 border border-indigo-100/60',
+    updatedAt: '2026-05-29T09:30:00Z'
   }
 ];
 
 export const DEFAULT_OFFICETEL_DATA = [
   {
-    title: '혁신적인 3룸 평면',
-    desc: '아파트를 대체하는 3룸 구조와 넉넉한 수납공간으로 주거 만족도를 극대화했습니다.',
+    title: '아파트를 대체하는 3룸 특화 설계',
+    desc: '전 호실이 채광과 통풍이 우수한 3룸 구조로 설계되었습니다. 이에 더해 현관 팬트리, 넉넉한 드레스룸, 파우더룸 등 혁신적인 수납 특화 설계를 적용하여 주거 쾌적성과 공간 활용성을 극대화했습니다.',
     images: [
       'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&q=80&w=800'
-    ]
+    ],
+    updatedAt: '2026-05-29T08:08:00Z'
   },
   {
-    title: '고품격 커뮤니티',
-    desc: '입주민을 위한 피트니스, 실내놀이터, 공유오피스 등 차별화된 커뮤니티 시설을 제공합니다.',
+    title: '하이엔드 라이프를 위한 프라이빗 커뮤니티',
+    desc: '스크린골프룸, 피트니스, 라운지 카페, 개인 오피스 등 어른들을 위한 프리미엄 여가 공간부터, 실내놀이터와 키즈스테이션 등 어린 자녀를 위한 보육 특화 시설까지 입주민의 다양한 라이프스타일을 지원합니다.',
     images: [
       'https://images.unsplash.com/photo-1540555700478-4be289fbecee?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&q=80&w=800'
-    ]
+    ],
+    updatedAt: '2026-05-29T08:08:00Z'
   },
   {
-    title: '스마트 홈 시스템',
-    desc: '최첨단 IoT 시스템을 적용하여 보안부터 에너지 관리까지 편리한 생활이 가능합니다.',
+    title: '365일 쾌적함을 지키는 에코·클린 시스템',
+    desc: '단지 내 미세먼지 저감 식재와 미스트 분사 시설물을 비롯해, 각 동 출입구의 에어커튼 및 날씨 정보를 제공하는 웨더 스테이션을 도입하여 입주민의 호흡기 건강과 쾌적한 일상을 빈틈없이 케어합니다.',
     images: [
       'https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1563770660941-20978e870e26?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1585776245991-cf89dd7fc73a?auto=format&fit=crop&q=80&w=800'
-    ]
+    ],
+    updatedAt: '2026-05-29T08:08:00Z'
   }
 ];
+
+const getTimestamp = (item: any): number => {
+  if (!item) return 0;
+  if (item.updatedAt) {
+    try {
+      return new Date(item.updatedAt).getTime();
+    } catch (_) {
+      return 0;
+    }
+  }
+  return 0;
+};
 
 const loadFromLocalStorage = (key: string, defaultValue: any) => {
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem(key);
+    const snapshotKey = `site_custom_code_snapshot_${key}`;
+    const savedSnapshotStr = localStorage.getItem(snapshotKey);
+    
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Smart data migration: automatically overwrite legacy placeholder description with the new detailed block
-        if (key === 'site_custom_analysis_data' && Array.isArray(parsed) && parsed[0]) {
-          if (parsed[0].desc && (parsed[0].desc.startsWith('약 706') || parsed[0].desc.includes('배후수요를 확보합니다.'))) {
-            parsed[0].desc = defaultValue[0].desc;
-            localStorage.setItem('site_custom_analysis_data', JSON.stringify(parsed));
+        let updated = false;
+        let codeChanged = false;
+        
+        let savedSnapshot: any = null;
+        if (savedSnapshotStr) {
+          try { savedSnapshot = JSON.parse(savedSnapshotStr); } catch (_) {}
+        } else {
+          // If no snapshot exists yet, fallback to comparing with parsed so legacy setups get the new code edits
+          savedSnapshot = parsed;
+        }
+
+        if (Array.isArray(parsed) && Array.isArray(defaultValue)) {
+          const merged = parsed.map((storedItem, index) => {
+            const defaultItem = defaultValue[index];
+            const prevDefaultItem = Array.isArray(savedSnapshot) ? savedSnapshot[index] : null;
+            
+            if (!defaultItem) return storedItem;
+
+            let itemUpdated = false;
+            const updatedItem = { ...storedItem };
+
+            Object.keys(defaultItem).forEach(prop => {
+              const valInCode = defaultItem[prop];
+              const valInOldCode = prevDefaultItem ? prevDefaultItem[prop] : undefined;
+
+              if (JSON.stringify(valInCode) !== JSON.stringify(valInOldCode)) {
+                updatedItem[prop] = valInCode;
+                itemUpdated = true;
+                codeChanged = true;
+              }
+            });
+
+            if (itemUpdated) {
+              updatedItem.updatedAt = new Date().toISOString();
+              updated = true;
+            }
+            return updatedItem;
+          });
+
+          // If there are more items in default config post-launch, add them
+          if (defaultValue.length > parsed.length) {
+            for (let i = parsed.length; i < defaultValue.length; i++) {
+              merged.push({
+                ...defaultValue[i],
+                updatedAt: new Date().toISOString()
+              });
+              updated = true;
+              codeChanged = true;
+            }
           }
+
+          if (updated || codeChanged) {
+            localStorage.setItem(key, JSON.stringify(merged));
+            localStorage.setItem(snapshotKey, JSON.stringify(defaultValue));
+            localStorage.setItem('site_custom_last_saved', new Date().toISOString());
+            (window as any)._site_code_updated = true;
+            return merged;
+          }
+          return parsed;
+        } else if (parsed && typeof parsed === 'object' && defaultValue && typeof defaultValue === 'object') {
+          let itemUpdated = false;
+          const updatedItem = { ...parsed };
+
+          Object.keys(defaultValue).forEach(prop => {
+            const valInCode = defaultValue[prop];
+            const valInOldCode = savedSnapshot ? savedSnapshot[prop] : undefined;
+
+            if (JSON.stringify(valInCode) !== JSON.stringify(valInOldCode)) {
+              updatedItem[prop] = valInCode;
+              itemUpdated = true;
+              codeChanged = true;
+            }
+          });
+
+          if (itemUpdated || codeChanged) {
+            updatedItem.updatedAt = new Date().toISOString();
+            localStorage.setItem(key, JSON.stringify(updatedItem));
+            localStorage.setItem(snapshotKey, JSON.stringify(defaultValue));
+            localStorage.setItem('site_custom_last_saved', new Date().toISOString());
+            (window as any)._site_code_updated = true;
+            return updatedItem;
+          }
+          return parsed;
+        }
+        
+        // Standard reconciliation using updatedAt timestamps if no code snapshot trigger has loaded yet
+        if (Array.isArray(parsed) && Array.isArray(defaultValue)) {
+          const reconstructed = parsed.map((storedItem, index) => {
+            const defaultItem = defaultValue[index];
+            if (!defaultItem) return storedItem;
+
+            const defaultTime = getTimestamp(defaultItem);
+            const storedTime = getTimestamp(storedItem);
+
+            if (defaultTime > storedTime) {
+              updated = true;
+              return {
+                ...storedItem,
+                ...defaultItem,
+              };
+            }
+            return storedItem;
+          });
+
+          if (defaultValue.length > parsed.length) {
+            for (let i = parsed.length; i < defaultValue.length; i++) {
+              reconstructed.push(defaultValue[i]);
+              updated = true;
+            }
+          }
+
+          if (updated) {
+            localStorage.setItem(key, JSON.stringify(reconstructed));
+            localStorage.setItem('site_custom_last_saved', new Date().toISOString());
+            (window as any)._site_code_updated = true;
+            return reconstructed;
+          }
+          return parsed;
+        } else if (parsed && typeof parsed === 'object' && defaultValue && typeof defaultValue === 'object') {
+          const defaultTime = getTimestamp(defaultValue);
+          const storedTime = getTimestamp(parsed);
+
+          if (defaultTime > storedTime) {
+            const merged = { ...parsed, ...defaultValue };
+            localStorage.setItem(key, JSON.stringify(merged));
+            localStorage.setItem('site_custom_last_saved', new Date().toISOString());
+            (window as any)._site_code_updated = true;
+            return merged;
+          }
+          return parsed;
         }
         return parsed;
       } catch (e) {
         console.error('Error loading config from localStorage:', e);
       }
+    } else {
+      localStorage.setItem(key, JSON.stringify(defaultValue));
+      localStorage.setItem(snapshotKey, JSON.stringify(defaultValue));
     }
   }
   return defaultValue;

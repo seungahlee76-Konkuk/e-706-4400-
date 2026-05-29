@@ -16,149 +16,25 @@ interface StoreUnit {
 }
 
 // 2. 데이터 객체 배열 (전체 호실의 확정된 카피라이팅 배치 - 호실별 3~5개 다각화 이미지 연동)
-const STORE_UNITS_BASE: StoreUnit[] = [
-  {
-    id: '117호',
-    area: '15.99평',
-    type: '라멘집 / 개인 필라테스',
-    desc: '[1인 타겟 컴팩트 상가] 바쁜 일상 속 가볍고 트렌디한 한 끼',
-    recommendation: '돈코츠 라멘 전문점, 키토 김밥 델리, 수제 디저트 공방, 1:1 기구 필라테스 클래스',
-    images: [
-      'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80&w=800'
-    ],
-    coords: { x: 39, y: 38 },
-    category: 'F&B/스포츠',
-    categoryStyle: 'bg-orange-50 text-orange-600 border border-orange-100/60'
-  },
-  {
-    id: '118호',
-    area: '36.35평',
-    type: '브런치 / 베이커리 카페',
-    desc: '[프리미엄 F&B 공간] 면회객과 대기 손님의 발길이 머무는 필수 방문 코스',
-    recommendation: '올데이 브런치 플레이트, 페이스트리 전문 베이커리 카페, 스페셜티 커피 로스터리',
-    images: [
-      'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1513442542250-854d436a73f2?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=800'
-    ],
-    coords: { x: 28, y: 33 },
-    category: 'F&B/디저트',
-    categoryStyle: 'bg-amber-50 text-amber-700 border border-amber-100/60'
-  },
-  {
-    id: '119호',
-    area: '58.81평',
-    type: '1번 약국',
-    desc: '[상권의 중심] 처방전 동선이 모이는 독점적 입지',
-    recommendation: '소아과/내과/정형외과 병동 처방 중심 메디컬 대형 약국, 올리브영 타입 드로그스토어',
-    images: [
-      'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?auto=format&fit=crop&q=80&w=800'
-    ],
-    coords: { x: 28, y: 45 },
-    category: '1번 약국',
-    categoryStyle: 'bg-teal-50 text-teal-700 border border-teal-100/60'
-  },
-  {
-    id: '126호',
-    area: '23.44평',
-    type: '국밥 / 설렁탕 전문점',
-    desc: '[빠른 회전율] 주문하면 5분 만에 나오는 든든한 식사',
-    recommendation: '전통 명품 곰탕·설렁탕 전문점, 남녀노소 집객력이 높은 든든한 한식 가마솥 국밥',
-    images: [
-      'https://images.unsplash.com/photo-1547928500-4722231facb3?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1616166311666-8805f6e87a28?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1594911773177-3e4b77f10fc1?auto=format&fit=crop&q=80&w=800'
-    ],
-    coords: { x: 44, y: 88 },
-    category: 'F&B/한식',
-    categoryStyle: 'bg-red-50 text-red-600 border border-red-100/60'
-  },
-  {
-    id: '127호',
-    area: '25.47평',
-    type: '1인 샤브샤브 / 찜닭',
-    desc: '[트렌디 다이닝] 혼자서도, 여럿이도 부담 없는 든든한 한 끼',
-    recommendation: '회전식 1인 팟 샤브샤브 식당, 모던 안동찜닭 패밀리 레스토랑, 정갈한 캐주얼 한식 정찬',
-    images: [
-      'https://images.unsplash.com/photo-1634047462615-ca805e243956?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80&w=800'
-    ],
-    coords: { x: 48, y: 88 },
-    category: '퍼스널다이닝',
-    categoryStyle: 'bg-rose-50 text-rose-600 border border-rose-100/60'
-  },
-  {
-    id: '128호',
-    area: '16.5평',
-    type: '포장 · 배달 피자 / 에그 샌드위치',
-    desc: '[포장·배달 특화] 병원 상권의 필수, 끊기지 않는 테이크아웃',
-    recommendation: '수제 화덕 피자 픽업 전문점, 프리미엄 토스트 & 에그 브랜드, 아웃백/가구수제 도시락 전문점',
-    images: [
-      'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&q=80&w=800'
-    ],
-    coords: { x: 51, y: 88 },
-    category: '테이크아웃/배달',
-    categoryStyle: 'bg-emerald-50 text-emerald-600 border border-emerald-100/60'
-  },
-  {
-    id: '129호',
-    area: '18.47평',
-    type: '생활맥주 / 프랜차이즈 맥주',
-    desc: '[시선 집중 코너] 낮부터 밤까지 발길을 끄는 간판 자리',
-    recommendation: '퇴근길 유도를 위한 수제 맥주 다이닝 펍, 역전할머니맥주식 스몰비어 프랜차이즈',
-    images: [
-      'https://images.unsplash.com/photo-1518176258769-f227c798150e?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1532634922-8fe0b757fb13?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&q=80&w=800'
-    ],
-    coords: { x: 54, y: 88 },
-    category: 'F&B/주류',
-    categoryStyle: 'bg-indigo-50 text-indigo-600 border border-indigo-100/60'
+// Dynamically map from our single source of truth in state/constants (mdData)
+const STORE_UNITS: StoreUnit[] = (mdData || DEFAULT_MD_DATA).map((custom: any) => {
+  let mergedImages = custom.images || [custom.image];
+  if (custom.image && (!mergedImages || mergedImages.length === 0 || mergedImages[0] !== custom.image)) {
+    // If the primary image was customized, let's keep it as the first item of the carousel
+    mergedImages = [custom.image, ...(custom.images?.slice(1) || [])];
   }
-];
 
-// Dynamically merge admin dashboard edits while maintaining high-end default descriptions
-const STORE_UNITS: StoreUnit[] = STORE_UNITS_BASE.map(base => {
-  const custom = mdData?.find((item: any) => item.id === base.id);
-  if (custom) {
-    const defaultItem = DEFAULT_MD_DATA.find((d: any) => d.id === base.id);
-    const isEditedDesc = defaultItem && custom.desc !== defaultItem.desc;
-    const isEditedType = defaultItem && custom.type !== defaultItem.type;
-    const isEditedArea = defaultItem && custom.area !== defaultItem.area;
-    const isEditedImage = defaultItem && custom.image !== defaultItem.image;
-
-    let mergedImages = base.images;
-    if (isEditedImage && custom.image) {
-      mergedImages = [custom.image, ...base.images.slice(1)];
-    }
-
-    return {
-      ...base,
-      id: custom.id || base.id,
-      area: isEditedArea ? custom.area : base.area,
-      type: isEditedType ? custom.type : base.type,
-      desc: isEditedDesc ? custom.desc : base.desc,
-      images: mergedImages,
-      recommendation: isEditedType ? custom.type : base.recommendation,
-      coords: base.coords, // coords는 무조건 최신 고정밀 소스값 유지
-      category: base.category, // category 무조건 최신 소스값 유지
-      categoryStyle: base.categoryStyle // categoryStyle 무조건 최신 소스값 유지
-    };
-  }
-  return base;
+  return {
+    id: custom.id,
+    area: custom.area,
+    type: custom.type,
+    desc: custom.desc,
+    recommendation: custom.recommendation || custom.type,
+    images: mergedImages,
+    coords: custom.coords || { x: 0, y: 0 },
+    category: custom.category || '공통',
+    categoryStyle: custom.categoryStyle || 'bg-gray-50 text-gray-700 border border-gray-100/60'
+  };
 });
 
 // SVG 앵커 포인트 정의 (보행 동선 역추적 시작점)
@@ -520,7 +396,7 @@ export default function MDConfig() {
               />
             </div>
           ) : (
-            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-stone-900 mt-4 tracking-tight leading-tight break-keep">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-stone-900 mt-4 tracking-tight leading-tight break-keep">
               {sectionTitle}
             </h2>
           )}
@@ -1126,7 +1002,7 @@ export default function MDConfig() {
         <div className="pt-12 md:pt-24 border-t border-stone-200/50">
           <div className="text-center mb-10 md:mb-20">
             <span className="text-accent font-black tracking-[0.25em] text-[11px] uppercase block mb-3">PREMIUM RESIDENCE</span>
-            <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-tight mb-6 break-keep">주거용 오피스텔 상품안내</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-gray-900 tracking-tight leading-tight mb-6 break-keep">주거용 오피스텔 상품안내</h2>
             <div className="mt-4">
               <span className="text-sm sm:text-base md:text-[17px] text-[#555555] font-semibold uppercase tracking-[0.08em] block leading-relaxed">
                 시행사 특별 보유분 한정

@@ -11,6 +11,16 @@ interface AnalysisCardProps {
 
 const AnalysisCard: React.FC<AnalysisCardProps> = ({ item, index }) => {
   const [currentImage, setCurrentImage] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Automatic slide transition with pause-on-hover interaction
+  React.useEffect(() => {
+    if (isHovered || item.images.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentImage((prev) => (prev + 1) % item.images.length);
+    }, 3500);
+    return () => clearInterval(timer);
+  }, [isHovered, item.images.length]);
 
   const nextImg = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -22,10 +32,36 @@ const AnalysisCard: React.FC<AnalysisCardProps> = ({ item, index }) => {
     setCurrentImage((prev) => (prev - 1 + item.images.length) % item.images.length);
   };
 
+  const highlightTitle = (title: string) => {
+    const keywords = [
+      '수원 TOP 3',
+      '메머드급 규모',
+      '원스톱 진료 체계',
+      '원스톱 진료',
+      '최상위 의료진',
+      '존스홉킨스',
+      '빅5 출신',
+      '경기 남부 중증 질환 치료',
+      '안정적인 수익 창출'
+    ];
+    
+    // Sort keywords by length descending to match longest first
+    const sortedKeywords = [...keywords].sort((a, b) => b.length - a.length);
+    const regex = new RegExp(`(${sortedKeywords.map(k => k.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')).join('|')})`, 'g');
+    const parts = title.split(regex);
+    
+    return parts.map((part, i) => {
+      if (keywords.includes(part)) {
+        return <span key={i} className="text-accent font-black">{part}</span>;
+      }
+      return part;
+    });
+  };
+
   const renderStructuredDesc = (desc: string) => {
     // Check if it's a numbered list or has paragraphs
     if (!desc.includes('1. ') && !desc.includes('1차 ')) {
-      return <p className="text-[#555555] leading-relaxed sm:leading-[1.85] text-sm sm:text-[16px] md:text-[17px] font-medium tracking-wide break-keep whitespace-pre-line">{desc}</p>;
+      return <p className="text-gray-900 leading-relaxed sm:leading-[1.85] text-sm sm:text-[16px] md:text-[17px] font-medium tracking-wide break-keep whitespace-pre-line">{desc}</p>;
     }
 
     // Split by empty lines or double newlines to isolate blocks
@@ -58,40 +94,77 @@ const AnalysisCard: React.FC<AnalysisCardProps> = ({ item, index }) => {
 
     return (
       <div className="space-y-8 sm:space-y-10">
-        {groups.map((group, idx) => (
-          <div key={idx} className="space-y-2">
-            {group.title && (
-              <h4 className="text-gray-900 font-black text-[15px] sm:text-[17px] md:text-[18px] tracking-tight leading-snug">
-                {group.title}
-              </h4>
-            )}
-            {group.body && (
-              <p className="text-stone-500/90 font-normal text-[13px] sm:text-[14px] md:text-[15px] leading-relaxed break-keep whitespace-pre-line">
-                {group.body}
-              </p>
-            )}
-          </div>
-        ))}
+        {groups.map((group, idx) => {
+          const numberMatch = group.title.match(/^(\d+)\.\s*(.*)$/);
+          let numStr = '';
+          let cleanTitle = group.title;
+          if (numberMatch) {
+            numStr = numberMatch[1];
+            cleanTitle = numberMatch[2];
+          }
+
+          return (
+            <div key={idx} className="space-y-2">
+              {group.title && (
+                <div className="flex items-center gap-3">
+                  {numStr ? (
+                    <span className="flex items-center justify-center w-6 h-6 bg-accent text-white font-black text-xs rounded-md shadow-[0_2px_4px_rgba(244,63,94,0.15)] select-none shrink-0">
+                      {numStr}
+                    </span>
+                  ) : (
+                    <span className="text-accent font-black text-sm">✔</span>
+                  )}
+                  <h4 className="text-[#0a2240] font-black text-[15px] sm:text-[17px] md:text-[18px] tracking-tight leading-snug">
+                    {cleanTitle}
+                  </h4>
+                </div>
+              )}
+              {group.body && (
+                <p className="text-gray-900 font-normal text-[13px] sm:text-[14px] md:text-[15px] leading-relaxed break-keep whitespace-pre-line pl-9">
+                  {group.body}
+                </p>
+              )}
+            </div>
+          );
+        })}
       </div>
     );
+  };
+
+  // Determine floating badge content depending on the section context
+  const getBadgeText = () => {
+    switch (index) {
+      case 0: return "수원 TOP 3 규모";
+      case 1: return "고색역 직접 역세권";
+      case 2: return "트리플 복합상권";
+      case 3: return "첨단 산업밸리 혁신지구";
+      default: return "수원 TOP 3 규모";
+    }
   };
 
   return (
     <div
       className={cn(
-        "flex flex-col gap-12 lg:gap-20 items-center w-full",
+        "flex flex-col gap-10 md:gap-14 lg:gap-16 items-stretch w-full md:flex-row",
         index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
       )}
     >
-      {/* Sharp Architectural Box: No rounded corners, no floating card frames, no IT-blog shadows */}
+      {/* High-end Framed Media Box with deep shadow and elegant rounded corners */}
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-120px" }}
         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full md:w-1/2 relative group rounded-none overflow-hidden aspect-[16/10] bg-stone-100 border border-stone-200/60"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className="w-full md:w-[48%] relative group rounded-2xl overflow-hidden aspect-[16/10] bg-stone-100 border border-stone-200/50 shadow-[0_20px_50px_rgba(0,0,0,0.08)] self-center"
       >
         <div className="relative w-full h-full">
+          {/* Glowing Floating Badge with rich dark luxury glassmorphism */}
+          <div className="absolute top-4 left-4 z-20 bg-slate-900/65 backdrop-blur-md text-white/95 text-[11px] sm:text-[12px] font-semibold tracking-[-0.03em] px-4.5 py-2 sm:px-5 sm:py-2.5 rounded-full border border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.12)] select-none">
+            {getBadgeText()}
+          </div>
+
           <AnimatePresence mode="wait">
             <motion.img
               key={currentImage}
@@ -100,7 +173,10 @@ const AnalysisCard: React.FC<AnalysisCardProps> = ({ item, index }) => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.7 }}
-              className="w-full h-full object-cover"
+              className={cn(
+                "w-full h-full",
+                item.title.includes("고색역 역세권") && currentImage === 0 ? "object-contain bg-stone-100" : "object-cover"
+              )}
               referrerPolicy="no-referrer"
             />
           </AnimatePresence>
@@ -121,14 +197,21 @@ const AnalysisCard: React.FC<AnalysisCardProps> = ({ item, index }) => {
               </button>
               <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
                 {item.images.map((_, i) => (
-                  <div key={i} className={`h-[2px] transition-all duration-500 ${i === currentImage ? 'bg-accent w-8' : 'bg-white/30 w-2'}`} />
+                  <button
+                    key={i}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImage(i);
+                    }}
+                    className={`h-[3px] transition-all duration-500 focus:outline-none rounded-full ${i === currentImage ? 'bg-[#f43f5e] w-8' : 'bg-white/40 w-2 hover:bg-white/70'}`}
+                  />
                 ))}
               </div>
             </>
           )}
         </div>
       </motion.div>
- 
+  
       {/* Solution 3: Staggered text fade-in triggered by scroll with grand contrast */}
       <motion.div
         initial="hidden"
@@ -143,8 +226,8 @@ const AnalysisCard: React.FC<AnalysisCardProps> = ({ item, index }) => {
           }
         }}
         className={cn(
-          "w-full md:w-1/2 flex flex-col justify-center",
-          index % 2 === 0 ? "md:pl-16 lg:pl-24" : "md:pr-16 lg:pr-24"
+          "w-full md:w-[52%] flex flex-col justify-center",
+          index % 2 === 0 ? "md:pl-8 lg:pl-12" : "md:pr-8 lg:pr-12"
         )}
       >
         <div className="space-y-6 sm:space-y-8 font-sans">
@@ -164,9 +247,9 @@ const AnalysisCard: React.FC<AnalysisCardProps> = ({ item, index }) => {
                 hidden: { opacity: 0, y: 35 },
                 visible: { opacity: 1, y: 0, transition: { duration: 1.0, ease: [0.16, 1, 0.3, 1] } }
               }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-[45px] font-black text-gray-900 leading-[1.15] tracking-tight"
+              className="text-lg sm:text-xl md:text-2xl font-black text-gray-900 leading-[1.2] tracking-tight"
             >
-              {item.title}
+              {highlightTitle(item.title)}
             </motion.h3>
           </div>
           
@@ -197,7 +280,7 @@ const AnalysisCard: React.FC<AnalysisCardProps> = ({ item, index }) => {
 export default function LocationAnalysis() {
   return (
     <section id="location" className="py-14 md:py-28 px-6 overflow-hidden bg-[#FAF8F5] border-t border-b border-stone-200/40">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -226,7 +309,7 @@ export default function LocationAnalysis() {
               hidden: { opacity: 0, y: 35 },
               visible: { opacity: 1, y: 0, transition: { duration: 1.1, ease: [0.16, 1, 0.3, 1] } }
             }}
-            className="text-2xl sm:text-4xl md:text-5xl font-black text-gray-900 mt-4 tracking-tight leading-tight break-keep"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-black text-gray-900 mt-4 tracking-tight leading-tight break-keep"
           >
             입지분석 및 프리미엄
           </motion.h2>

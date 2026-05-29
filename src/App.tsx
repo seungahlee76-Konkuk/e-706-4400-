@@ -15,7 +15,7 @@ import QuickMenu from './components/ui/QuickMenu';
 import AdminDashboard from './components/ui/AdminDashboard';
 import StickyBottomForm from './components/ui/StickyBottomForm';
 import { db } from './lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -46,6 +46,24 @@ export default function App() {
 
     const syncDbConfig = async () => {
       try {
+        if ((window as any)._site_code_updated) {
+          const localProject = localStorage.getItem('site_custom_project_info');
+          const localAnalysis = localStorage.getItem('site_custom_analysis_data');
+          const localMd = localStorage.getItem('site_custom_md_data');
+          const localOfficetel = localStorage.getItem('site_custom_officetel_data');
+          const currentIsoString = new Date().toISOString();
+
+          await Promise.all([
+            setDoc(doc(db, 'site_config', 'project_info'), { data: localProject ? JSON.parse(localProject) : null, updatedAt: currentIsoString }),
+            setDoc(doc(db, 'site_config', 'analysis_data'), { data: localAnalysis ? JSON.parse(localAnalysis) : null, updatedAt: currentIsoString }),
+            setDoc(doc(db, 'site_config', 'md_data'), { data: localMd ? JSON.parse(localMd) : null, updatedAt: currentIsoString }),
+            setDoc(doc(db, 'site_config', 'officetel_data'), { data: localOfficetel ? JSON.parse(localOfficetel) : null, updatedAt: currentIsoString })
+          ]);
+          localStorage.setItem('site_custom_last_saved', currentIsoString);
+          delete (window as any)._site_code_updated;
+          console.log("☁️ Successfully auto-synced local code changes to Firestore!");
+        }
+
         const projectRef = doc(db, 'site_config', 'project_info');
         const analysisRef = doc(db, 'site_config', 'analysis_data');
         const mdRef = doc(db, 'site_config', 'md_data');

@@ -292,6 +292,8 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
         .replace(/script/gi, "blocked-script");
     };
 
+    const currentIsoString = new Date().toISOString();
+
     const sanitizedProject = {
       ...DEFAULT_PROJECT_INFO,
       ...customProjectInfo,
@@ -320,7 +322,8 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
         totalAreaM2: sanitizeHTML(u.totalAreaM2 || ""),
         totalAreaPy: sanitizeHTML(u.totalAreaPy || ""),
         efficiency: sanitizeHTML(u.efficiency || ""),
-      }))
+      })),
+      updatedAt: currentIsoString
     };
 
     const sanitizedAnalysis = customAnalysis.map((item: any) => ({
@@ -329,6 +332,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
       images: (item.images || [])
         .map((img: string) => sanitizeHTML(img || ""))
         .filter((img: string) => img.trim() !== ""),
+      updatedAt: currentIsoString,
     }));
 
     const sanitizedMd = customMd.map((item: any) => ({
@@ -337,6 +341,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
       area: sanitizeHTML(item.area),
       desc: sanitizeHTML(item.desc),
       image: sanitizeHTML(item.image),
+      updatedAt: currentIsoString,
     }));
 
     const sanitizedOfficetel = customOfficetel.map((item: any) => ({
@@ -345,9 +350,9 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
       images: (item.images || [])
         .map((img: string) => sanitizeHTML(img || ""))
         .filter((img: string) => img.trim() !== ""),
+      updatedAt: currentIsoString,
     }));
 
-    const currentIsoString = new Date().toISOString();
     localStorage.setItem('site_custom_project_info', JSON.stringify(sanitizedProject));
     localStorage.setItem('site_custom_analysis_data', JSON.stringify(sanitizedAnalysis));
     localStorage.setItem('site_custom_md_data', JSON.stringify(sanitizedMd));

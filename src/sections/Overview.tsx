@@ -17,7 +17,7 @@ export default function Overview() {
           className="mb-10 md:mb-16 text-center md:text-left"
         >
           <span className="text-accent font-bold tracking-[0.2em] text-[11px] uppercase">PROJECT OVERVIEW</span>
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-gray-900 mt-4 tracking-tight leading-tight break-keep">사업개요</h2>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-gray-900 mt-4 tracking-tight leading-tight break-keep">사업개요</h2>
           <div className="w-16 h-1 bg-accent mt-6 rounded-full hidden md:block" />
         </motion.div>
 
