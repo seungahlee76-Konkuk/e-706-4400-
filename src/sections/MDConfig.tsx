@@ -239,9 +239,14 @@ function MDImageSlider({ images: rawImages, title, badgeText, isMobile = false }
 export default function MDConfig() {
   // 기본적으로 118호를 활성화
   const [activeUnit, setActiveUnit] = useState<string>('118호');
+  const [isMobileExpanded, setIsMobileExpanded] = useState<boolean>(false);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [sectionTitle, setSectionTitle] = useState<string>(() => {
-    return localStorage.getItem('site_custom_md_section_title') || '수원덕산병원 상가 입점 가이드';
+    const raw = localStorage.getItem('site_custom_md_section_title');
+    if (raw === '수원덕산병원 상가 입점 가이드' || !raw) {
+      return 'e편한세상시티 고색 상가 입점 가이드';
+    }
+    return raw;
   });
   const [blueprintImg, setBlueprintImg] = useState<string>(() => {
     return localStorage.getItem('site_custom_md_blueprint_img') || 'https://i.ibb.co/pjDBc2bh/image.png';
@@ -321,18 +326,16 @@ export default function MDConfig() {
   return (
     <section 
       id="md" 
-      className="py-14 md:py-28 px-6 border-b border-gray-100 bg-[#F3F2EE] relative"
+      className="bg-white relative w-full"
       style={{ scrollSnapAlign: 'start' }}
     >
-      {/* 1F PLAN Background Watermark (Oversized typography decoration) */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
-        <span className="text-[14rem] sm:text-[18rem] md:text-[22rem] lg:text-[26rem] font-sans font-black text-[#030F26]/[0.011] md:text-white/35 tracking-[0.02em] uppercase leading-none whitespace-nowrap">
-          1F PLAN
-        </span>
-      </div>
-
       {/* 선 애니메이션용 CSS 인젝션 */}
       <style>{`
+        @media (min-width: 768px) {
+          .split-bg-container {
+            background: linear-gradient(to right, #F4F5F7 55%, #FFFFFF 55%) !important;
+          }
+        }
         @keyframes dash-flow {
           from {
             stroke-dashoffset: 0;
@@ -372,183 +375,214 @@ export default function MDConfig() {
         }
       `}</style>
 
-      <div className="max-w-[1600px] mx-auto w-full px-6 lg:px-12">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          className="text-center mb-6 md:mb-10"
-        >
-          <span className="text-accent font-bold tracking-[0.2em] text-[11px] uppercase block">Premium MD Curation</span>
-          {isEditMode ? (
-            <div className="max-w-2xl mx-auto mb-4 px-6">
-              <label className="block text-[10px] font-bold text-accent mb-1 uppercase tracking-wider">대시보드 메인 타이틀 편집</label>
-              <input 
-                type="text" 
-                className="w-full text-center text-xl sm:text-2xl md:text-3xl font-bold border border-accent/40 bg-white px-4 py-2 text-stone-900 rounded-md focus:outline-none focus:ring-1 focus:ring-accent"
-                value={sectionTitle} 
-                onChange={(e) => {
-                  setSectionTitle(e.target.value);
-                  localStorage.setItem('site_custom_md_section_title', e.target.value);
-                }} 
-              />
-            </div>
-          ) : (
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-stone-900 mt-4 tracking-tight leading-tight break-keep">
-              {sectionTitle}
-            </h2>
-          )}
-          <div className="w-16 h-1 bg-accent mx-auto mt-4 rounded-full" />
-        </motion.div>
+      {/* 1. 독립된 상단 타이틀 영역 (배경: 순백색 #FFFFFF) */}
+      <div className="pt-12 md:pt-28 pb-2 md:pb-8 px-6 bg-[#FFFFFF]">
+        <div className="max-w-[1600px] mx-auto w-full px-6 lg:px-12">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="text-center"
+          >
+            <span className="text-accent font-bold tracking-[0.2em] text-[11px] uppercase block">Premium MD Curation</span>
+            {isEditMode ? (
+              <div className="max-w-2xl mx-auto mb-4 px-6">
+                <label className="block text-[10px] font-bold text-accent mb-1 uppercase tracking-wider">대시보드 메인 타이틀 편집</label>
+                <input 
+                  type="text" 
+                  className="w-full text-center text-xl sm:text-2xl md:text-3xl font-bold border border-accent/40 bg-white px-4 py-2 text-stone-900 rounded-md focus:outline-none focus:ring-1 focus:ring-accent"
+                  value={sectionTitle} 
+                  onChange={(e) => {
+                    setSectionTitle(e.target.value);
+                    localStorage.setItem('site_custom_md_section_title', e.target.value);
+                  }} 
+                />
+              </div>
+            ) : (
+              <div className="flex flex-col items-center">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-stone-900 mt-4 tracking-tight leading-tight break-keep">
+                  {sectionTitle}
+                </h2>
+              </div>
+            )}
+            <div className="w-16 h-1 bg-accent mx-auto mt-4 rounded-full" />
+          </motion.div>
+        </div>
+      </div>
 
-        <div className="mb-8 md:mb-12" />
+      {/* 2. 하단 독립된 스플릿 영역 (반반 배경 적용) */}
+      <div className="split-bg-container pt-3 pb-10 md:py-20 px-6 relative">
+        <div className="max-w-[1600px] mx-auto w-full px-6 lg:px-12">
 
-        {/* 모바일 (md 미만) 전용 고급스러운 프롭테크 대시보드 리스트 뷰 */}
-        <div className="block md:hidden mb-12 md:mb-20 -mx-6 w-[calc(100%+3rem)]">
+          {/* 모바일 (md 미만) 전용 고급스러운 프롭테크 대시보드 리스트 뷰 */}
+          <div className="block md:hidden mb-8 -mx-6 w-[calc(100%+3rem)]">
           <div className="bg-transparent">
             <div className="flex flex-col">
-              {units.map((unit) => (
-                <div key={unit.id} className="bg-transparent py-8 border-b border-stone-200/60 last:border-b-0 flex flex-col">
-                  
-                  {/* 1. 카탈로그 메타데이터 상단 배치 */}
-                  <div className="flex items-center justify-between mb-3.5 px-5">
-                    <span className="text-sm font-bold text-stone-500 tracking-wider uppercase">
-                      {unit.id} <span className="mx-1.5 text-stone-300">|</span> 전용 {unit.area}
-                    </span>
-                    <span className={`px-3 py-1 text-xs font-bold tracking-wider rounded ${unit.categoryStyle}`}>
-                      {unit.category}
-                    </span>
-                  </div>
-
-                  {/* 2. 에셋 타이틀 */}
-                  <h4 className="text-[18px] sm:text-[20px] font-bold text-stone-950 leading-snug mb-4 tracking-tight break-keep px-5">
-                    {unit.desc}
-                  </h4>
-
-                  {/* 3. 이미지 */}
-                  <div className="w-full aspect-[16/9] bg-stone-100 overflow-hidden relative mb-5">
-                    <MDImageSlider 
-                      images={unit.images} 
-                      title={unit.type} 
-                      badgeText="MD REAL-VIEW" 
-                      isMobile={true} 
-                    />
-                  </div>
-
-                  {/* 4. 입지 공학적 데이터 분석 정보 */}
-                  {/* 권장 MD 디스플레이 */}
-                  <div className="w-full bg-accent/5 border-y border-accent/15 py-5 px-5 mb-5 space-y-3.5">
-                    <span className="text-[14px] sm:text-[15px] font-black text-accent block font-sans tracking-wide">▷ 권장 테넌트:</span>
-                    <div className="pt-2.5 border-t border-accent/10">
-                      <p className="text-[15px] sm:text-[16px] font-extrabold text-stone-950 leading-relaxed font-sans antialiased select-none">
-                        {unit.recommendation}
-                      </p>
+              <AnimatePresence initial={false}>
+                {(isMobileExpanded ? units : units.slice(0, 3)).map((unit, index) => (
+                  <motion.div 
+                    key={unit.id}
+                    initial={index >= 3 ? { opacity: 0, height: 0 } : false}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                    className="bg-transparent py-5 border-b border-stone-200/60 last:border-b-0 flex flex-col overflow-hidden"
+                  >
+                    
+                    {/* 1. 카탈로그 메타데이터 상단 배치 */}
+                    <div className="flex items-center justify-between mb-3 py-3 px-5 bg-[#F5F3ED] border-y border-stone-200/40">
+                      <span className="text-[15px] font-bold text-stone-950 tracking-tight font-sans">
+                        {unit.id} <span className="mx-2 text-stone-300 font-normal">|</span> 전용 {unit.area}
+                      </span>
+                      <span className={`px-2.5 py-1 text-[11px] font-bold tracking-tight rounded ${unit.categoryStyle} font-sans`}>
+                        {unit.category}
+                      </span>
                     </div>
-                  </div>
 
-                  {/* 모바일 실시간 편집 폼 */}
-                  {isEditMode && (
-                    <div className="mx-5 p-4 bg-white border border-accent/20 rounded-xl space-y-4 shadow-sm mb-4">
-                      <h5 className="text-xs font-semibold text-accent flex items-center gap-1">
-                        <Sparkles className="w-3.5 h-3.5" /> {unit.id} 정보 및 미디어 실시간 수정
-                      </h5>
-                      
-                      <div className="grid grid-cols-2 gap-2">
+                    {/* 2. 에셋 타이틀 */}
+                    <h4 className="text-[17px] sm:text-[19px] font-bold text-stone-950 leading-snug mb-3 tracking-tight break-keep px-5">
+                      {unit.desc}
+                    </h4>
+
+                    {/* 3. 이미지 */}
+                    <div className="w-full aspect-[16/9] bg-stone-100 overflow-hidden relative mb-4">
+                      <MDImageSlider 
+                        images={unit.images} 
+                        title={unit.type} 
+                        badgeText="MD REAL-VIEW" 
+                        isMobile={true} 
+                      />
+                    </div>
+
+                    {/* 4. 입지 공학적 데이터 분석 정보 */}
+                    {/* 권장 MD 디스플레이 */}
+                    <div className="w-full bg-accent/5 border-y border-accent/15 py-4 px-5 mb-4 space-y-3">
+                      <span className="text-[14px] sm:text-[15px] font-black text-accent block font-sans tracking-wide">▷ 권장 테넌트:</span>
+                      <div className="pt-2 border-t border-accent/10">
+                        <p className="text-[14px] sm:text-[15px] font-extrabold text-stone-950 leading-relaxed font-sans antialiased select-none">
+                          {unit.recommendation}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 모바일 실시간 편집 폼 */}
+                    {isEditMode && (
+                      <div className="mx-5 p-4 bg-white border border-accent/20 rounded-xl space-y-4 shadow-sm mb-4">
+                        <h5 className="text-xs font-semibold text-accent flex items-center gap-1">
+                          <Sparkles className="w-3.5 h-3.5" /> {unit.id} 정보 및 미디어 실시간 수정
+                        </h5>
+                        
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">전용면적</label>
+                            <input 
+                              type="text" 
+                              value={unit.area} 
+                              onChange={(e) => updateUnitValue(unit.id, 'area', e.target.value)}
+                              className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2 py-1"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">대표 샵 업종</label>
+                            <input 
+                              type="text" 
+                              value={unit.type} 
+                              onChange={(e) => updateUnitValue(unit.id, 'type', e.target.value)}
+                              className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2 py-1"
+                            />
+                          </div>
+                        </div>
+
                         <div>
-                          <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">전용면적</label>
+                          <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">상가 비주얼 카피라이팅</label>
                           <input 
                             type="text" 
-                            value={unit.area} 
-                            onChange={(e) => updateUnitValue(unit.id, 'area', e.target.value)}
+                            value={unit.desc} 
+                            onChange={(e) => updateUnitValue(unit.id, 'desc', e.target.value)}
                             className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2 py-1"
                           />
                         </div>
+
                         <div>
-                          <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">대표 샵 업종</label>
-                          <input 
-                            type="text" 
-                            value={unit.type} 
-                            onChange={(e) => updateUnitValue(unit.id, 'type', e.target.value)}
+                          <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">권장 테넌트(MD) 리스트</label>
+                          <textarea 
+                            rows={2}
+                            value={unit.recommendation} 
+                            onChange={(e) => updateUnitValue(unit.id, 'recommendation', e.target.value)}
                             className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2 py-1"
                           />
                         </div>
-                      </div>
 
-                      <div>
-                        <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">상가 비주얼 카피라이팅</label>
-                        <input 
-                          type="text" 
-                          value={unit.desc} 
-                          onChange={(e) => updateUnitValue(unit.id, 'desc', e.target.value)}
-                          className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2 py-1"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">권장 테넌트(MD) 리스트</label>
-                        <textarea 
-                          rows={2}
-                          value={unit.recommendation} 
-                          onChange={(e) => updateUnitValue(unit.id, 'recommendation', e.target.value)}
-                          className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2 py-1"
-                        />
-                      </div>
-
-                      {/* 이미지 관리 */}
-                      <div className="space-y-1.5 border-t border-stone-100 pt-3">
-                        <span className="block text-[10px] font-semibold text-stone-500">📸 실사 분위기 슬라이더 업로드 (최대 4장)</span>
-                        {[0, 1, 2, 3].map((imgIdx) => {
-                          const imgUrl = unit.images && unit.images[imgIdx] ? unit.images[imgIdx] : '';
-                          return (
-                            <div key={imgIdx} className="flex gap-2 items-center">
-                              <span className="text-[10px] font-semibold text-stone-400 w-3">#{imgIdx + 1}</span>
-                              <input 
-                                type="text" 
-                                value={imgUrl} 
-                                placeholder="이미지 URL 주소 또는 우측 파일 업로드"
-                                onChange={(e) => {
-                                  const newImages = [...(unit.images || [])];
-                                  newImages[imgIdx] = e.target.value;
-                                  updateUnitValue(unit.id, 'images', newImages);
-                                }}
-                                className="flex-1 text-[10px] font-mono border border-stone-300 rounded px-2 py-1 bg-white"
-                              />
-                              <label className="flex items-center gap-1 px-2.5 py-1 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded text-[10px] font-bold cursor-pointer whitespace-nowrap">
-                                <Upload className="w-3 h-3 text-stone-600" />
+                        {/* 이미지 관리 */}
+                        <div className="space-y-1.5 border-t border-stone-100 pt-3">
+                          <span className="block text-[10px] font-semibold text-stone-500">📸 실사 분위기 슬라이더 업로드 (최대 4장)</span>
+                          {[0, 1, 2, 3].map((imgIdx) => {
+                            const imgUrl = unit.images && unit.images[imgIdx] ? unit.images[imgIdx] : '';
+                            return (
+                              <div key={imgIdx} className="flex gap-2 items-center">
+                                <span className="text-[10px] font-semibold text-stone-400 w-3">#{imgIdx + 1}</span>
                                 <input 
-                                  type="file" 
-                                  accept="image/*"
-                                  className="hidden"
+                                  type="text" 
+                                  value={imgUrl} 
+                                  placeholder="이미지 URL 주소 또는 우측 파일 업로드"
                                   onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                      handleImageUpload(file, (base64) => {
-                                        const newImages = [...(unit.images || [])];
-                                        newImages[imgIdx] = base64;
-                                        updateUnitValue(unit.id, 'images', newImages);
-                                      });
-                                    }
+                                    const newImages = [...(unit.images || [])];
+                                    newImages[imgIdx] = e.target.value;
+                                    updateUnitValue(unit.id, 'images', newImages);
                                   }}
+                                  className="flex-1 text-[10px] font-mono border border-stone-300 rounded px-2 py-1 bg-white"
                                 />
-                              </label>
-                            </div>
-                          );
-                        })}
+                                <label className="flex items-center gap-1 px-2.5 py-1 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded text-[10px] font-bold cursor-pointer whitespace-nowrap">
+                                  <Upload className="w-3 h-3 text-stone-600" />
+                                  <input 
+                                    type="file" 
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        handleImageUpload(file, (base64) => {
+                                          const newImages = [...(unit.images || [])];
+                                          newImages[imgIdx] = base64;
+                                          updateUnitValue(unit.id, 'images', newImages);
+                                        });
+                                      }
+                                    }}
+                                  />
+                                </label>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                </div>
-              ))}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
+
+            {/* 전체 추천 호실 더보기 (세련된 고스트 버튼) */}
+            {!isMobileExpanded && units.length > 3 && (
+              <div className="px-5 pt-8 pb-4 flex justify-center text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsMobileExpanded(true)}
+                  className="w-full max-w-[320px] py-4 px-6 text-[13px] font-extrabold text-slate-800 bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.03)] tracking-tight group"
+                >
+                  <span> 전체 추천 호실 더보기</span>
+                  <ChevronDown className="w-4 h-4 text-slate-700 group-hover:translate-y-0.5 transition-transform" />
+                </button>
+              </div>
+            )}
           </div>
-        </div>
+          </div>
 
         {/* 1. 최상위 부모 컨테이너 (★ items-start가 핵심입니다) */}
-        <div className="hidden md:flex flex-col md:flex-row items-start gap-8 lg:gap-14 xl:gap-20 w-full relative mb-32">
+        <div className="hidden md:flex flex-col md:flex-row items-start gap-0 w-full relative mb-14">
           
           {/* 2. 왼쪽 도면 영역 (★ sticky와 top-24를 줍니다) */}
-          <div className="w-full md:w-[45%] lg:w-[45%] sticky top-24 z-10 transition-all duration-300">
+          <div className="w-full md:w-[55%] sticky top-24 z-10 transition-all duration-300 md:pr-8 lg:pr-12 xl:pr-16">
             
             {/* 고급스러운 카드 UI 적용 (p-0 w-full overflow-hidden) */}
             <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-0 w-full overflow-hidden flex flex-col">
@@ -588,29 +622,38 @@ export default function MDConfig() {
                 )}
               </div>
 
-              {/* 이미지와 SVG 애니메이션 코드가 들어가는 영역 */}
-              <div className="relative w-full h-auto">
-                {/* 도면 캔버스 컨테이너 - 원본 이미지의 비율(Aspect Ratio)이 유지되고 높이가 밀착되도록 h-auto 적용 */}
+              {/* 이미지와 SVG 애니메이션 코드가 들어가는 영역 (액자 외부 여백 추가) */}
+              <div className="relative w-full h-auto p-5 md:p-6">
+                <style>{`
+                  .white-premium-frame {
+                    background: #FFFFFF !important;
+                    background-color: #FFFFFF !important;
+                    border: 1px solid rgba(0, 0, 0, 0.04) !important;
+                    border-radius: 24px !important;
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08) !important;
+                    padding: 32px !important;
+                  }
+                  @media (max-width: 640px) {
+                    .white-premium-frame {
+                      padding: 24px !important;
+                    }
+                  }
+                  .blueprint-matching-img {
+                    border-radius: 8px !important;
+                  }
+                `}</style>
+                {/* 1. 지도를 담는 하이엔드 액자 (Wrapper) - 화이트 카드 프레임 강제 지정 */}
                 <div 
-                  className="relative bg-[#FBFBFA] border-y border-stone-100 w-full shadow-inner h-auto md:h-max"
-                  style={{
-                    backgroundImage: `
-                      linear-gradient(to right, rgba(165, 156, 144, 0.08) 1px, transparent 1px),
-                      linear-gradient(to bottom, rgba(165, 156, 144, 0.08) 1px, transparent 1px),
-                      linear-gradient(to right, rgba(165, 156, 144, 0.03) 1px, transparent 1px),
-                      linear-gradient(to bottom, rgba(165, 156, 144, 0.03) 1px, transparent 1px)
-                    `,
-                    backgroundSize: '40px 40px, 40px 40px, 8px 8px, 8px 8px',
-                    backgroundPosition: 'center center'
-                  }}
+                  className="white-premium-frame relative w-full h-auto md:h-max"
                 >
-                  
-                  {/* 이미지의 원본 비율과 100% 투명도 수치를 복원하고 기본 여백이 없도록 block 적용 */}
-                  <img 
-                    src="https://i.ibb.co/pjDBc2bh/image.png" 
-                    alt="1F Blueprint Map Layout" 
-                    className="w-full h-auto pointer-events-none select-none opacity-100 block object-cover"
-                  />
+                  {/* 도면 캔버스 내부 컨테이너 - 이미지 크기에 정확히 동기화되어 SVG 오버레이 자리를 보존 */}
+                  <div className="relative w-full h-auto">
+                    {/* 이미지의 원본 비율과 100% 투명도 수치를 복원하고 기본 여백이 없도록 block 적용, 겉 액자에 대응하는 모서리 라운딩 적용 */}
+                    <img 
+                      src={blueprintImg || "https://i.ibb.co/pjDBc2bh/image.png"} 
+                      alt="1F Blueprint Map Layout" 
+                      className="blueprint-matching-img w-full h-auto pointer-events-none select-none opacity-100 block object-cover"
+                    />
 
                   {/* SVG 오버레이 애니메이션 레이어 (viewBox 0 0 100 100 백분율 상대좌표 동기화 및 찌그러짐 방지 잠금) */}
                   <svg 
@@ -706,11 +749,11 @@ export default function MDConfig() {
                         }
                       }
 
-                      const rectWidth = isActive ? 5.8 : 4.6;
-                      const rectHeight = isActive ? 2.1 : 1.7;
+                      const rectWidth = isActive ? 6.2 : 5.0;
+                      const rectHeight = isActive ? 2.3 : 1.8;
                       const rectX = unit.coords.x - rectWidth / 2;
                       const rectY = unit.coords.y - labelYOffset;
-                      const textY = rectY + (isActive ? 1.55 : 1.25);
+                      const textY = rectY + (isActive ? 1.65 : 1.35);
                       
                       return (
                         <g 
@@ -725,10 +768,10 @@ export default function MDConfig() {
                               y1={unit.coords.y} 
                               x2={unit.coords.x} 
                               y2={rectY + (labelYOffset > 4 ? rectHeight : 0)} 
-                              stroke={isActive ? "#CE9F6F" : "#CEAE8E"} 
-                              strokeWidth="0.1" 
+                              stroke={isActive ? "#e66400" : "#002C5F"} 
+                              strokeWidth="0.12" 
                               strokeDasharray="0.3 0.3"
-                              opacity="0.65"
+                              opacity="0.8"
                             />
                           )}
 
@@ -736,33 +779,34 @@ export default function MDConfig() {
                           <circle 
                             cx={unit.coords.x} 
                             cy={unit.coords.y} 
-                            r={isActive ? "1.2" : "0.8"} 
-                            fill={isActive ? "#CE9F6F" : "#7A6F62"} 
+                            r={isActive ? "1.3" : "0.85"} 
+                            fill={isActive ? "#e66400" : "#002C5F"} 
                             stroke="#FFF" 
-                            strokeWidth={isActive ? "0.3" : "0.15"}
+                            strokeWidth={isActive ? "0.3" : "0.18"}
                             className="transition-all duration-300 group-hover:fill-accent"
                           />
                           
-                          {/* 인포 칩 라벨 (잘림 방지 및 세련된 패딩 설정) */}
+                          {/* 인포 칩 라벨 (최고의 시인성을 위해 테두리 두께 및 글씨 굵기 보강) */}
                           <rect 
                             x={rectX} 
                             y={rectY} 
                             width={rectWidth} 
                             height={rectHeight} 
-                            rx="0.3" 
-                            fill={isActive ? "#272522" : "#FFFFFF"} 
-                            stroke={isActive ? "#CE9F6F" : "#D3C2AF"} 
-                            strokeWidth="0.15" 
-                            opacity="0.98"
+                            rx="0.4" 
+                            fill={isActive ? "#002C5F" : "#FFFFFF"} 
+                            stroke={isActive ? "#e66400" : "#1e293b"} 
+                            strokeWidth={isActive ? "0.35" : "0.22"} 
+                            opacity="1.0"
+                            className="transition-all duration-300 shadow-md"
                           />
                           <text 
                             x={unit.coords.x} 
                             y={textY} 
-                            fill={isActive ? "#CE9F6F" : "#272522"} 
-                            fontSize={isActive ? "1.4" : "1.1"} 
-                            fontWeight="700" 
+                            fill={isActive ? "#FFFFFF" : "#0f172a"} 
+                            fontSize={isActive ? "1.5" : "1.25"} 
+                            fontWeight="900" 
                             textAnchor="middle"
-                            className="select-none font-sans"
+                            className="select-none font-sans font-black"
                           >
                             {unit.id.replace('호', '')}
                           </text>
@@ -772,6 +816,7 @@ export default function MDConfig() {
                   </svg>
                 </div>
               </div>
+            </div>
 
               {/* 하단 범례 */}
               <div className="p-5 flex flex-wrap justify-between items-center gap-3">
@@ -792,13 +837,25 @@ export default function MDConfig() {
 
           </div>
 
-          {/* 3. 오른쪽 리스트 영역 (전체 55% 공간) */}
-          {/* ★ flex와 justify-start를 주어 내부 박스가 시작 지점에 부드럽게 밀착하도록 합니다 */}
-          <div className="w-full md:w-[53%] md:pl-6 lg:pl-10 xl:pl-16 flex justify-start pb-32">
+          {/* 3. 오른쪽 리스트 영역 */}
+          {/* ★ 좌측 정렬(justify-start)로 원복하여 좁은 공간이나 고해상도 전체화면에서도 왼쪽이 절대 잘리지 않도록 안전을 가합니다 */}
+          <div className="w-full md:w-[45%] flex justify-start pb-12 md:pl-10 lg:pl-14 xl:pl-20 md:pr-4 lg:pr-8">
             
-            {/* ★ 진짜 콘텐츠가 담기는 이너 박스 (가로 폭을 너무 넓지 않게 max-w-xl로 정돈합니다) */}
-            <div className="w-full max-w-xl flex flex-col gap-6">
-            <div className="py-5 px-5 lg:px-1 bg-white lg:bg-transparent border-b border-stone-100 lg:border-stone-900 pb-4 lg:pb-3 flex justify-between items-end">
+            {/* ★ 진짜 콘텐츠가 담기는 이너 박스 (가로 폭을 유연하게 잡고, max-w-xl로 자연물 정돈합니다) */}
+            <div className="w-full max-w-xl flex flex-col gap-6 md:bg-white md:border md:border-gray-200 md:rounded-[20px] md:p-8 md:px-6 md:shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+              {/* PC/Tablet 전용 안내 멘트: 👉 우측 리스트의 호실을 클릭하면 동선이 표시됩니다 */}
+              <div 
+                className="hidden md:inline-flex self-start items-center justify-center px-4 py-2 mt-1 rounded-full bg-[#000E26] border border-white/10 shadow-sm"
+              >
+                <span 
+                  className="text-xs font-semibold tracking-tight"
+                  style={{ color: '#45ffde' }}
+                >
+                  👉 우측 리스트의 호실을 클릭하면 동선이 표시됩니다
+                </span>
+              </div>
+              
+              <div className="py-2 bg-transparent border-b border-gray-200 pb-3 flex justify-between items-end">
               <div>
                 <span className="text-accent font-semibold text-[10px] tracking-widest uppercase block mb-1">TARGET CATEGORY</span>
                 <h3 className="text-xl font-bold text-stone-900 tracking-tight">호실별 최적 권장업종</h3>
@@ -823,7 +880,7 @@ export default function MDConfig() {
                     {/* 아코디언 헤더 (클릭 가능한 행) */}
                     <button
                       onClick={() => setActiveUnit(activeUnit === unit.id ? '' : unit.id)}
-                      className={`w-full text-left py-5 px-4 sm:px-5 lg:px-3 flex items-center justify-between transition-all duration-300 group ${
+                      className={`w-full text-left py-3.5 px-4 sm:px-5 lg:px-3 flex items-center justify-between transition-all duration-300 group ${
                         isOpen ? 'bg-amber-50/10 lg:bg-stone-50/80' : 'bg-white lg:bg-transparent hover:bg-slate-50/40 lg:hover:bg-stone-50/40'
                       }`}
                     >
@@ -1018,28 +1075,62 @@ export default function MDConfig() {
         </div>
 
         </div>
+      </div>
+    </div>
 
-        {/* 오피스텔 섹션 유지 - Refined to match modern design guides */}
-        <div className="pt-12 md:pt-24 border-t border-stone-200/50">
-          <div className="text-center mb-10 md:mb-20">
-            <span className="text-accent font-black tracking-[0.25em] text-[11px] uppercase block mb-3">PREMIUM RESIDENCE</span>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-gray-900 tracking-tight leading-tight mb-6 break-keep">주거용 오피스텔 상품안내</h2>
-            <div className="mt-4">
-              <span className="text-sm sm:text-base md:text-[17px] text-[#555555] font-semibold uppercase tracking-[0.08em] block leading-relaxed">
-                시행사 특별 보유분 한정
-                <br />
-                프리미엄 리저브 세대
-              </span>
+      {/* 3. 오피스텔 섹션 유지 (개인/상가 정보가 섞이지 않도록 단일 #F8F9FA 배경을 유지하며 하단 배치) */}
+      <div id="officetel" className="py-10 md:py-16 px-6 bg-[#F8F9FA] border-t border-gray-100">
+        <div className="max-w-[1600px] mx-auto w-full px-6 lg:px-12">
+          <div className="pt-8 md:pt-14 border-t border-stone-200/50">
+            <div className="text-center mb-8 md:mb-12">
+              <span className="text-accent font-black tracking-[0.25em] text-[11px] uppercase block mb-3">PREMIUM RESIDENCE</span>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-gray-900 tracking-tight leading-tight mb-6 break-keep">주거용 오피스텔 상품안내</h2>
+              <div className="mt-2.5">
+                <span className="text-sm sm:text-base md:text-[17.5px] text-gray-900 font-semibold tracking-[-0.04em] block leading-[1.4]">
+                  시행사 <span className="text-[#FF6600] font-bold">특별 보유분</span> 한정
+                  <br />
+                  프리미엄 리저브 세대
+                </span>
+              </div>
             </div>
-          </div>
 
-          <div className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 gap-y-12 md:gap-8 -mx-6 w-[calc(100%+3rem)] md:mx-0 md:w-full">
-            {officetelData.map((unit: any, idx: number) => (
-              <OfficetelProductCard key={idx} unit={unit} idx={idx} />
-            ))}
+            <div className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 gap-y-12 md:gap-8 -mx-6 w-[calc(100%+3rem)] md:mx-0 md:w-full">
+              {officetelData.map((unit: any, idx: number) => (
+                <OfficetelProductCard key={idx} unit={unit} idx={idx} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* 모바일 전용 [ ∧ 리스트 닫기 ] 플로팅 sticky 버튼 */}
+      <AnimatePresence>
+        {isMobileExpanded && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: 30, x: "-50%" }}
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+            className="md:hidden fixed bottom-7 left-1/2 z-[100]"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setIsMobileExpanded(false);
+                // 접기 완료 후 원래 상가 리스트 시작 위치로 부드럽게 스크롤
+                const el = document.getElementById('md');
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="bg-[#0A1D37] hover:bg-[#051329] text-white font-extrabold text-[13px] tracking-tight px-6 py-3.5 rounded-[30px] flex items-center justify-center gap-1.5 shadow-[0_12px_36px_rgba(10,29,55,0.3)] border border-white/10 active:scale-95 transition-all w-max leading-none"
+            >
+              <ChevronDown className="w-4 h-4 rotate-180 text-white" />
+              <span>리스트 닫기</span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

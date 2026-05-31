@@ -220,13 +220,13 @@ export default function App() {
       
       <main className="bg-[#F5F5F0]">
         <Hero />
-        <hr className="border-t border-gray-200" />
+        <div className="h-2.5 md:h-px bg-[#ECEFF1] md:bg-gray-200 border-t border-b border-gray-200/50 md:border-b-0 w-full" />
         <Overview />
-        <hr className="border-t border-gray-200" />
+        <div className="h-2.5 md:h-px bg-[#ECEFF1] md:bg-gray-200 border-t border-b border-gray-200/50 md:border-b-0 w-full" />
         <LocationAnalysis />
-        <hr className="border-t border-gray-200" />
+        <div className="h-2.5 md:h-px bg-[#ECEFF1] md:bg-gray-200 border-t border-b border-gray-200/50 md:border-b-0 w-full" />
         <MDConfig />
-        <hr className="border-t border-gray-200" />
+        <div className="h-2.5 md:h-px bg-[#ECEFF1] md:bg-gray-200 border-t border-b border-gray-200/50 md:border-b-0 w-full" />
         <ContactForm />
       </main>
 

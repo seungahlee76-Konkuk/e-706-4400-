@@ -86,7 +86,7 @@ export default function StickyBottomForm() {
           <div className="text-primary whitespace-nowrap hidden lg:flex items-center gap-4 shrink-0">
             <div>
               <span className="text-[10px] block text-slate-500 font-normal uppercase tracking-widest">Special Consultation</span>
-              <span className="font-bold">분양 상담 예약</span>
+              <span className="font-bold">분양·임대 상담 예약</span>
             </div>
             <div className="h-8 w-px bg-slate-200 hidden xl:block" />
             <a href={`tel:${PROJECT_INFO.representativeNumber.replace(/[^0-9]/g, '')}`} className="hidden xl:flex items-center gap-2 group">
@@ -161,7 +161,7 @@ export default function StickyBottomForm() {
 
               <a 
                 href="tel:010-3370-8602"
-                className="w-full sm:w-[65%] lg:w-auto lg:px-10 h-10 lg:h-12 bg-[#002C5F] lg:bg-accent hover:bg-[#001D3F] lg:hover:bg-[#e66400] text-white rounded font-black lg:font-extrabold text-[12px] sm:text-[13px] lg:text-base relative group overflow-hidden transition-all duration-300 shadow-md lg:shadow-lg shadow-[#002C5F]/15 lg:shadow-orange-500/20 flex items-center justify-center shrink-0 select-none cursor-pointer border border-transparent"
+                className="w-full sm:w-[65%] lg:w-auto lg:px-10 h-10 lg:h-12 bg-accent hover:bg-[#e66400] text-white rounded font-black lg:font-extrabold text-[12px] sm:text-[13px] lg:text-base relative group overflow-hidden transition-all duration-300 shadow-md lg:shadow-lg shadow-orange-500/20 flex items-center justify-center shrink-0 select-none cursor-pointer border border-transparent"
               >
                 <div className="relative w-full h-full flex items-center justify-center">
                   {/* Default State: sliding text container */}

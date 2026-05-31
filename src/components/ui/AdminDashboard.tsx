@@ -10,12 +10,39 @@ import React from 'react';
 import { 
   DEFAULT_PROJECT_INFO, 
   DEFAULT_ANALYSIS_DATA, 
+  DEFAULT_CARDNEWS_DATA,
   DEFAULT_MD_DATA,
   DEFAULT_OFFICETEL_DATA
 } from '../../constants';
 import { auth, db, googleProvider, handleFirestoreError, OperationType } from '@/src/lib/firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
 import { collection, doc, deleteDoc, onSnapshot, query, orderBy, setDoc, getDoc } from 'firebase/firestore';
+
+const decodeHtmlEntities = (str: string): string => {
+  if (typeof str !== 'string') return str;
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'");
+};
+
+const deepDecode = (obj: any): any => {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj === 'string') return decodeHtmlEntities(obj);
+  if (Array.isArray(obj)) return obj.map(deepDecode);
+  if (typeof obj === 'object') {
+    const res: any = {};
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        res[key] = deepDecode(obj[key]);
+      }
+    }
+    return res;
+  }
+  return obj;
+};
 
 export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [leads, setLeads] = useState<any[]>([]);
@@ -98,7 +125,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
   // Customizer state
   const [customProjectInfo, setCustomProjectInfo] = useState<any>(() => {
     const saved = localStorage.getItem('site_custom_project_info');
-    const parsed = saved ? JSON.parse(saved) : {};
+    const parsed = saved ? deepDecode(JSON.parse(saved)) : {};
     return {
       ...DEFAULT_PROJECT_INFO,
       ...parsed
@@ -107,17 +134,27 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
 
   const [customAnalysis, setCustomAnalysis] = useState<any[]>(() => {
     const saved = localStorage.getItem('site_custom_analysis_data');
-    return saved ? JSON.parse(saved) : DEFAULT_ANALYSIS_DATA;
+    if (saved) {
+      try {
+        const parsed = deepDecode(JSON.parse(saved));
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].slides) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error("Failed to parse site_custom_analysis_data in Admin init:", e);
+      }
+    }
+    return DEFAULT_CARDNEWS_DATA;
   });
 
   const [customMd, setCustomMd] = useState<any[]>(() => {
     const saved = localStorage.getItem('site_custom_md_data');
-    return saved ? JSON.parse(saved) : DEFAULT_MD_DATA;
+    return saved ? deepDecode(JSON.parse(saved)) : DEFAULT_MD_DATA;
   });
 
   const [customOfficetel, setCustomOfficetel] = useState<any[]>(() => {
     const saved = localStorage.getItem('site_custom_officetel_data');
-    return saved ? JSON.parse(saved) : DEFAULT_OFFICETEL_DATA;
+    return saved ? deepDecode(JSON.parse(saved)) : DEFAULT_OFFICETEL_DATA;
   });
 
   // Track Auth and auto-bootstrap designated email account
@@ -284,11 +321,6 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
         return str;
       }
       return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;")
         .replace(/script/gi, "blocked-script");
     };
 
@@ -323,15 +355,26 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
         totalAreaPy: sanitizeHTML(u.totalAreaPy || ""),
         efficiency: sanitizeHTML(u.efficiency || ""),
       })),
+      interestLabel: sanitizeHTML(customProjectInfo.interestLabel || ""),
+      interestOptions: (customProjectInfo.interestOptions || []).map((opt: any) => ({
+        value: sanitizeHTML(opt.value || ""),
+        label: sanitizeHTML(opt.label || ""),
+        group: sanitizeHTML(opt.group || ""),
+      })),
       updatedAt: currentIsoString
     };
 
     const sanitizedAnalysis = customAnalysis.map((item: any) => ({
       title: sanitizeHTML(item.title || ""),
-      desc: sanitizeHTML(item.desc || ""),
-      images: (item.images || [])
-        .map((img: string) => sanitizeHTML(img || ""))
-        .filter((img: string) => img.trim() !== ""),
+      subTitle: sanitizeHTML(item.subTitle || ""),
+      mainTitle: sanitizeHTML(item.mainTitle || ""),
+      headline: sanitizeHTML(item.headline || ""),
+      coverImage: sanitizeHTML(item.coverImage || ""),
+      slides: (item.slides || []).map((slide: any) => ({
+        title: sanitizeHTML(slide.title || ""),
+        desc: sanitizeHTML(slide.desc || ""),
+        image: sanitizeHTML(slide.image || "")
+      })),
       updatedAt: currentIsoString,
     }));
 
@@ -786,6 +829,92 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                                 className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold text-[#002C5F]"
                               />
                             </div>
+
+                            <div className="border-t border-gray-150 pt-5 mt-5 space-y-4">
+                              <span className="text-xs font-black text-[#002C5F] uppercase block">상담신청 폼 관심호실 리스트 관리</span>
+                              
+                              <div>
+                                <label className="text-xs font-extrabold text-gray-600 block mb-1">관심 항목 선택창 제목 (Label)</label>
+                                <input
+                                  type="text"
+                                  value={customProjectInfo.interestLabel || ""}
+                                  onChange={(e) => setCustomProjectInfo({ ...customProjectInfo, interestLabel: e.target.value })}
+                                  className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold"
+                                  placeholder="관심호실/품목"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="text-xs font-extrabold text-gray-600 block mb-1">상담품목 옵션 리스트 편집</label>
+                                <p className="text-[11px] text-gray-400 mb-2">그룹(분류), 표시될 텍스트, 고유 식별값을 직접 수정 가능합니다.</p>
+                                
+                                <div className="space-y-2 max-h-[220px] overflow-y-auto border border-gray-200 p-2.5 rounded-lg bg-gray-50/50">
+                                  {(customProjectInfo.interestOptions || []).map((opt: any, index: number) => (
+                                    <div key={index} className="flex gap-1.5 items-center bg-white p-2 rounded-lg border border-gray-200 shadow-xs">
+                                      <input
+                                        type="text"
+                                        placeholder="그룹"
+                                        value={opt.group || ""}
+                                        onChange={(e) => {
+                                          const nextOpts = [...(customProjectInfo.interestOptions || [])];
+                                          nextOpts[index] = { ...nextOpts[index], group: e.target.value };
+                                          setCustomProjectInfo({ ...customProjectInfo, interestOptions: nextOpts });
+                                        }}
+                                        className="w-[25%] px-2 py-1 text-xs border border-gray-200 rounded"
+                                      />
+                                      <input
+                                        type="text"
+                                        placeholder="옵션 표시 단어"
+                                        value={opt.label || ""}
+                                        onChange={(e) => {
+                                          const nextOpts = [...(customProjectInfo.interestOptions || [])];
+                                          nextOpts[index] = { ...nextOpts[index], label: e.target.value };
+                                          setCustomProjectInfo({ ...customProjectInfo, interestOptions: nextOpts });
+                                        }}
+                                        className="w-[45%] px-2 py-1 text-xs border border-gray-200 rounded font-semibold"
+                                      />
+                                      <input
+                                        type="text"
+                                        placeholder="코드값"
+                                        value={opt.value || ""}
+                                        onChange={(e) => {
+                                          const nextOpts = [...(customProjectInfo.interestOptions || [])];
+                                          nextOpts[index] = { ...nextOpts[index], value: e.target.value };
+                                          setCustomProjectInfo({ ...customProjectInfo, interestOptions: nextOpts });
+                                        }}
+                                        className="w-[20%] px-2 py-1 text-xs border border-gray-200 rounded text-gray-500 font-mono"
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const nextOpts = (customProjectInfo.interestOptions || []).filter((_: any, i: number) => i !== index);
+                                          setCustomProjectInfo({ ...customProjectInfo, interestOptions: nextOpts });
+                                        }}
+                                        className="text-red-500 p-1 hover:bg-red-50 rounded"
+                                      >
+                                        <X className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  ))}
+
+                                  {(customProjectInfo.interestOptions || []).length === 0 && (
+                                    <div className="text-center text-xs text-gray-400 py-4">등록된 옵션이 없습니다.</div>
+                                  )}
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const nextOpts = [...(customProjectInfo.interestOptions || [])];
+                                    nextOpts.push({ group: '상업시설 (1F)', label: '새로운 상품/호실 옵션', value: 'option-' + Date.now().toString(36) });
+                                    setCustomProjectInfo({ ...customProjectInfo, interestOptions: nextOpts });
+                                  }}
+                                  className="mt-2 px-3 py-1.5 bg-[#002C5F] hover:bg-opacity-90 text-white text-xs font-bold rounded-lg transition-all"
+                                >
+                                  + 신규 옵션 추가
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         )}
 
@@ -933,90 +1062,221 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                         {activeSubEdit === 'analysis' && (
                           <div className="space-y-8">
                             <div>
-                              <h4 className="text-sm font-extrabold text-gray-900 border-b pb-2 mb-2">입지분석 및 프리미엄 카드 편집</h4>
-                              <p className="text-xs text-gray-400 mb-4">지그재그형 입지분석 4가지 핵심 카드의 타이틀, 세부설명, 활용 이미지를 제어합니다.</p>
+                              <h4 className="text-sm font-extrabold text-gray-900 border-b pb-2 mb-2">입지분석 및 프리미엄 카드뉴스 편집</h4>
+                              <p className="text-xs text-gray-400 mb-4 font-medium">4가지 입지 테마(의료, 교통, 행정, 탑동밸리) 각각의 대타이틀, 헤드라인, 표지 사진 및 3~4개의 상세 카드뉴스 슬라이드를 입체적으로 편집할 수 있습니다.</p>
                             </div>
 
                             {customAnalysis.map((item, idx) => (
-                              <div key={idx} className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-4">
-                                <div className="flex items-center gap-2 border-b border-gray-200/50 pb-2">
-                                  <span className="w-5 h-5 bg-[#002C5F]/10 text-[#002C5F] text-[10px] font-bold rounded-md flex items-center justify-center">0{idx + 1}</span>
-                                  <span className="text-xs font-extrabold text-gray-800">입지구획 카드 #{idx + 1}</span>
+                              <div key={idx} className="p-5 bg-white rounded-2xl border border-gray-200/80 shadow-sm space-y-5">
+                                <div className="flex items-center gap-2 border-b border-gray-100 pb-3 justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-5 h-5 bg-[#002C5F]/10 text-[#002C5F] text-[10px] font-black rounded-md flex items-center justify-center">0{idx + 1}</span>
+                                    <span className="text-xs font-black text-gray-900">{item.title} 카드뉴스 테마 편집</span>
+                                  </div>
+                                  <span className="text-[10px] font-bold text-accent px-2 py-0.5 bg-accent/5 rounded-full">{item.subTitle}</span>
                                 </div>
-                                <div className="grid md:grid-cols-3 gap-3">
-                                  <div className="md:col-span-1">
-                                    <label className="text-[10px] font-extrabold text-gray-500 uppercase block mb-1">카피 타이틀</label>
+
+                                {/* 메타 영역 */}
+                                <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3 bg-gray-50/50 p-3.5 rounded-xl border border-gray-100">
+                                  <div>
+                                    <label className="text-[10px] font-bold text-gray-400 block mb-1">분류명</label>
                                     <input
                                       type="text"
-                                      value={item.title}
+                                      value={item.title || ""}
                                       onChange={(e) => {
                                         const updated = [...customAnalysis];
                                         updated[idx].title = e.target.value;
                                         setCustomAnalysis(updated);
                                       }}
-                                      className="w-full px-3 py-1.5 border border-gray-200 rounded text-xs font-bold"
+                                      className="w-full px-2 py-1.5 border rounded text-xs font-bold"
                                     />
                                   </div>
-                                  <div className="md:col-span-2">
-                                    <label className="text-[10px] font-extrabold text-gray-500 uppercase block mb-1">설명 기술 기사문구</label>
-                                    <textarea
-                                      rows={2}
-                                      value={item.desc}
+                                  <div>
+                                    <label className="text-[10px] font-bold text-gray-400 block mb-1">서브타이틀 (영문)</label>
+                                    <input
+                                      type="text"
+                                      value={item.subTitle || ""}
                                       onChange={(e) => {
                                         const updated = [...customAnalysis];
-                                        updated[idx].desc = e.target.value;
+                                        updated[idx].subTitle = e.target.value;
                                         setCustomAnalysis(updated);
                                       }}
-                                      className="w-full px-3 py-1.5 border border-gray-200 rounded text-xs leading-relaxed"
+                                      className="w-full px-2 py-1.5 border rounded text-xs"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] font-bold text-gray-400 block mb-1">부제목 요약</label>
+                                    <input
+                                      type="text"
+                                      value={item.mainTitle || ""}
+                                      onChange={(e) => {
+                                        const updated = [...customAnalysis];
+                                        updated[idx].mainTitle = e.target.value;
+                                        setCustomAnalysis(updated);
+                                      }}
+                                      className="w-full px-2 py-1.5 border rounded text-xs font-bold text-gray-700"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] font-bold text-gray-400 block mb-1">메인 헤드라인 슬로건</label>
+                                    <input
+                                      type="text"
+                                      value={item.headline || ""}
+                                      onChange={(e) => {
+                                        const updated = [...customAnalysis];
+                                        updated[idx].headline = e.target.value;
+                                        setCustomAnalysis(updated);
+                                      }}
+                                      className="w-full px-2 py-1.5 border rounded text-xs font-semibold"
                                     />
                                   </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                  <label className="text-[10px] font-extrabold text-gray-700 block">이미지 슬라이드 리스트 (최대 4개 - 3개 이상 등록 가능)</label>
-                                  {[0, 1, 2, 3].map((imgIdx) => (
-                                    <div key={imgIdx} className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                      <span className="text-[10px] font-bold text-gray-400 w-16 shrink-0">이미지 #{imgIdx + 1}</span>
-                                      <div className="flex-1 flex gap-2">
-                                        <input
-                                          type="text"
-                                          placeholder="이미지 복사 URL 또는 우측 파일 업로드"
-                                          value={item.images && item.images[imgIdx] ? item.images[imgIdx] : ""}
-                                          onChange={(e) => {
-                                            const updated = [...customAnalysis];
-                                            if (!updated[idx].images) {
-                                              updated[idx].images = [];
-                                            }
-                                            updated[idx].images[imgIdx] = e.target.value;
-                                            setCustomAnalysis(updated);
-                                          }}
-                                          className="flex-1 px-3 py-1.5 border border-gray-200 rounded text-[11px] font-mono bg-white"
-                                        />
-                                        <label className="flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-gray-50 text-gray-700 text-[10px] font-bold rounded cursor-pointer border border-gray-300 shadow-sm transition-all shrink-0 whitespace-nowrap active:scale-[0.98]">
-                                          <Upload className="w-2.5 h-2.5" />
-                                          업로드
-                                          <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={(e) => {
-                                              const file = e.target.files?.[0];
-                                              if (file) {
-                                                compressAndConvertImage(file, (base64) => {
+                                {/* 대표 표지 이미지 */}
+                                <div className="space-y-1.5">
+                                  <label className="text-[10px] font-bold text-gray-600 block">🖼️ 대표 커버 이미지 (섹션 표지 및 숏컷 썸네일)</label>
+                                  <div className="flex gap-2">
+                                    <input
+                                      type="text"
+                                      placeholder="커버 이미지 URL 또는 우측 업로드"
+                                      value={item.coverImage || ""}
+                                      onChange={(e) => {
+                                        const updated = [...customAnalysis];
+                                        updated[idx].coverImage = e.target.value;
+                                        setCustomAnalysis(updated);
+                                      }}
+                                      className="flex-1 px-3 py-1.5 border rounded text-[11px] font-mono bg-white"
+                                    />
+                                    <label className="flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold rounded-lg cursor-pointer border shadow-sm transition-all shrink-0 active:scale-95">
+                                      <Upload className="w-3 h-3 text-gray-500" />
+                                      업로드
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                          const file = e.target.files?.[0];
+                                          if (file) {
+                                            compressAndConvertImage(file, (base64) => {
+                                              const updated = [...customAnalysis];
+                                              updated[idx].coverImage = base64;
+                                              setCustomAnalysis(updated);
+                                            });
+                                          }
+                                        }}
+                                        className="hidden"
+                                      />
+                                    </label>
+                                  </div>
+                                </div>
+
+                                {/* 상세 슬라이드 편집 (3~4개 개별 상세 카드뉴스) */}
+                                <div className="space-y-3 pt-2 border-t border-gray-100">
+                                  <div className="flex items-center justify-between">
+                                    <h5 className="text-[11px] font-extrabold text-blue-900">📑 상세 슬라이드 뉴스 리스트 (순방향 롤링 카드)</h5>
+                                    <span className="text-[10px] font-medium text-gray-400">등록 슬라이드 수: {item.slides?.length || 0}개</span>
+                                  </div>
+
+                                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    {[0, 1, 2, 3].map((slideIdx) => {
+                                      // If slides array is shorter, ensure we can write it or lazy instantiate
+                                      if (!item.slides) {
+                                        item.slides = [];
+                                      }
+                                      while (item.slides.length <= slideIdx) {
+                                        item.slides.push({ title: "", desc: "", image: "" });
+                                      }
+                                      const slide = item.slides[slideIdx];
+
+                                      return (
+                                        <div key={slideIdx} className="p-3 bg-stone-50/70 border border-stone-200/60 rounded-xl space-y-2.5">
+                                          <div className="flex justify-between items-center border-b border-stone-200 pb-1">
+                                            <span className="text-[10px] font-black text-stone-600">슬라이드 #{slideIdx + 1}</span>
+                                          </div>
+
+                                          <div>
+                                            <label className="text-[9px] font-bold text-stone-400 block mb-0.5">상세 슬라이더 타이틀</label>
+                                            <input
+                                              type="text"
+                                              placeholder="예: 경기 남부 중증 질환 치료 거점"
+                                              value={slide.title || ""}
+                                              onChange={(e) => {
+                                                const updated = [...customAnalysis];
+                                                if (!updated[idx].slides) updated[idx].slides = [];
+                                                while (updated[idx].slides.length <= slideIdx) {
+                                                  updated[idx].slides.push({ title: "", desc: "", image: "" });
+                                               }
+                                                updated[idx].slides[slideIdx].title = e.target.value;
+                                                setCustomAnalysis(updated);
+                                              }}
+                                              className="w-full px-2 py-1 border border-stone-200 rounded text-[11px] font-bold text-stone-800"
+                                            />
+                                          </div>
+
+                                          <div>
+                                            <label className="text-[9px] font-bold text-stone-400 block mb-0.5">상세 슬라이더 설명문구</label>
+                                            <textarea
+                                              placeholder="상세 정보를 가독성 있게 서술해 주세요."
+                                              rows={3}
+                                              value={slide.desc || ""}
+                                              onChange={(e) => {
+                                                const updated = [...customAnalysis];
+                                                if (!updated[idx].slides) updated[idx].slides = [];
+                                                while (updated[idx].slides.length <= slideIdx) {
+                                                  updated[idx].slides.push({ title: "", desc: "", image: "" });
+                                                }
+                                                updated[idx].slides[slideIdx].desc = e.target.value;
+                                                setCustomAnalysis(updated);
+                                              }}
+                                              className="w-full px-2 py-1 border border-stone-200 rounded text-[10px] leading-relaxed text-stone-600"
+                                            />
+                                          </div>
+
+                                          <div className="space-y-1">
+                                            <label className="text-[9px] font-bold text-stone-400 block">슬라이더 이미지</label>
+                                            <div className="flex gap-1.5">
+                                              <input
+                                                type="text"
+                                                placeholder="이미지 URL"
+                                                value={slide.image || ""}
+                                                onChange={(e) => {
                                                   const updated = [...customAnalysis];
-                                                  if (!updated[idx].images) {
-                                                    updated[idx].images = [];
+                                                  if (!updated[idx].slides) updated[idx].slides = [];
+                                                  while (updated[idx].slides.length <= slideIdx) {
+                                                    updated[idx].slides.push({ title: "", desc: "", image: "" });
                                                   }
-                                                  updated[idx].images[imgIdx] = base64;
+                                                  updated[idx].slides[slideIdx].image = e.target.value;
                                                   setCustomAnalysis(updated);
-                                                });
-                                              }
-                                            }}
-                                            className="hidden"
-                                          />
-                                        </label>
-                                      </div>
-                                    </div>
-                                  ))}
+                                                }}
+                                                className="flex-1 px-2 py-1 border border-stone-200 rounded text-[9px] font-mono bg-white"
+                                              />
+                                              <label className="flex items-center gap-1 px-2 py-1 bg-white hover:bg-stone-100 text-stone-700 text-[9px] font-bold rounded cursor-pointer border border-stone-300 shadow-sm shrink-0 active:scale-95">
+                                                <Upload className="w-2.5 h-2.5" />
+                                                <input
+                                                  type="file"
+                                                  accept="image/*"
+                                                  onChange={(e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (file) {
+                                                      compressAndConvertImage(file, (base64) => {
+                                                        const updated = [...customAnalysis];
+                                                        if (!updated[idx].slides) updated[idx].slides = [];
+                                                        while (updated[idx].slides.length <= slideIdx) {
+                                                          updated[idx].slides.push({ title: "", desc: "", image: "" });
+                                                        }
+                                                        updated[idx].slides[slideIdx].image = base64;
+                                                        setCustomAnalysis(updated);
+                                                      });
+                                                    }
+                                                  }}
+                                                  className="hidden"
+                                                />
+                                              </label>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
                                 </div>
                               </div>
                             ))}

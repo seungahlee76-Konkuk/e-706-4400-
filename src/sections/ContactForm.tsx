@@ -70,7 +70,7 @@ export default function ContactForm() {
   return (
     <section 
       id="contact" 
-      className="relative py-14 md:py-28 text-gray-905 px-6 bg-gradient-to-b from-white to-slate-50/70 overflow-hidden"
+      className="relative py-10 md:py-16 text-gray-905 px-6 bg-gradient-to-b from-white to-slate-50/70 overflow-hidden"
       style={{ scrollSnapAlign: 'start' }}
     >
       {/* Decorative Blur BG Orb */}
@@ -81,12 +81,14 @@ export default function ContactForm() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          className="text-center mb-10 md:mb-20"
+          className="text-center mb-6 md:mb-10"
         >
           <span className="text-accent font-bold tracking-[0.2em] text-[11px] uppercase">Consultation</span>
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-gray-900 mt-4 tracking-tight leading-tight break-keep">상담 신청 및 예약</h2>
-          <p className="mt-5 text-gray-500 font-semibold break-keep text-base max-w-lg mx-auto">{"정보를 입력해주시면 전문 상담원이 빠르고 정확하게 안내해 드리겠습니다."}</p>
-          <div className="w-16 h-1.5 bg-accent mx-auto mt-4 md:mt-8 rounded-full" />
+          <p className="mt-4 text-gray-550 font-bold break-keep text-base max-w-lg mx-auto whitespace-pre-line leading-relaxed">
+            {"하단에 정보를 남겨주시면,\n실시간 잔여 호실 현황과 분양가를\n안내해 드리겠습니다."}
+          </p>
+          <div className="w-14 h-1 bg-accent mx-auto mt-4 md:mt-6 rounded-full" />
         </motion.div>
  
         {isSuccess ? (
@@ -166,7 +168,9 @@ export default function ContactForm() {
               </div>
  
               <div>
-                <label className="block text-xs font-black text-gray-500 mb-2 uppercase tracking-wider">관심호실/품목</label>
+                <label className="block text-xs font-black text-gray-500 mb-2 uppercase tracking-wider">
+                  {PROJECT_INFO.interestLabel || '관심호실/품목'}
+                </label>
                 <div className="relative">
                   <select
                     {...register('interest', { required: '항목을 선택해주세요.' })}
@@ -176,21 +180,40 @@ export default function ContactForm() {
                     )}
                   >
                     <option value="">항목을 선택하세요</option>
-                    <optgroup label="상업시설 (1F)">
-                      <option value="상업시설-117호">117호 (라멘집 / 개인 필라테스)</option>
-                      <option value="상업시설-118호">118호 (브런치카페 / 베이커리카페)</option>
-                      <option value="상업시설-119호">119호 (문전약국)</option>
-                      <option value="상업시설-126호">126호 (한식집 / 샤브샤브전문점)</option>
-                      <option value="상업시설-127호">127호 (한식집 / 샤브샤브전문점)</option>
-                      <option value="상업시설-128호">128호 (국밥집 / 육개장)</option>
-                      <option value="상업시설-129호">129호 (프랜차이즈 맥주전문점)</option>
-                      <option value="상업시설-기타">기타 상업시설 문의</option>
-                    </optgroup>
-                    <optgroup label="주거용 오피스텔">
-                      <option value="오피스텔-3룸">3룸 혁신평면</option>
-                      <option value="오피스텔-기타">일반 오피스텔 문의</option>
-                    </optgroup>
-                    <option value="기타">기타 문의</option>
+                    {(() => {
+                      const optionsList = PROJECT_INFO.interestOptions || [
+                        { value: '상업시설-117호', label: '117호 (라멘집 / 개인 필라테스)', group: '상업시설 (1F)' },
+                        { value: '상업시설-118호', label: '118호 (브런치카페 / 베이커리카페)', group: '상업시설 (1F)' },
+                        { value: '상업시설-119호', label: '119호 (문전약국)', group: '상업시설 (1F)' },
+                        { value: '상업시설-126호', label: '126호 (한식집 / 샤브샤브전문점)', group: '상업시설 (1F)' },
+                        { value: '상업시설-127호', label: '127호 (한식집 / 샤브샤브전문점)', group: '상업시설 (1F)' },
+                        { value: '상업시설-128호', label: '128호 (국밥집 / 육개장)', group: '상업시설 (1F)' },
+                        { value: '상업시설-129호', label: '129호 (프랜차이즈 맥주전문점)', group: '상업시설 (1F)' },
+                        { value: '상업시설-기타', label: '기타 상업시설 문의', group: '상업시설 (1F)' },
+                        { value: '오피스텔-3룸', label: '3룸 혁신평면', group: '주거용 오피스텔' },
+                        { value: '오피스텔-기타', label: '일반 오피스텔 문의', group: '주거용 오피스텔' },
+                        { value: '기타', label: '기타 문의', group: '일반' }
+                      ];
+                      
+                      const groupsMap: Record<string, any[]> = {};
+                      optionsList.forEach((opt: any) => {
+                        const gName = opt.group || '일반';
+                        if (!groupsMap[gName]) {
+                          groupsMap[gName] = [];
+                        }
+                        groupsMap[gName].push(opt);
+                      });
+
+                      return Object.keys(groupsMap).map((gName) => (
+                        <optgroup key={gName} label={gName}>
+                          {groupsMap[gName].map((opt: any) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ));
+                    })()}
                   </select>
                 </div>
                 {errors.interest && <p className="mt-1 text-xs text-red-500">{errors.interest.message}</p>}
