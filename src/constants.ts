@@ -125,7 +125,7 @@ export const DEFAULT_MD_DATA = [
       'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80&w=800'
     ],
     recommendation: '돈코츠 라멘 전문점, 키토 김밥 델리, 수제 디저트 공방, 1:1 기구 필라테스 클래스',
-    coords: { x: 39, y: 38 },
+    coords: { x: 37, y: 38 },
     category: 'F&B/스포츠',
     categoryStyle: 'bg-orange-50 text-orange-600 border border-orange-100/60',
     updatedAt: '2026-05-29T09:30:00Z'
@@ -179,10 +179,10 @@ export const DEFAULT_MD_DATA = [
       'https://images.unsplash.com/photo-1594911773177-3e4b77f10fc1?auto=format&fit=crop&q=80&w=800'
     ],
     recommendation: '전통 명품 곰탕·설렁탕 전문점, 남녀노소 집객력이 높은 든든한 한식 가마솥 국밥',
-    coords: { x: 44, y: 88 },
+    coords: { x: 44, y: 84.5 },
     category: 'F&B/한식',
     categoryStyle: 'bg-red-50 text-red-600 border border-red-100/60',
-    updatedAt: '2026-05-29T09:30:00Z'
+    updatedAt: '2026-05-31T06:35:00Z'
   },
   { 
     id: '127호', 
@@ -196,10 +196,10 @@ export const DEFAULT_MD_DATA = [
       'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80&w=800'
     ],
     recommendation: '회전식 1인 팟 샤브샤브 식당, 모던 안동찜닭 패밀리 레스토랑, 정갈한 캐주얼 한식 정찬',
-    coords: { x: 48, y: 88 },
+    coords: { x: 48, y: 84.5 },
     category: '퍼스널다이닝',
     categoryStyle: 'bg-rose-50 text-rose-600 border border-rose-100/60',
-    updatedAt: '2026-05-29T09:30:00Z'
+    updatedAt: '2026-05-31T06:35:00Z'
   },
   { 
     id: '128호', 
@@ -214,10 +214,10 @@ export const DEFAULT_MD_DATA = [
       'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&q=80&w=800'
     ],
     recommendation: '수제 화덕 피자 픽업 전문점, 프리미엄 토스트 & 에그 브랜드, 아웃백/가구수제 도시락 전문점',
-    coords: { x: 51, y: 88 },
+    coords: { x: 51, y: 84.5 },
     category: '테이크아웃/배달',
     categoryStyle: 'bg-emerald-50 text-emerald-600 border border-emerald-100/60',
-    updatedAt: '2026-05-29T09:30:00Z'
+    updatedAt: '2026-05-31T06:35:00Z'
   },
   { 
     id: '129호', 
@@ -232,10 +232,10 @@ export const DEFAULT_MD_DATA = [
       'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&q=80&w=800'
     ],
     recommendation: '퇴근길 유도를 위한 수제 맥주 다이닝 펍, 역전할머니맥주식 스몰비어 프랜차이즈',
-    coords: { x: 54, y: 88 },
+    coords: { x: 54, y: 84.5 },
     category: 'F&B/주류',
     categoryStyle: 'bg-indigo-50 text-indigo-600 border border-indigo-100/60',
-    updatedAt: '2026-05-29T09:30:00Z'
+    updatedAt: '2026-05-31T06:35:00Z'
   }
 ];
 

@@ -57,7 +57,7 @@ function getFlowPaths(unitId: string): FlowPath[] {
         startId: 'gate2',
         label: '후문 동선 (후문 약국행)',
         color: '#0D9488',
-        points: [{ x: 22, y: 35 }, { x: 39, y: 42 }, { x: 39, y: 38 }]
+        points: [{ x: 22, y: 35 }, { x: 37, y: 42 }, { x: 37, y: 38 }]
       }];
     case '118호':
       return [{
@@ -81,13 +81,13 @@ function getFlowPaths(unitId: string): FlowPath[] {
           startId: 'gate1',
           label: '정문 동선',
           color: '#F43F5E',
-          points: [{ x: 6, y: 85 }, { x: 6, y: 95 }, { x: 44, y: 95 }, { x: 44, y: 88 }]
+          points: [{ x: 6, y: 85 }, { x: 6, y: 95 }, { x: 44, y: 95 }, { x: 44, y: 84.5 }]
         },
         {
           startId: 'gate2',
           label: '후문 동선',
           color: '#0D9488',
-          points: [{ x: 22, y: 35 }, { x: 22, y: 95 }, { x: 44, y: 95 }, { x: 44, y: 88 }]
+          points: [{ x: 22, y: 35 }, { x: 22, y: 95 }, { x: 44, y: 95} ,  { x: 44, y: 84.5 }]
         }
       ];
     case '127호':
@@ -96,13 +96,13 @@ function getFlowPaths(unitId: string): FlowPath[] {
           startId: 'gate1',
           label: '정문 동선',
           color: '#F43F5E',
-          points: [{ x: 6, y: 85 }, { x: 6, y: 95 }, { x: 48, y: 95 }, { x: 48, y: 88 }]
+          points: [{ x: 6, y: 85 }, { x: 6, y: 95 }, { x: 48, y: 95 }, { x: 48, y: 84.5 }]
         },
         {
           startId: 'gate2',
           label: '후문 동선',
           color: '#0D9488',
-          points: [{ x: 22, y: 35 }, { x: 22, y: 95 }, { x: 48, y: 95 }, { x: 48, y: 88 }]
+          points: [{ x: 22, y: 35 }, { x: 22, y: 95 }, { x: 48, y: 95}, { x: 48, y: 84.5 }]
         }
       ];
     case '128호':
@@ -111,13 +111,13 @@ function getFlowPaths(unitId: string): FlowPath[] {
           startId: 'gate1',
           label: '정문 동선',
           color: '#F43F5E',
-          points: [{ x: 6, y: 85 }, { x: 6, y: 95 }, { x: 51, y: 95 }, { x: 51, y: 88 }]
+          points: [{ x: 6, y: 85 }, { x: 6, y: 95 }, { x: 51, y: 95 }, { x: 51, y: 84.5 }]
         },
         {
           startId: 'gate2',
           label: '후문 동선',
           color: '#0D9488',
-          points: [{ x: 22, y: 35 }, { x: 22, y: 95 }, { x: 51, y: 95 }, { x: 51, y: 88 }]
+          points: [{ x: 22, y: 35 }, { x: 22, y: 95 }, { x: 51, y: 95}, { x: 51, y: 84.5 }]
         }
       ];
     case '129호':
@@ -126,30 +126,19 @@ function getFlowPaths(unitId: string): FlowPath[] {
           startId: 'gate1',
           label: '정문 동선',
           color: '#F43F5E',
-          points: [{ x: 6, y: 85 }, { x: 6, y: 95 }, { x: 54, y: 95 }, { x: 54, y: 88 }]
+          points: [{ x: 6, y: 85 }, { x: 6, y: 95 }, { x: 54, y: 95 }, { x: 54, y: 84.5 }]
         },
         {
           startId: 'gate2',
           label: '후문 동선',
           color: '#0D9488',
-          points: [{ x: 22, y: 35 }, { x: 22, y: 95 }, { x: 54, y: 95 }, { x: 54, y: 88 }]
+          points: [{ x: 22, y: 35 }, { x: 22, y: 95 }, { x: 54, y: 95}, { x: 54, y: 84.5 }]
         }
       ];
     default:
       return [];
   }
 }
-{/* 후문 -> 126~129호 방향 서브 동선 */}
-<path
-  // M: 시작점(후문 X, Y 좌표) / L: 도착점(후문 X 좌표 그대로, Y좌표만 126호 라인으로)
-  d="M 22 35 L 22 88"
-  fill="none"
-  stroke="#0D9488"
-  strokeWidth="2"
-  strokeLinecap="round"
-  strokeLinejoin="round"
-  opacity={0.85}
-/>
 function buildPathData(points: { x: number; y: number }[]): string {
   if (points.length === 0) return '';
   return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
@@ -194,7 +183,7 @@ function MDImageSlider({ images, title, badgeText, isMobile = false }: MDImageSl
       {!isMobile && (
         <div className="absolute bottom-3 left-4 flex items-center gap-1.5 text-white pointer-events-none z-10">
           <MapPin className="w-3.5 h-3.5 text-accent" />
-          <span className="text-xs font-black tracking-widest uppercase">추천 업종 실사 분위기 ({currentIndex + 1}/{images.length})</span>
+          <span className="text-xs font-black tracking-widest uppercase">Concept Image ({currentIndex + 1}/{images.length})</span>
         </div>
       )}
 
@@ -244,8 +233,8 @@ function MDImageSlider({ images, title, badgeText, isMobile = false }: MDImageSl
 }
 
 export default function MDConfig() {
-  // 기본적으로 119호를 활성화
-  const [activeUnit, setActiveUnit] = useState<string>('119호');
+  // 기본적으로 118호를 활성화
+  const [activeUnit, setActiveUnit] = useState<string>('118호');
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [sectionTitle, setSectionTitle] = useState<string>(() => {
     return localStorage.getItem('site_custom_md_section_title') || '수원덕산병원 상가 입점 가이드';
@@ -254,17 +243,7 @@ export default function MDConfig() {
     return localStorage.getItem('site_custom_md_blueprint_img') || 'https://i.ibb.co/pjDBc2bh/image.png';
   });
 
-  const [units, setUnits] = useState<StoreUnit[]>(() => {
-    const savedFull = localStorage.getItem('site_custom_md_units');
-    if (savedFull) {
-      try {
-        return JSON.parse(savedFull);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return STORE_UNITS;
-  });
+  const [units, setUnits] = useState<StoreUnit[]>(STORE_UNITS);
 
   const selectedUnit = units.find(u => u.id === activeUnit) || units[0];
 
@@ -276,7 +255,6 @@ export default function MDConfig() {
       return u;
     });
     setUnits(updated);
-    localStorage.setItem('site_custom_md_units', JSON.stringify(updated));
 
     // Sync to sitewise mdData for Admin panel compatibility
     const adminFormat = updated.map(u => ({
@@ -284,7 +262,12 @@ export default function MDConfig() {
       type: u.type,
       area: u.area,
       desc: u.desc,
-      image: u.images[0] || ''
+      image: u.images[0] || '',
+      coords: u.coords,
+      images: u.images,
+      category: u.category,
+      categoryStyle: u.categoryStyle,
+      recommendation: u.recommendation
     }));
     localStorage.setItem('site_custom_md_data', JSON.stringify(adminFormat));
   };
@@ -332,7 +315,18 @@ export default function MDConfig() {
   };
 
   return (
-    <section id="md" className="py-14 md:py-28 px-6 border-b border-gray-100 bg-[#FAF8F5]">
+    <section 
+      id="md" 
+      className="py-14 md:py-28 px-6 border-b border-gray-100 bg-[#F3F2EE] relative"
+      style={{ scrollSnapAlign: 'start' }}
+    >
+      {/* 1F PLAN Background Watermark (Oversized typography decoration) */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
+        <span className="text-[14rem] sm:text-[18rem] md:text-[22rem] lg:text-[26rem] font-sans font-black text-[#030F26]/[0.011] md:text-white/35 tracking-[0.02em] uppercase leading-none whitespace-nowrap">
+          1F PLAN
+        </span>
+      </div>
+
       {/* 선 애니메이션용 CSS 인젝션 */}
       <style>{`
         @keyframes dash-flow {
@@ -438,15 +432,11 @@ export default function MDConfig() {
                   </div>
 
                   {/* 4. 입지 공학적 데이터 분석 정보 */}
-                  <div className="text-[15px] text-stone-700 leading-relaxed break-keep px-5">
-                    <p className="mb-4 font-normal">
-                      수원덕산병원 인접 최고 보행 집객구역에 위치한 {unit.id}호는 가시성이 뛰어나며 안정적인 점포 활성화 지표를 보유하고 있습니다. 정밀 동선 및 시뮬레이션에 매칭된 MD 상세 리스트는 아래와 같습니다.
-                    </p>
-                    
-                    {/* 권장 MD 디스플레이 */}
-                    <div className="p-4.5 bg-accent/5 border border-accent/20 rounded-xl flex items-start gap-2.5 mb-5 shadow-sm">
-                      <span className="text-[15px] font-bold text-accent shrink-0 mt-0.5 font-sans">▷ 권장 테넌트:</span>
-                      <p className="text-[15px] font-bold text-stone-950 leading-relaxed font-sans antialiased">
+                  {/* 권장 MD 디스플레이 */}
+                  <div className="w-full bg-accent/5 border-y border-accent/15 py-5 px-5 mb-5 space-y-3.5">
+                    <span className="text-[14px] sm:text-[15px] font-black text-accent block font-sans tracking-wide">▷ 권장 테넌트:</span>
+                    <div className="pt-2.5 border-t border-accent/10">
+                      <p className="text-[15px] sm:text-[16px] font-extrabold text-stone-950 leading-relaxed font-sans antialiased select-none">
                         {unit.recommendation}
                       </p>
                     </div>
@@ -547,10 +537,10 @@ export default function MDConfig() {
         </div>
 
         {/* 1. 최상위 부모 컨테이너 (★ items-start가 핵심입니다) */}
-        <div className="hidden md:flex flex-col md:flex-row items-start gap-6 lg:gap-8 w-full relative mb-32">
+        <div className="hidden md:flex flex-col md:flex-row items-start gap-8 lg:gap-14 xl:gap-20 w-full relative mb-32">
           
           {/* 2. 왼쪽 도면 영역 (★ sticky와 top-24를 줍니다) */}
-          <div className="w-full lg:w-[45%] sticky top-24 z-10 transition-all duration-300">
+          <div className="w-full md:w-[45%] lg:w-[45%] sticky top-24 z-10 transition-all duration-300">
             
             {/* 고급스러운 카드 UI 적용 (p-0 w-full overflow-hidden) */}
             <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-0 w-full overflow-hidden flex flex-col">
@@ -631,7 +621,7 @@ export default function MDConfig() {
                       );
                     })}
 
-                    {/* 2. 보행 동선 그리기 (고정밀 단일 레이어 직교 직선 & 출발지->목적지 실선 드로잉 흐름 모션 연동) */}
+                     {/* 2. 보행 동선 그리기 (고정밀 단일 레이어 직교 직선 & 출발지->목적지 실선 드로잉 흐름 모션 연동) */}
                     {getFlowPaths(selectedUnit.id).map((flow) => {
                       const pathD = buildPathData(flow.points);
                       return (
@@ -673,6 +663,25 @@ export default function MDConfig() {
                         </g>
                       );
                     })}
+
+                    {/* [★ 동선 직접 추가 및 개별 수정용 코드 블록]
+                        지도 위에 선을 직접 그리거나 보조 유도선을 상시 띄우고 싶을 때, 아래 <path> 요소를 자유롭게 복제/수정해 사용하실 수 있습니다.
+                        - M {startX} {startY} : 선이 시작되는 좌표 (예: 후문 22 35)
+                        - L {endX} {endY} : 선이 꺾이거나 도달하는 좌표 (예: 복도 중심 22 84.5)
+                        - stroke : 선의 색 코드
+                        - strokeWidth : 선 두께
+                    */}
+                    <path
+                      id="manual-sub-flow-connector"
+                      d="M 22 35 L 22 84.5"
+                      fill="none"
+                      stroke="#0D9488"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      opacity={0.35}
+                      strokeDasharray="2 3"
+                    />
 
                     {/* 3. 모든 호실의 원형 핀 노드 표기 (정밀 백분율 좌표 연동) */}
                     {units.map((unit) => {
@@ -777,7 +786,7 @@ export default function MDConfig() {
 
           {/* 3. 오른쪽 리스트 영역 (전체 55% 공간) */}
           {/* ★ flex와 justify-start를 주어 내부 박스가 시작 지점에 부드럽게 밀착하도록 합니다 */}
-          <div className="w-full lg:w-[55%] flex justify-start pb-32">
+          <div className="w-full md:w-[53%] md:pl-6 lg:pl-10 xl:pl-16 flex justify-start pb-32">
             
             {/* ★ 진짜 콘텐츠가 담기는 이너 박스 (가로 폭을 너무 넓지 않게 max-w-xl로 정돈합니다) */}
             <div className="w-full max-w-xl flex flex-col gap-6">
@@ -1012,7 +1021,7 @@ export default function MDConfig() {
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 gap-y-12 md:gap-8 -mx-6 w-[calc(100%+3rem)] md:mx-0 md:w-full">
             {officetelData.map((unit: any, idx: number) => (
               <OfficetelProductCard key={idx} unit={unit} idx={idx} />
             ))}
@@ -1048,9 +1057,9 @@ function OfficetelProductCard({ unit, idx }: { unit: any; idx: number; key?: any
       transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: idx * 0.15 }}
       className="group h-full"
     >
-      <div className="rounded-none overflow-hidden border border-stone-200 bg-white flex flex-col h-full transition-all duration-500 hover:border-accent">
+      <div className="w-full bg-transparent pb-8 border-b border-stone-200/50 last:border-b-0 flex flex-col md:rounded-none md:overflow-hidden md:border md:border-stone-200 md:bg-white md:h-full md:pb-0 md:transition-all md:duration-500 md:hover:border-accent">
         {/* 이미지 영역 슬라이더 */}
-        <div className="h-64 overflow-hidden relative group/slider bg-stone-50">
+        <div className="w-full aspect-[16/10] md:h-64 md:aspect-auto overflow-hidden relative group/slider bg-stone-50">
           <img 
             src={images[currentImgIndex]} 
             alt={unit.title} 
@@ -1099,9 +1108,9 @@ function OfficetelProductCard({ unit, idx }: { unit: any; idx: number; key?: any
         </div>
         
         {/* 텍스트 내용 */}
-        <div className="p-6 flex-1 flex flex-col justify-between">
+        <div className="pt-5 px-5 md:p-6 md:flex-1 md:flex md:flex-col md:justify-between">
           <div>
-            <h4 className="font-black text-lg text-gray-900 mb-2.5 group-hover:text-accent transition-colors">{unit.title}</h4>
+            <h4 className="font-black text-[18px] sm:text-[20px] md:text-lg text-gray-900 mb-2.5 group-hover:text-accent transition-colors leading-tight">{unit.title}</h4>
             <p className="text-sm sm:text-[15px] text-[#555555] leading-relaxed font-semibold">{unit.desc}</p>
           </div>
         </div>

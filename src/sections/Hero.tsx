@@ -37,7 +37,10 @@ export default function Hero() {
   }, [nextSlide]);
 
   return (
-    <section className="relative bg-stone-900 min-h-screen md:h-screen flex items-center justify-center overflow-hidden py-20 md:py-0">
+    <section 
+      className="relative bg-stone-900 min-h-screen md:h-screen flex items-center justify-center overflow-hidden py-20 md:py-0"
+      style={{ scrollSnapAlign: 'start' }}
+    >
       {/* Background Slideshow - Pure & Responsive */}
       <div className="absolute inset-0 z-0">
         <AnimatePresence mode="wait" initial={false}>

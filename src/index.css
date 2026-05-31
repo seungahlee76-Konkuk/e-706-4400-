@@ -10,8 +10,15 @@
 }
 
 @layer base {
-  html, body {
+  html {
     scroll-behavior: smooth;
+  }
+  @media (min-width: 1024px) {
+    html {
+      scroll-snap-type: y mandatory;
+    }
+  }
+  html, body {
     font-family: var(--font-sans);
     letter-spacing: -0.025em;
   }

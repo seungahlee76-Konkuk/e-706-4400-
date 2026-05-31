@@ -21,7 +21,7 @@ export default function Footer({ onAdminOpen }: { onAdminOpen: () => void }) {
               <ul className="space-y-4 text-sm">
                 <li><a href="#overview" className="hover:text-accent transition-colors">사업개요</a></li>
                 <li><a href="#location" className="hover:text-accent transition-colors">입지분석</a></li>
-                <li><a href="#md" className="hover:text-accent transition-colors">상품안내</a></li>
+                <li><a href="#md" className="hover:text-accent transition-colors">입점추천</a></li>
                 <li><a href="#contact" className="hover:text-accent transition-colors">상담신청</a></li>
               </ul>
             </div>

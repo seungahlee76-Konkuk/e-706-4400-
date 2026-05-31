@@ -3,7 +3,11 @@ import { PROJECT_INFO } from '../constants';
 
 export default function Overview() {
   return (
-    <section id="overview" className="relative py-14 md:py-28 px-6 overflow-hidden bg-gradient-to-b from-slate-50/50 via-white to-slate-50/30">
+    <section 
+      id="overview" 
+      className="relative py-14 md:py-28 px-6 overflow-hidden bg-gradient-to-b from-slate-50/50 via-white to-slate-50/30"
+      style={{ scrollSnapAlign: 'start' }}
+    >
       {/* Premium Ambient Background Orbs */}
       <div className="absolute top-1/4 left-0 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-1/3 right-0 w-[500px] h-[500px] bg-sky-200/10 rounded-full blur-[120px] pointer-events-none" />

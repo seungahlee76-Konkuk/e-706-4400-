@@ -341,6 +341,11 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
       area: sanitizeHTML(item.area),
       desc: sanitizeHTML(item.desc),
       image: sanitizeHTML(item.image),
+      coords: item.coords || { x: 0, y: 0 },
+      images: item.images || [item.image || ""],
+      category: sanitizeHTML(item.category || "공통"),
+      categoryStyle: sanitizeHTML(item.categoryStyle || "bg-gray-50 text-gray-700 border border-gray-100/60"),
+      recommendation: sanitizeHTML(item.recommendation || item.type),
       updatedAt: currentIsoString,
     }));
 

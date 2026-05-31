@@ -68,7 +68,11 @@ export default function ContactForm() {
   };
 
   return (
-    <section id="contact" className="relative py-14 md:py-28 text-gray-905 px-6 bg-gradient-to-b from-white to-slate-50/70 overflow-hidden">
+    <section 
+      id="contact" 
+      className="relative py-14 md:py-28 text-gray-905 px-6 bg-gradient-to-b from-white to-slate-50/70 overflow-hidden"
+      style={{ scrollSnapAlign: 'start' }}
+    >
       {/* Decorative Blur BG Orb */}
       <div className="absolute bottom-0 left-0 w-[450px] h-[450px] bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
 

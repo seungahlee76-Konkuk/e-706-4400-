@@ -137,11 +137,11 @@ export default function StickyBottomForm() {
               />
             </div>
 
-            {/* Row 2 on mobile: Select (60%) & Button (40%) */}
-            <div className="flex gap-2 w-full lg:contents">
+            {/* Row 2 on mobile: Select (w-full) & Button (w-full) for gorgeous layout readability */}
+            <div className="flex flex-col sm:flex-row gap-2 w-full lg:contents">
               <select 
                 {...register('interest', { required: true })}
-                className="w-[60%] shrink-0 lg:w-auto lg:flex-1 h-10 lg:h-12 px-2.5 lg:px-4 bg-stone-50 lg:bg-white border border-slate-200 rounded text-slate-700 text-sm focus:outline-none focus:border-[#002C5F] lg:focus:border-primary"
+                className="w-full sm:w-[35%] lg:w-auto lg:flex-1 h-10 lg:h-12 px-2.5 lg:px-4 bg-stone-50 lg:bg-white border border-slate-200 rounded text-slate-700 text-sm focus:outline-none focus:border-[#002C5F] lg:focus:border-primary"
               >
                 <option value="">관심호실 선택</option>
                 <optgroup label="상업시설 (1F)">
@@ -159,15 +159,23 @@ export default function StickyBottomForm() {
                 </optgroup>
               </select>
 
-              <button 
-                disabled={isSubmitting}
-                type="submit"
-                className="w-[40%] flex-1 lg:w-auto lg:px-8 h-10 lg:h-12 bg-[#002C5F] lg:bg-accent hover:bg-[#001D3F] lg:hover:bg-[#e66400] text-white rounded font-black lg:font-bold text-sm lg:text-base transition-colors whitespace-nowrap shadow-md lg:shadow-lg shadow-[#002C5F]/15 lg:shadow-orange-500/20 flex items-center justify-center gap-1.5 shrink-0"
+              <a 
+                href="tel:010-3370-8602"
+                className="w-full sm:w-[65%] lg:w-auto lg:px-10 h-10 lg:h-12 bg-[#002C5F] lg:bg-accent hover:bg-[#001D3F] lg:hover:bg-[#e66400] text-white rounded font-black lg:font-extrabold text-[12px] sm:text-[13px] lg:text-base relative group overflow-hidden transition-all duration-300 shadow-md lg:shadow-lg shadow-[#002C5F]/15 lg:shadow-orange-500/20 flex items-center justify-center shrink-0 select-none cursor-pointer border border-transparent"
               >
-                {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
-                <span className="lg:hidden">상담 예약</span>
-                <span className="hidden lg:inline">상담 예약하기</span>
-              </button>
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {/* Default State: sliding text container */}
+                  <div className="flex items-center justify-center gap-1.5 transition-all duration-500 ease-in-out group-hover:opacity-0 group-hover:-translate-y-10">
+                    <Phone className="w-3.5 h-3.5 fill-current shrink-0 animate-pulse" />
+                    <span className="whitespace-nowrap">핵심 업종(약국·F&B) 1층 프리미엄 호실 확인</span>
+                  </div>
+                  
+                  {/* Hover State: sliding in from bottom */}
+                  <div className="absolute inset-0 flex items-center justify-center gap-1.5 transition-all duration-500 ease-in-out translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 text-white font-black text-sm lg:text-[17px]">
+                    <span>GO GO 고색! ➔</span>
+                  </div>
+                </div>
+              </a>
             </div>
           </form>
         </motion.div>

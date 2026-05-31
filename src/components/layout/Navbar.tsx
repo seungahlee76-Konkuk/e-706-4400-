@@ -7,7 +7,7 @@ import { PROJECT_INFO } from '../../constants';
 const navItems = [
   { name: '사업개요', href: '#overview' },
   { name: '입지분석', href: '#location' },
-  { name: '상품안내', href: '#md' },
+  { name: '입점추천', href: '#md' },
   { name: '문의하기', href: '#contact' },
 ];
 
