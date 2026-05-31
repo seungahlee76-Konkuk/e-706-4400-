@@ -342,7 +342,9 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
       desc: sanitizeHTML(item.desc),
       image: sanitizeHTML(item.image),
       coords: item.coords || { x: 0, y: 0 },
-      images: item.images || [item.image || ""],
+      images: (item.images || [item.image || ""])
+        .map((img: string) => sanitizeHTML(img || ""))
+        .filter((img: string) => img.trim() !== ""),
       category: sanitizeHTML(item.category || "공통"),
       categoryStyle: sanitizeHTML(item.categoryStyle || "bg-gray-50 text-gray-700 border border-gray-100/60"),
       recommendation: sanitizeHTML(item.recommendation || item.type),
@@ -1415,40 +1417,64 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                                     />
                                   </div>
 
-                                  <div>
-                                    <label className="text-[10px] font-bold text-gray-500 block mb-0.5">대표 샵 홍보 이미지 URL 또는 파일 업로드</label>
-                                    <div className="flex gap-2">
-                                      <input
-                                        type="text"
-                                        value={item.image}
-                                        placeholder="이미지 URL 주소 또는 우측 파일 업로드"
-                                        onChange={(e) => {
-                                          const updated = [...customMd];
-                                          updated[idx].image = e.target.value;
-                                          setCustomMd(updated);
-                                        }}
-                                        className="flex-1 px-2 py-1 border rounded text-[10px] font-mono"
-                                      />
-                                      <label className="flex items-center gap-1 px-2 py-1 bg-white hover:bg-gray-50 text-gray-700 text-[10px] font-bold rounded cursor-pointer border border-gray-300 shadow-sm transition-all shrink-0 whitespace-nowrap active:scale-[0.98]">
-                                        <Upload className="w-2.5 h-2.5" />
-                                        업로드
-                                        <input
-                                          type="file"
-                                          accept="image/*"
-                                          onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file) {
-                                              compressAndConvertImage(file, (base64) => {
-                                                const updated = [...customMd];
-                                                updated[idx].image = base64;
-                                                setCustomMd(updated);
-                                              });
-                                            }
-                                          }}
-                                          className="hidden"
-                                        />
-                                      </label>
-                                    </div>
+                                  <div className="space-y-1.5 pt-2 border-t border-gray-100">
+                                    <label className="text-[10px] font-bold text-gray-700 block">📸 샵 이미지 슬라이더 (최대 4장)</label>
+                                    {[0, 1, 2, 3].map((imgIdx) => {
+                                      const imgVal = (item.images && item.images[imgIdx]) || (imgIdx === 0 ? item.image : "") || "";
+                                      return (
+                                        <div key={imgIdx} className="flex gap-2 items-center">
+                                          <span className="text-[10px] font-semibold text-gray-400 w-4 shrink-0">#{imgIdx + 1}</span>
+                                          <input
+                                            type="text"
+                                            value={imgVal}
+                                            placeholder={imgIdx === 0 ? "대표 이미지 URL 주소 또는 우측 업로드" : `추가 슬라이드 #${imgIdx + 1} 이미지 URL`}
+                                            onChange={(e) => {
+                                              const updated = [...customMd];
+                                              if (!updated[idx].images) {
+                                                updated[idx].images = [updated[idx].image || ""];
+                                              }
+                                              while (updated[idx].images.length <= imgIdx) {
+                                                updated[idx].images.push("");
+                                              }
+                                              updated[idx].images[imgIdx] = e.target.value;
+                                              if (imgIdx === 0) {
+                                                updated[idx].image = e.target.value;
+                                              }
+                                              setCustomMd(updated);
+                                            }}
+                                            className="flex-1 px-2 py-0.5 border rounded text-[10px] font-mono bg-white"
+                                          />
+                                          <label className="flex items-center gap-1 px-2 py-0.5 bg-white hover:bg-gray-50 text-gray-700 text-[10px] font-bold rounded cursor-pointer border border-gray-300 shadow-sm transition-all shrink-0 whitespace-nowrap active:scale-[0.98]">
+                                            <Upload className="w-2.5 h-2.5" />
+                                            업로드
+                                            <input
+                                              type="file"
+                                              accept="image/*"
+                                              onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                  compressAndConvertImage(file, (base64) => {
+                                                    const updated = [...customMd];
+                                                    if (!updated[idx].images) {
+                                                      updated[idx].images = [updated[idx].image || ""];
+                                                    }
+                                                    while (updated[idx].images.length <= imgIdx) {
+                                                      updated[idx].images.push("");
+                                                    }
+                                                    updated[idx].images[imgIdx] = base64;
+                                                    if (imgIdx === 0) {
+                                                      updated[idx].image = base64;
+                                                    }
+                                                    setCustomMd(updated);
+                                                  });
+                                                }
+                                              }}
+                                              className="hidden"
+                                            />
+                                          </label>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               ))}

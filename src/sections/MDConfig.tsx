@@ -151,24 +151,28 @@ interface MDImageSliderProps {
   isMobile?: boolean;
 }
 
-function MDImageSlider({ images, title, badgeText, isMobile = false }: MDImageSliderProps) {
+function MDImageSlider({ images: rawImages, title, badgeText, isMobile = false }: MDImageSliderProps) {
+  const images = (rawImages || []).filter((img: string) => img && img.trim() !== '');
+  const finalImages = images.length > 0 ? images : ['https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=800'];
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const safeIndex = currentIndex >= finalImages.length ? 0 : currentIndex;
 
   const prevSlide = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+    setCurrentIndex((prev) => (prev - 1 + finalImages.length) % finalImages.length);
   };
 
   const nextSlide = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setCurrentIndex((prev) => (prev + 1) % images.length);
+    setCurrentIndex((prev) => (prev + 1) % finalImages.length);
   };
 
   return (
     <div className="w-full h-full relative group/slider overflow-hidden bg-stone-100">
       <img
-        src={images[currentIndex]}
-        alt={`${title} view ${currentIndex + 1}`}
+        src={finalImages[safeIndex]}
+        alt={`${title} view ${safeIndex + 1}`}
         className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
         referrerPolicy="no-referrer"
       />
@@ -183,12 +187,12 @@ function MDImageSlider({ images, title, badgeText, isMobile = false }: MDImageSl
       {!isMobile && (
         <div className="absolute bottom-3 left-4 flex items-center gap-1.5 text-white pointer-events-none z-10">
           <MapPin className="w-3.5 h-3.5 text-accent" />
-          <span className="text-xs font-black tracking-widest uppercase">Concept Image ({currentIndex + 1}/{images.length})</span>
+          <span className="text-xs font-black tracking-widest uppercase">Concept Image ({safeIndex + 1}/{finalImages.length})</span>
         </div>
       )}
 
       {/* Chevron down with 90/-90 degree rotation for sliders */}
-      {images.length > 1 && (
+      {finalImages.length > 1 && (
         <>
           <button
             type="button"
@@ -210,9 +214,9 @@ function MDImageSlider({ images, title, badgeText, isMobile = false }: MDImageSl
       )}
 
       {/* Slide tiny dot indicators at the bottom */}
-      {images.length > 1 && (
+      {finalImages.length > 1 && (
         <div className={`absolute bottom-3 flex gap-1.5 z-20 ${isMobile ? 'left-1/2 -translate-x-1/2' : 'right-4'}`}>
-          {images.map((_, idx) => (
+          {finalImages.map((_, idx) => (
             <button
               key={idx}
               type="button"
@@ -221,7 +225,7 @@ function MDImageSlider({ images, title, badgeText, isMobile = false }: MDImageSl
                 setCurrentIndex(idx);
               }}
               className={`h-[3px] rounded-full transition-all duration-300 ${
-                currentIndex === idx ? 'bg-accent w-5' : 'bg-white/50 w-1.5'
+                safeIndex === idx ? 'bg-accent w-5' : 'bg-white/50 w-1.5'
               }`}
               aria-label={`Go to slide ${idx + 1}`}
             />
@@ -493,39 +497,43 @@ export default function MDConfig() {
                       {/* 이미지 관리 */}
                       <div className="space-y-1.5 border-t border-stone-100 pt-3">
                         <span className="block text-[10px] font-semibold text-stone-500">📸 실사 분위기 슬라이더 업로드 (최대 4장)</span>
-                        {unit.images.map((imgUrl, imgIdx) => (
-                          <div key={imgIdx} className="flex gap-2 items-center">
-                            <span className="text-[10px] font-semibold text-stone-400 w-3">#{imgIdx + 1}</span>
-                            <input 
-                              type="text" 
-                              value={imgUrl} 
-                              onChange={(e) => {
-                                const newImages = [...unit.images];
-                                newImages[imgIdx] = e.target.value;
-                                updateUnitValue(unit.id, 'images', newImages);
-                              }}
-                              className="flex-1 text-[10px] font-mono border border-stone-300 rounded px-2 py-1 bg-white"
-                            />
-                            <label className="flex items-center gap-1 px-2.5 py-1 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded text-[10px] font-bold cursor-pointer whitespace-nowrap">
-                              <Upload className="w-3 h-3 text-stone-600" />
+                        {[0, 1, 2, 3].map((imgIdx) => {
+                          const imgUrl = unit.images && unit.images[imgIdx] ? unit.images[imgIdx] : '';
+                          return (
+                            <div key={imgIdx} className="flex gap-2 items-center">
+                              <span className="text-[10px] font-semibold text-stone-400 w-3">#{imgIdx + 1}</span>
                               <input 
-                                type="file" 
-                                accept="image/*"
-                                className="hidden"
+                                type="text" 
+                                value={imgUrl} 
+                                placeholder="이미지 URL 주소 또는 우측 파일 업로드"
                                 onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) {
-                                    handleImageUpload(file, (base64) => {
-                                      const newImages = [...unit.images];
-                                      newImages[imgIdx] = base64;
-                                      updateUnitValue(unit.id, 'images', newImages);
-                                    });
-                                  }
+                                  const newImages = [...(unit.images || [])];
+                                  newImages[imgIdx] = e.target.value;
+                                  updateUnitValue(unit.id, 'images', newImages);
                                 }}
+                                className="flex-1 text-[10px] font-mono border border-stone-300 rounded px-2 py-1 bg-white"
                               />
-                            </label>
-                          </div>
-                        ))}
+                              <label className="flex items-center gap-1 px-2.5 py-1 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded text-[10px] font-bold cursor-pointer whitespace-nowrap">
+                                <Upload className="w-3 h-3 text-stone-600" />
+                                <input 
+                                  type="file" 
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      handleImageUpload(file, (base64) => {
+                                        const newImages = [...(unit.images || [])];
+                                        newImages[imgIdx] = base64;
+                                        updateUnitValue(unit.id, 'images', newImages);
+                                      });
+                                    }
+                                  }}
+                                />
+                              </label>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -957,39 +965,43 @@ export default function MDConfig() {
                                 {/* 이미지 업로드 */}
                                 <div className="space-y-1.5 border-t border-stone-100 pt-3">
                                   <span className="block text-[10px] font-semibold text-stone-500">📸 실사 분위기 슬라이더 업로드 (최대 4장)</span>
-                                  {unit.images.map((imgUrl, imgIdx) => (
-                                    <div key={imgIdx} className="flex gap-2 items-center">
-                                      <span className="text-[10px] font-semibold text-stone-400 w-3">#{imgIdx + 1}</span>
-                                      <input 
-                                        type="text" 
-                                        value={imgUrl} 
-                                        onChange={(e) => {
-                                          const newImages = [...unit.images];
-                                          newImages[imgIdx] = e.target.value;
-                                          updateUnitValue(unit.id, 'images', newImages);
-                                        }}
-                                        className="flex-1 text-[10px] font-mono border border-stone-300 rounded px-2 py-1 bg-white"
-                                      />
-                                      <label className="flex items-center gap-1 px-2.5 py-1 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded text-[10px] font-bold cursor-pointer whitespace-nowrap">
-                                        <Upload className="w-3 h-3 text-stone-600" />
+                                  {[0, 1, 2, 3].map((imgIdx) => {
+                                    const imgUrl = unit.images && unit.images[imgIdx] ? unit.images[imgIdx] : '';
+                                    return (
+                                      <div key={imgIdx} className="flex gap-2 items-center">
+                                        <span className="text-[10px] font-semibold text-stone-400 w-3">#{imgIdx + 1}</span>
                                         <input 
-                                          type="file" 
-                                          accept="image/*"
-                                          className="hidden"
+                                          type="text" 
+                                          value={imgUrl} 
+                                          placeholder="이미지 URL 주소 또는 우측 파일 업로드"
                                           onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file) {
-                                              handleImageUpload(file, (base64) => {
-                                                const newImages = [...unit.images];
-                                                newImages[imgIdx] = base64;
-                                                updateUnitValue(unit.id, 'images', newImages);
-                                              });
-                                            }
+                                            const newImages = [...(unit.images || [])];
+                                            newImages[imgIdx] = e.target.value;
+                                            updateUnitValue(unit.id, 'images', newImages);
                                           }}
+                                          className="flex-1 text-[10px] font-mono border border-stone-300 rounded px-2 py-1 bg-white"
                                         />
-                                      </label>
-                                    </div>
-                                  ))}
+                                        <label className="flex items-center gap-1 px-2.5 py-1 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded text-[10px] font-bold cursor-pointer whitespace-nowrap">
+                                          <Upload className="w-3 h-3 text-stone-600" />
+                                          <input 
+                                            type="file" 
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                              const file = e.target.files?.[0];
+                                              if (file) {
+                                                handleImageUpload(file, (base64) => {
+                                                  const newImages = [...(unit.images || [])];
+                                                  newImages[imgIdx] = base64;
+                                                  updateUnitValue(unit.id, 'images', newImages);
+                                                });
+                                              }
+                                            }}
+                                          />
+                                        </label>
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             )}
