@@ -6,76 +6,32 @@ import { DEFAULT_CARDNEWS_DATA } from '../constants';
 
 export default function LocationAnalysis() {
   const [cardNewsData] = useState(() => {
-    // 1. Try to load site_custom_analysis_data edited in the Admin Panel
+    // 1. Try to load site_custom_cardnews_data
+    const savedCardnews = localStorage.getItem('site_custom_cardnews_data');
+    if (savedCardnews) {
+      try {
+        const parsed = JSON.parse(savedCardnews);
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0] && Array.isArray(parsed[0].slides)) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error("Failed to parse site_custom_cardnews_data in LocationAnalysis:", e);
+      }
+    }
+
+    // 2. Fallback to site_custom_analysis_data only if it contains actual slide structures
     const savedAnalysis = localStorage.getItem('site_custom_analysis_data');
     if (savedAnalysis) {
       try {
         const parsedAnalysis = JSON.parse(savedAnalysis);
-        if (Array.isArray(parsedAnalysis) && parsedAnalysis.length > 0) {
-          // If already in the new format with slides, return directly
-          if (parsedAnalysis[0] && Array.isArray(parsedAnalysis[0].slides)) {
-            return parsedAnalysis;
-          }
-
-          const categoriesInfo = [
-            { id: 'medical', title: '의료', subTitle: 'MEDICAL PREMIUM', headline: '706병상 수원 최대 핵심 메디컬 타워 바로 앞 초밀착 입지' },
-            { id: 'traffic', title: '교통', subTitle: 'TRAFFIC INFRASTRUCTURE', headline: '수인분당선 직통 주파 및 광역 신설 교통망의 초강력 집결형 노선' },
-            { id: 'valley', title: '탑동이노베이션 밸리', subTitle: 'INNOVATION VALLEY', headline: '고부가 지식 인조이 인력과 직접 소통하며 수혜를 거머쥐는 중심' },
-            { id: 'admin', title: '행정', subTitle: 'GOVERNMENT TOWN', headline: '구청·보건소·우체국을 밀착하여 품은 평일/주말 365일 배후지' }
-          ];
-
-          return parsedAnalysis.map((item: any, idx: number) => {
-            const cat = categoriesInfo[idx] || {
-              id: `cat_${idx}`,
-              title: item.title || `입지 ${idx + 1}`,
-              subTitle: 'PREMIUM',
-              headline: item.title || `입지 ${idx + 1}`
-            };
-
-            const images = Array.isArray(item.images)
-              ? item.images.filter((img: string) => img && img.trim() !== '')
-              : [];
-
-            const defaultCat = DEFAULT_CARDNEWS_DATA[idx] || DEFAULT_CARDNEWS_DATA[0];
-            const finalImages = images.length > 0 ? images : defaultCat.slides.map((s: any) => s.image);
-            const coverImg = images.length > 0 ? images[0] : defaultCat.coverImage;
-
-            return {
-              id: cat.id,
-              title: cat.title,
-              subTitle: cat.subTitle,
-              mainTitle: item.title || defaultCat.mainTitle,
-              headline: cat.headline,
-              coverImage: coverImg,
-              slides: finalImages.map((img: string, sIdx: number) => {
-                const defaultSlide = (defaultCat.slides && defaultCat.slides[sIdx]) || {
-                  title: `${item.title || cat.title} 상세 #${sIdx + 1}`,
-                  desc: ''
-                };
-                return {
-                  title: defaultSlide.title,
-                  desc: defaultSlide.desc,
-                  image: img
-                };
-               })
-             };
-           });
-         }
-       } catch (e) {
-         console.error("Failed to parse site_custom_analysis_data in LocationAnalysis:", e);
-       }
-     }
- 
-     // 2. Fallback to site_custom_cardnews_data
-     const savedCardnews = localStorage.getItem('site_custom_cardnews_data');
-     if (savedCardnews) {
-       try {
-         return JSON.parse(savedCardnews);
-       } catch (e) {
-         console.error("Failed to parse site_custom_cardnews_data in LocationAnalysis:", e);
-       }
-     }
-     return DEFAULT_CARDNEWS_DATA;
+        if (Array.isArray(parsedAnalysis) && parsedAnalysis.length > 0 && parsedAnalysis[0] && Array.isArray(parsedAnalysis[0].slides)) {
+          return parsedAnalysis;
+        }
+      } catch (e) {
+        console.error("Failed to parse legacy site_custom_analysis_data in LocationAnalysis:", e);
+      }
+    }
+    return DEFAULT_CARDNEWS_DATA;
   });
 
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -284,11 +240,7 @@ export default function LocationAnalysis() {
                         onTouchStart={handleCoverTouchStart}
                         onTouchMove={handleCoverTouchMove}
                         onClick={() => {
-                          // On desktop (>=768px), allow full card click to open details
-                          if (window.innerWidth >= 768) {
-                            setActiveCategory(category.id);
-                            setActiveSlideIndex(0);
-                          }
+                          handleCoverClick(category.id);
                         }}
                         whileHover={{ scale: 1.03, y: -4 }}
                         whileTap={{ scale: 0.98 }}

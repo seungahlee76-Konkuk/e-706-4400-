@@ -555,3 +555,4 @@ export const PROJECT_INFO = loadProjectInfo();
 export const analysisData = loadFromLocalStorage('site_custom_analysis_data', DEFAULT_ANALYSIS_DATA);
 export const mdData = loadFromLocalStorage('site_custom_md_data', DEFAULT_MD_DATA);
 export const officetelData = loadFromLocalStorage('site_custom_officetel_data', DEFAULT_OFFICETEL_DATA);
+export const cardnewsData = loadFromLocalStorage('site_custom_cardnews_data', DEFAULT_CARDNEWS_DATA);

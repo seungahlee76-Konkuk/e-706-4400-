@@ -133,7 +133,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
   });
 
   const [customAnalysis, setCustomAnalysis] = useState<any[]>(() => {
-    const saved = localStorage.getItem('site_custom_analysis_data');
+    const saved = localStorage.getItem('site_custom_cardnews_data');
     if (saved) {
       try {
         const parsed = deepDecode(JSON.parse(saved));
@@ -141,7 +141,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
           return parsed;
         }
       } catch (e) {
-        console.error("Failed to parse site_custom_analysis_data in Admin init:", e);
+        console.error("Failed to parse site_custom_cardnews_data in Admin init:", e);
       }
     }
     return DEFAULT_CARDNEWS_DATA;
@@ -404,7 +404,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
     }));
 
     localStorage.setItem('site_custom_project_info', JSON.stringify(sanitizedProject));
-    localStorage.setItem('site_custom_analysis_data', JSON.stringify(sanitizedAnalysis));
+    localStorage.setItem('site_custom_cardnews_data', JSON.stringify(sanitizedAnalysis));
     localStorage.setItem('site_custom_md_data', JSON.stringify(sanitizedMd));
     localStorage.setItem('site_custom_officetel_data', JSON.stringify(sanitizedOfficetel));
     localStorage.setItem('site_custom_last_saved', currentIsoString);
@@ -419,7 +419,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
     try {
       await Promise.all([
         setDoc(doc(db, 'site_config', 'project_info'), { data: sanitizedProject, updatedAt: currentIsoString }),
-        setDoc(doc(db, 'site_config', 'analysis_data'), { data: sanitizedAnalysis, updatedAt: currentIsoString }),
+        setDoc(doc(db, 'site_config', 'cardnews_data'), { data: sanitizedAnalysis, updatedAt: currentIsoString }),
         setDoc(doc(db, 'site_config', 'md_data'), { data: sanitizedMd, updatedAt: currentIsoString }),
         setDoc(doc(db, 'site_config', 'officetel_data'), { data: sanitizedOfficetel, updatedAt: currentIsoString })
       ]);
@@ -431,7 +431,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
       try {
         await setDoc(doc(db, 'site_config', 'current'), {
           projectInfo: sanitizedProject,
-          analysisData: sanitizedAnalysis,
+          cardnewsData: sanitizedAnalysis,
           mdData: sanitizedMd,
           officetelData: sanitizedOfficetel,
           updatedAt: currentIsoString
@@ -1063,7 +1063,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                           <div className="space-y-8">
                             <div>
                               <h4 className="text-sm font-extrabold text-gray-900 border-b pb-2 mb-2">입지분석 및 프리미엄 카드뉴스 편집</h4>
-                              <p className="text-xs text-gray-400 mb-4 font-medium">4가지 입지 테마(의료, 교통, 행정, 탑동밸리) 각각의 대타이틀, 헤드라인, 표지 사진 및 3~4개의 상세 카드뉴스 슬라이드를 입체적으로 편집할 수 있습니다.</p>
+                              <p className="text-xs text-gray-400 mb-4 font-medium">4가지 입지 테마(의료, 교통, 탑동이노베이션밸리, 행정) 각각의 대타이틀, 헤드라인, 표지 사진 및 3~4개의 상세 카드뉴스 슬라이드를 입체적으로 편집할 수 있습니다.</p>
                             </div>
 
                             {customAnalysis.map((item, idx) => (
