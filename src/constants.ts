@@ -239,7 +239,7 @@ export const DEFAULT_MD_DATA = [
   },
   { 
     id: '118호', 
-    type: '[대형 휴식 공간] 면회객과 대기 손님의 필수 방문 코스(브런치 / 베이커리 카페)', 
+    type: '대형 휴식 공간(브런치 / 베이커리 카페)', 
     area: '36.35평', 
     desc: '[프리미엄 F&B 공간] 면회객과 대기 손님의 발길이 머무는 필수 방문 코스',
     image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=800',
@@ -275,7 +275,7 @@ export const DEFAULT_MD_DATA = [
   },
   { 
     id: '126호', 
-    type: '[빠른 회전율] 주문하면 5분 만에 나오는 든든한 한 끼(국밥 / 설렁탕 전문점)', 
+    type: '빠른 회전율(국밥 / 설렁탕 전문점)', 
     area: '23.44평', 
     desc: '[빠른 회전율] 주문하면 5분 만에 나오는 든든한 식사',
     image: 'https://images.unsplash.com/photo-1634047462615-ca805e243956?auto=format&fit=crop&q=80&w=800',
@@ -293,7 +293,7 @@ export const DEFAULT_MD_DATA = [
   },
   { 
     id: '127호', 
-    type: '[가족 맞춤 식당] 여유로운 식사와 모임이 있는 곳(중소형 샤브샤브 / 찜닭)', 
+    type: '가족 맞춤 식당(중소형 샤브샤브 / 찜닭)', 
     area: '25.47평', 
     desc: '[트렌디 다이닝] 혼자서도, 여럿이도 부담 없는 든든한 한 끼',
     image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=800',
@@ -310,7 +310,7 @@ export const DEFAULT_MD_DATA = [
   },
   { 
     id: '128호', 
-    type: '[포장·배달 특화] 병원 상권의 필수, 끊기지 않는 테이크아웃(피자 / 에그 샌드위치)', 
+    type: '포장·배달 특화(피자 / 에그 샌드위치)', 
     area: '16.5평', 
     desc: '[포장·배달 특화] 병원 상권의 필수, 끊기지 않는 테이크아웃',
     image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&q=80&w=800',
@@ -328,7 +328,7 @@ export const DEFAULT_MD_DATA = [
   },
   { 
     id: '129호', 
-    type: '[시선 집중 코너] 낮부터 밤까지 발길을 끄는 코너 자리(생활맥주 / 프랜차이즈 맥주)', 
+    type: '시선 집중 코너(생활맥주 / 프랜차이즈 맥주)', 
     area: '18.47평', 
     desc: '[시선 집중 코너] 낮부터 밤까지 발길을 끄는 간판 자리',
     image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800',

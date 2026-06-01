@@ -24,10 +24,24 @@ const STORE_UNITS: StoreUnit[] = (mdData || DEFAULT_MD_DATA).map((custom: any) =
     mergedImages = [custom.image, ...(custom.images?.slice(1) || [])];
   }
 
+  // 예전의 길고 투박한 기호/문장이 담긴 로컬 스토리지를 자동으로 치환하여 정보 위계를 한눈에 정리합니다.
+  let cleanType = custom.type || '';
+  if (cleanType.includes('[대형 휴식 공간]')) {
+    cleanType = '대형 휴식 공간(브런치 / 베이커리 카페)';
+  } else if (cleanType.includes('[빠른 회전율]')) {
+    cleanType = '빠른 회전율(국밥 / 설렁탕 전문점)';
+  } else if (cleanType.includes('[가족 맞춤 식당]')) {
+    cleanType = '가족 맞춤 식당(중소형 샤브샤브 / 찜닭)';
+  } else if (cleanType.includes('[포장·배달 특화]')) {
+    cleanType = '포장·배달 특화(피자 / 에그 샌드위치)';
+  } else if (cleanType.includes('[시선 집중 코너]')) {
+    cleanType = '시선 집중 코너(생활맥주 / 프랜차이즈 맥주)';
+  }
+
   return {
     id: custom.id,
     area: custom.area,
-    type: custom.type,
+    type: cleanType,
     desc: custom.desc,
     recommendation: custom.recommendation || custom.type,
     images: mergedImages,
@@ -376,7 +390,7 @@ export default function MDConfig() {
       `}</style>
 
       {/* 1. 독립된 상단 타이틀 영역 (배경: 순백색 #FFFFFF) */}
-      <div className="pt-12 md:pt-28 pb-2 md:pb-8 px-6 bg-[#FFFFFF]">
+      <div className="pt-12 md:pt-28 pb-2 md:pb-16 px-6 bg-[#FFFFFF]">
         <div className="max-w-[1600px] mx-auto w-full px-6 lg:px-12">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -880,35 +894,35 @@ export default function MDConfig() {
                     {/* 아코디언 헤더 (클릭 가능한 행) */}
                     <button
                       onClick={() => setActiveUnit(activeUnit === unit.id ? '' : unit.id)}
-                      className={`w-full text-left py-3.5 px-4 sm:px-5 lg:px-3 flex items-center justify-between transition-all duration-300 group ${
+                      className={`w-full text-left py-5 sm:py-6.5 lg:py-6 px-4 sm:px-5 lg:px-4 flex items-center justify-between transition-all duration-300 group ${
                         isOpen ? 'bg-amber-50/10 lg:bg-stone-50/80' : 'bg-white lg:bg-transparent hover:bg-slate-50/40 lg:hover:bg-stone-50/40'
                       }`}
                     >
                       <div className="flex items-center gap-4 sm:gap-6 lg:gap-5">
                         {/* 호실 번호 강조 */ }
                         <div className="flex items-center leading-none shrink-0 border-r border-stone-200/60 pr-4">
-                          <span className={`text-2xl sm:text-3xl lg:text-[22px] font-extrabold tracking-tight transition-colors ${
+                          <span className={`text-2xl sm:text-3xl lg:text-[22px] font-semibold tracking-tight transition-colors ${
                             isOpen ? 'text-accent' : 'text-slate-800 lg:text-slate-800 group-hover:text-accent'
                           }`}>
                             {unit.id.replace('호', '')}
                           </span>
-                          <span className={`text-base sm:text-lg lg:text-[15px] font-extrabold ml-0.5 mt-1 transition-colors ${
+                          <span className={`text-base sm:text-lg lg:text-[15px] font-medium ml-0.5 mt-1 transition-colors ${
                             isOpen ? 'text-accent' : 'text-slate-500 group-hover:text-slate-700'
                           }`}>호</span>
                         </div>
 
                         <div>
                           <div className="flex items-center flex-wrap gap-2 lg:gap-3">
-                            <p className={`text-xl sm:text-2xl lg:text-[19px] font-extrabold tracking-tight text-wrap break-keep transition-colors ${
-                              isOpen ? 'text-accent' : 'text-stone-900 group-hover:text-accent'
+                            <p className={`text-[15px] sm:text-[17px] lg:text-[15px] font-semibold tracking-tight text-wrap break-keep leading-[1.5] transition-colors ${
+                              isOpen ? 'text-accent font-bold' : 'text-stone-900 group-hover:text-accent'
                             }`}>
                               {unit.type}
                             </p>
-                            <span className={`px-3 py-1 text-xs sm:text-sm font-extrabold rounded select-none transition-all duration-300 ${unit.categoryStyle}`}>
+                            <span className={`px-2.5 py-0.5 text-[11px] font-semibold rounded select-none transition-all duration-300 ${unit.categoryStyle}`}>
                               {unit.category}
                             </span>
                           </div>
-                          <span className="text-sm sm:text-base text-stone-600 font-extrabold block mt-1.5">
+                          <span className="text-xs sm:text-sm text-gray-500 font-normal block mt-1.5 leading-[1.5]">
                             실평수: {unit.area}
                           </span>
                         </div>

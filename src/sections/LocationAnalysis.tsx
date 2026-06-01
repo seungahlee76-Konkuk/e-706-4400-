@@ -231,15 +231,15 @@ export default function LocationAnalysis() {
 
       {/* 2. Upper 60% Area: Deep Navy Background, Edge-to-Edge Full Bleed */}
       <div className={cn(
-        "w-full bg-[#F8F9FA] md:bg-[#030F26] flex flex-col py-4 select-none relative shadow-[inset_0_-30px_60px_rgba(0,0,0,0.01)] md:shadow-[inset_0_-30px_60px_rgba(0,0,0,0.25)] border-b-0 md:border-b md:border-stone-850 overflow-visible md:overflow-hidden transition-all duration-300 shrink-0",
+        "w-full bg-[#F8F9FA] md:bg-[#030F26] flex flex-col py-3 select-none relative shadow-[inset_0_-30px_60px_rgba(0,0,0,0.01)] md:shadow-[inset_0_-30px_60px_rgba(0,0,0,0.25)] border-b-0 md:border-b md:border-stone-850 overflow-visible md:overflow-hidden transition-all duration-300 shrink-0",
         activeCategory 
           ? "h-auto py-12 md:h-[75dvh] justify-center items-center" 
-          : "h-auto pb-10 mb-10 md:mb-0 md:pb-4 md:h-[65dvh] justify-between"
+          : "h-auto pb-6 mb-3 md:mb-0 md:pb-2 md:h-[65dvh] justify-between"
       )}>
         
         {/* Section Heading over dark background */}
         {!activeCategory && (
-          <div className="text-center mb-8 md:mb-12 px-4 shrink-0 mt-5 animate-fadeIn">
+          <div className="text-center mb-4 md:mb-2 px-4 shrink-0 mt-3 md:mt-2 animate-fadeIn">
             <span className="text-accent font-black tracking-[0.25em] text-[10px] sm:text-xs uppercase block mb-1 text-[#f43f5e]">
               LOCATION & PREMIUM
             </span>
@@ -247,7 +247,7 @@ export default function LocationAnalysis() {
             <h2 className="text-xl sm:text-2xl font-black text-[#0A1931] md:text-white tracking-tight leading-tight">
               입지분석 및 프리미엄
             </h2>
-            <div className="w-12 h-0.5 bg-[#f43f5e] mx-auto mt-2 rounded-full mb-3" />
+            <div className="w-12 h-0.5 bg-[#f43f5e] mx-auto mt-1 rounded-full mb-1" />
           </div>
         )}
 
@@ -272,7 +272,7 @@ export default function LocationAnalysis() {
                 <div 
                   ref={coverScrollRef}
                   onScroll={handleCoverScroll}
-                  className="flex overflow-x-auto lg:overflow-x-visible snap-x snap-mandatory lg:snap-none no-scrollbar gap-4 sm:gap-6 w-full py-3 pb-8 px-[14vw] lg:px-0 justify-start lg:justify-center items-center shrink-0"
+                  className="flex overflow-x-auto lg:overflow-x-visible snap-x snap-mandatory lg:snap-none no-scrollbar gap-4 sm:gap-6 w-full py-3 pb-3 md:pb-4 px-[14vw] lg:px-0 justify-start lg:justify-center items-center shrink-0"
                 >
                   {cardNewsData.map((category: any, idx: number) => (
                     <div 
@@ -350,14 +350,14 @@ export default function LocationAnalysis() {
                 </div>
 
                 {/* Elegant Museum-style Caption Guidance with Breath Pulse Animation */}
-                <div className="text-center mt-3 sm:mt-4 md:mt-1 shrink-0 select-none font-sans font-medium tracking-tight flex flex-col items-center justify-center">
+                <div className="text-center mt-3 sm:mt-4 md:mt-4 shrink-0 select-none font-sans font-medium tracking-tight flex flex-col items-center justify-center pb-2">
                   <span 
                     className="block md:hidden text-[13px] sm:text-sm font-bold text-slate-500 select-none animate-pulse"
                   >
                     👉 좌우로 넘겨 입지 프리미엄 모아보기
                   </span>
                   <div className="hidden md:flex items-center justify-center select-none text-center">
-                    <span className="text-xs sm:text-[13px] md:text-sm text-white/70 tracking-wider font-extrabold md:font-normal animate-pulse">
+                    <span className="text-xs sm:text-[13px] md:text-sm text-[#45ffde] tracking-wider font-extrabold animate-pulse">
                       ✨ 자세히 보시려면 카드뉴스를 클릭해주세요 ✨
                     </span>
                   </div>
@@ -453,36 +453,39 @@ export default function LocationAnalysis() {
 
       {/* 2. Bottom 40% Area: Premium Minimalist Classic Light Base - Seamlessly integrated with pure white background */}
       <div className={cn(
-        "w-full bg-white border-0 flex flex-col justify-center items-center relative z-10 overflow-visible md:overflow-hidden px-6 pt-2 pb-10 md:py-0 transition-all duration-300 shrink-0",
+        "w-full bg-white border-0 flex flex-col justify-start md:justify-center items-center relative z-10 overflow-visible md:overflow-hidden px-6 pt-0 pb-6 md:py-0 transition-all duration-300 shrink-0",
         activeCategory ? "h-auto md:h-[25dvh]" : "h-auto md:h-[35dvh]"
       )}>
-        <div className="w-full max-w-md md:max-w-lg text-left space-y-3 sm:space-y-4 md:space-y-6 font-sans select-text">
-          {/* Label Title */}
-          <h4 className="text-[#333333] font-extrabold text-sm sm:text-base tracking-widest uppercase select-none">
-            상담전화
-          </h4>
-          
-          {/* Giant Number (Styled with custom Deep Teal #005B5B & thick Extra Bold weight) */}
-          <div className="group relative block">
-            <a 
-              href="tel:010-3370-8602"
-              className="font-sans font-black text-4xl sm:text-5xl md:text-5xl lg:text-5xl tracking-tighter leading-none inline-block transition-all duration-200 cursor-pointer text-[#005B5B] hover:text-[#006666] hover:underline hover:scale-[1.01]"
-            >
-              010-3370-8602
-            </a>
+        <div className="w-full max-w-md md:max-w-4xl text-left font-sans select-text mt-2 md:mt-0 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-16 items-start md:-translate-y-12">
+          {/* Left Side: 상담전화, 번호, 연결안내 */}
+          <div className="space-y-1.5 sm:space-y-2 md:space-y-4">
+            {/* Label Title */}
+            <h4 className="text-[#333333] font-extrabold text-sm sm:text-base tracking-widest uppercase select-none">
+              상담전화
+            </h4>
             
-            {/* [전화 연결 안내 카피 추가] */}
-            <a 
-              href="tel:010-3370-8602"
-              className="mt-3 flex items-center gap-1.5 text-sm sm:text-base font-semibold tracking-tight transition-all duration-200 cursor-pointer hover:underline text-[#64748b]"
-            >
-              <span className="text-[#005B5B] font-bold mr-0.5">📞</span>
-              <span>번호를 터치하시면 홍보관으로 바로 연결됩니다.</span>
-            </a>
+            {/* Giant Number (Styled with custom Deep Teal #005B5B & thick Extra Bold weight) */}
+            <div className="group relative block">
+              <a 
+                href="tel:010-3370-8602"
+                className="font-sans font-black text-4xl sm:text-5xl md:text-5xl lg:text-5xl tracking-tighter leading-none inline-block transition-all duration-200 cursor-pointer text-[#005B5B] hover:text-[#006666] hover:underline hover:scale-[1.01]"
+              >
+                010-3370-8602
+              </a>
+              
+              {/* [전화 연결 안내 카피 추가] */}
+              <a 
+                href="tel:010-3370-8602"
+                className="mt-3 flex items-center gap-1.5 text-sm sm:text-base font-semibold tracking-tight transition-all duration-200 cursor-pointer hover:underline text-[#64748b]"
+              >
+                <span className="text-[#005B5B] font-bold mr-0.5">📞</span>
+                <span>번호를 터치하시면 홍보관으로 바로 연결됩니다.</span>
+              </a>
+            </div>
           </div>
           
-          {/* Sub information stack below big number matching referenced weights and sizing */}
-          <div className="pt-5 text-[#333333] text-sm sm:text-base md:text-sm font-semibold leading-relaxed space-y-2 border-t border-gray-200/60 mt-5">
+          {/* Right Side: 대표번호, 운영시간, 내방안내 */}
+          <div className="pt-5 md:pt-0 text-[#333333] text-sm sm:text-base md:text-sm font-semibold leading-relaxed space-y-2 md:space-y-3.5 border-t md:border-t-0 border-gray-200/60 mt-5 md:mt-4 self-start md:self-center">
             <div className="flex items-center">
               <span className="text-[#666666] select-none w-24 sm:w-28 shrink-0 font-bold">대표번호 :</span>
               <a href="tel:031-293-1073" className="text-[#333333] hover:text-[#005B5B] hover:underline transition-colors font-bold">
