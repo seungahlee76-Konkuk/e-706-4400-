@@ -19,9 +19,9 @@ export default function LocationAnalysis() {
 
           const categoriesInfo = [
             { id: 'medical', title: '의료', subTitle: 'MEDICAL PREMIUM', headline: '706병상 수원 최대 핵심 메디컬 타워 바로 앞 초밀착 입지' },
-            { id: 'traffic', title: '교통', subTitle: 'TRAFFIC INFRASTRUCTURE', headline: '수인분당선 직통 주파 및 광역 신설 교통망 of 초강력 집결형 노선' },
-            { id: 'admin', title: '행정', subTitle: 'GOVERNMENT TOWN', headline: '구청·보건소·우체국을 밀착하여 품은 평일/주말 365일 배후지' },
-            { id: 'valley', title: '탑동밸리', subTitle: 'INNOVATION VALLEY', headline: '고부가 지식 인조이 인력과 직접 소통하며 수혜를 거머쥐는 중심' }
+            { id: 'traffic', title: '교통', subTitle: 'TRAFFIC INFRASTRUCTURE', headline: '수인분당선 직통 주파 및 광역 신설 교통망의 초강력 집결형 노선' },
+            { id: 'valley', title: '탑동이노베이션 밸리', subTitle: 'INNOVATION VALLEY', headline: '고부가 지식 인조이 인력과 직접 소통하며 수혜를 거머쥐는 중심' },
+            { id: 'admin', title: '행정', subTitle: 'GOVERNMENT TOWN', headline: '구청·보건소·우체국을 밀착하여 품은 평일/주말 365일 배후지' }
           ];
 
           return parsedAnalysis.map((item: any, idx: number) => {
