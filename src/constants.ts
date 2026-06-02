@@ -241,7 +241,7 @@ export const DEFAULT_MD_DATA = [
       'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?auto=format&fit=crop&q=80&w=800'
     ],
-    recommendation: '소아과/내과/정형외과 병동 처방 중심 메디컬 대형 약국, 올리브영 타입 드로그스토어',
+    recommendation: '수원 덕산병원 365일 메인 동선 확보, 처방 조제 및 H&B(헬스앤뷰티) 결합형 하이엔드 드럭스토어, 기업형 메디컬 대형 약국',
     coords: { x: 28, y: 45 },
     category: '1번 약국',
     categoryStyle: 'bg-teal-50 text-teal-700 border border-teal-100/60',
