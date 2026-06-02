@@ -159,23 +159,33 @@ export default function StickyBottomForm() {
                 </optgroup>
               </select>
 
-              <a 
-                href="tel:010-3370-8602"
-                className="w-full sm:w-[65%] lg:w-auto lg:px-10 h-10 lg:h-12 bg-accent hover:bg-[#e66400] text-white rounded font-black lg:font-extrabold text-[12px] sm:text-[13px] lg:text-base relative group overflow-hidden transition-all duration-300 shadow-md lg:shadow-lg shadow-orange-500/20 flex items-center justify-center shrink-0 select-none cursor-pointer border border-transparent"
+              <button 
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full sm:w-[65%] lg:w-auto lg:px-10 h-10 lg:h-12 bg-accent hover:bg-[#e66400] disabled:bg-slate-400 disabled:cursor-not-allowed text-white rounded font-black lg:font-extrabold text-[12px] sm:text-[13px] lg:text-base relative group overflow-hidden transition-all duration-300 shadow-md lg:shadow-lg shadow-orange-500/20 flex items-center justify-center shrink-0 select-none cursor-pointer border border-transparent"
               >
                 <div className="relative w-full h-full flex items-center justify-center">
-                  {/* Default State: sliding text container */}
-                  <div className="flex items-center justify-center gap-1.5 transition-all duration-500 ease-in-out group-hover:opacity-0 group-hover:-translate-y-10">
-                    <Phone className="w-3.5 h-3.5 fill-current shrink-0 animate-pulse" />
-                    <span className="whitespace-nowrap">핵심 업종(약국·F&B) 1층 프리미엄 호실 확인</span>
-                  </div>
-                  
-                  {/* Hover State: sliding in from bottom */}
-                  <div className="absolute inset-0 flex items-center justify-center gap-1.5 transition-all duration-500 ease-in-out translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 text-white font-black text-sm lg:text-[17px]">
-                    <span>GO GO 고색! ➔</span>
-                  </div>
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-white shrink-0" />
+                      <span>신청 등록 중...</span>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Default State: sliding text container */}
+                      <div className="flex items-center justify-center gap-1.5 transition-all duration-500 ease-in-out group-hover:opacity-0 group-hover:-translate-y-10">
+                        <Phone className="w-3.5 h-3.5 fill-current shrink-0 animate-pulse" />
+                        <span className="whitespace-nowrap">핵심 업종(약국·F&B) 1층 프리미엄 호실 확인</span>
+                      </div>
+                      
+                      {/* Hover State: sliding in from bottom */}
+                      <div className="absolute inset-0 flex items-center justify-center gap-1.5 transition-all duration-500 ease-in-out translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 text-white font-black text-sm lg:text-[17px]">
+                        <span>GO GO 고색! ➔</span>
+                      </div>
+                    </>
+                  )}
                 </div>
-              </a>
+              </button>
             </div>
           </form>
         </motion.div>
