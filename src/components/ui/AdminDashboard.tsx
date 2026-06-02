@@ -67,9 +67,9 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = options?.maxWidth || 1920; // Crisp Full HD resolution
-        const MAX_HEIGHT = options?.maxHeight || 1080;
-        const quality = options?.quality || 0.8; // Clean balance of size and visual quality
+        const MAX_WIDTH = options?.maxWidth || 1000; // Optimized resolution for web/mobile compatibility
+        const MAX_HEIGHT = options?.maxHeight || 1000;
+        const quality = options?.quality || 0.65; // Highly optimized quality to bypass storage limits (10x smaller file size)
         let width = img.width;
         let height = img.height;
 
@@ -133,12 +133,16 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
   });
 
   const [customAnalysis, setCustomAnalysis] = useState<any[]>(() => {
+    const defaultIds = ['medical', 'traffic', 'topdong', 'admin'];
     const saved = localStorage.getItem('site_custom_cardnews_data');
     if (saved) {
       try {
         const parsed = deepDecode(JSON.parse(saved));
         if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].slides) {
-          return parsed;
+          return parsed.map((item: any, idx: number) => ({
+            ...item,
+            id: item.id || defaultIds[idx] || `theme-${idx}`
+          }));
         }
       } catch (e) {
         console.error("Failed to parse site_custom_cardnews_data in Admin init:", e);
@@ -364,7 +368,9 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
       updatedAt: currentIsoString
     };
 
-    const sanitizedAnalysis = customAnalysis.map((item: any) => ({
+    const defaultIds = ['medical', 'traffic', 'topdong', 'admin'];
+    const sanitizedAnalysis = customAnalysis.map((item: any, idx: number) => ({
+      id: sanitizeHTML(item.id || defaultIds[idx] || `theme-${idx}`),
       title: sanitizeHTML(item.title || ""),
       subTitle: sanitizeHTML(item.subTitle || ""),
       mainTitle: sanitizeHTML(item.mainTitle || ""),

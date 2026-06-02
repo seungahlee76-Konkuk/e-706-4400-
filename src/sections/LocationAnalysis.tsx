@@ -6,13 +6,17 @@ import { DEFAULT_CARDNEWS_DATA } from '../constants';
 
 export default function LocationAnalysis() {
   const [cardNewsData] = useState(() => {
+    const defaultIds = ['medical', 'traffic', 'topdong', 'admin'];
     // 1. Try to load site_custom_cardnews_data
     const savedCardnews = localStorage.getItem('site_custom_cardnews_data');
     if (savedCardnews) {
       try {
         const parsed = JSON.parse(savedCardnews);
         if (Array.isArray(parsed) && parsed.length > 0 && parsed[0] && Array.isArray(parsed[0].slides)) {
-          return parsed;
+          return parsed.map((item: any, idx: number) => ({
+            ...item,
+            id: item.id || defaultIds[idx] || `theme-${idx}`
+          }));
         }
       } catch (e) {
         console.error("Failed to parse site_custom_cardnews_data in LocationAnalysis:", e);
@@ -25,7 +29,10 @@ export default function LocationAnalysis() {
       try {
         const parsedAnalysis = JSON.parse(savedAnalysis);
         if (Array.isArray(parsedAnalysis) && parsedAnalysis.length > 0 && parsedAnalysis[0] && Array.isArray(parsedAnalysis[0].slides)) {
-          return parsedAnalysis;
+          return parsedAnalysis.map((item: any, idx: number) => ({
+            ...item,
+            id: item.id || defaultIds[idx] || `theme-${idx}`
+          }));
         }
       } catch (e) {
         console.error("Failed to parse legacy site_custom_analysis_data in LocationAnalysis:", e);
@@ -101,6 +108,9 @@ export default function LocationAnalysis() {
   };
 
   const selectedCategory = cardNewsData.find((c: any) => c.id === activeCategory);
+  const availableSlides = selectedCategory
+    ? (selectedCategory.slides || []).filter((s: any) => s && s.image && s.image.trim() !== '')
+    : [];
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartXRef.current = e.targetTouches[0].clientX;
@@ -123,13 +133,13 @@ export default function LocationAnalysis() {
   };
 
   const handleNext = () => {
-    if (!selectedCategory) return;
-    setActiveSlideIndex((prev) => (prev + 1) % selectedCategory.slides.length);
+    if (availableSlides.length === 0) return;
+    setActiveSlideIndex((prev) => (prev + 1) % availableSlides.length);
   };
 
   const handlePrev = () => {
-    if (!selectedCategory) return;
-    setActiveSlideIndex((prev) => (prev - 1 + selectedCategory.slides.length) % selectedCategory.slides.length);
+    if (availableSlides.length === 0) return;
+    setActiveSlideIndex((prev) => (prev - 1 + availableSlides.length) % availableSlides.length);
   };
 
   // Stagger configurations for Wallet spread intro
@@ -194,7 +204,7 @@ export default function LocationAnalysis() {
       <div className={cn(
         "w-full bg-[#F8F9FA] md:bg-[#030F26] flex flex-col select-none relative shadow-[inset_0_-30px_60px_rgba(0,0,0,0.01)] md:shadow-[inset_0_-30px_60px_rgba(0,0,0,0.25)] border-b-0 md:border-b md:border-stone-850 overflow-visible md:overflow-hidden transition-all duration-300 shrink-0",
         activeCategory 
-          ? "h-auto py-12 md:py-20 md:min-h-[78vh] justify-center items-center" 
+          ? "h-auto py-6 md:py-10 md:min-h-[62vh] justify-center items-center" 
           : "h-auto pb-6 mb-3 md:mb-0 md:pb-2 md:h-[65dvh] justify-between py-3"
       )}>
         
@@ -251,12 +261,16 @@ export default function LocationAnalysis() {
                         whileTap={{ scale: 0.98 }}
                         className="group relative rounded-xl overflow-hidden bg-white md:bg-[#020914] border border-gray-200/60 md:border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.08)] md:shadow-[0_12px_24px_rgba(0,0,0,0.45)] aspect-square flex items-center justify-center w-full md:cursor-pointer"
                       >
-                        <img 
-                          src={category.coverImage} 
-                          alt={`${category.title} : ${category.mainTitle} - ${category.headline} (${category.subTitle})`}
-                          className="w-full h-full object-cover aspect-square pointer-events-none transition-transform duration-500 group-hover:scale-103"
-                          referrerPolicy="no-referrer"
-                        />
+                        {category.coverImage ? (
+                          <img 
+                            src={category.coverImage} 
+                            alt={`${category.title} : ${category.mainTitle} - ${category.headline} (${category.subTitle})`}
+                            className="w-full h-full object-cover aspect-square pointer-events-none transition-transform duration-500 group-hover:scale-103"
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : (
+                          <div className="text-gray-400 text-xs font-semibold">이미지 미지정</div>
+                        )}
                         
                         {/* SEO Screen-reader Only Data Blocks for crawler preservation */}
                         <div className="sr-only">
@@ -353,56 +367,70 @@ export default function LocationAnalysis() {
                       id="detail-pagination"
                       className="text-white font-extrabold text-xs sm:text-sm select-none tracking-tight block drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] sm:drop-shadow-none"
                     >
-                      {selectedCategory.title} ({activeSlideIndex + 1} / {selectedCategory.slides.length})
+                      {selectedCategory.title} ({availableSlides.length > 0 ? activeSlideIndex + 1 : 0} / {availableSlides.length})
                     </span>
                   </div>
 
-                  {/* 1:1 Image Container */}
-                  <div 
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                    className="w-full aspect-square relative overflow-hidden bg-[#020914] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/10 flex items-center justify-center"
-                  >
-                    <motion.img 
-                      key={activeSlideIndex}
-                      src={selectedCategory.slides[activeSlideIndex].image}
-                      alt={`${selectedCategory.slides[activeSlideIndex].title} - ${selectedCategory.slides[activeSlideIndex].desc}`}
-                      initial={{ opacity: 0, scale: 0.98 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.4 }}
-                      className="w-full h-full object-contain aspect-square block select-none pointer-events-none"
-                      referrerPolicy="no-referrer"
-                    />
-                    
-                    {/* Persistent Arrow Controls */}
-                    <button 
-                      onClick={handlePrev}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-black/65 text-white rounded-full hover:bg-black/80 transition-all border border-white/10 shadow-lg cursor-pointer hover:scale-105 z-35"
+                  {/* 1:1 Image Container with Arrows Absolutely Positioned Outside */}
+                  {availableSlides.length > 0 ? (
+                    <div 
+                      onTouchStart={handleTouchStart}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={handleTouchEnd}
+                      className="w-full aspect-square relative overflow-visible bg-[#020914] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/10 flex items-center justify-center"
                     >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <button 
-                      onClick={handleNext}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-black/65 text-white rounded-full hover:bg-black/80 transition-all border border-white/10 shadow-lg cursor-pointer hover:scale-105 z-35"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
+                      <motion.img 
+                        key={activeSlideIndex}
+                        src={availableSlides[activeSlideIndex].image}
+                        alt={`${availableSlides[activeSlideIndex].title || ""} - ${availableSlides[activeSlideIndex].desc || ""}`}
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.4 }}
+                        className="w-full h-full object-contain aspect-square block select-none pointer-events-none rounded-3xl"
+                        referrerPolicy="no-referrer"
+                      />
 
-                    {/* Navigation Dots */}
-                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 z-20 flex gap-1">
-                      {selectedCategory.slides.map((_: any, i: number) => (
-                        <button
-                          key={i}
-                          onClick={() => setActiveSlideIndex(i)}
-                          className={cn(
-                            "h-1 rounded-full transition-all duration-300 focus:outline-none",
-                            i === activeSlideIndex ? "bg-[#f43f5e] w-4" : "bg-white/30 w-1 hover:bg-white/50"
-                          )}
-                        />
-                      ))}
+                      {/* Left Button - Physically Outside the Image via Absolute Positioning */}
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePrev();
+                        }}
+                        className="absolute -left-4 sm:-left-12 md:-left-14 lg:-left-16 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-[#020914]/90 hover:bg-black text-white hover:text-[#45ffde] rounded-full transition-all border border-white/10 shadow-lg cursor-pointer hover:scale-105 z-35"
+                      >
+                        <ChevronLeft className="w-5 h-5 shrink-0" />
+                      </button>
+
+                      {/* Right Button - Physically Outside the Image via Absolute Positioning */}
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleNext();
+                        }}
+                        className="absolute -right-4 sm:-right-12 md:-right-14 lg:-right-16 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-[#020914]/90 hover:bg-black text-white hover:text-[#45ffde] rounded-full transition-all border border-white/10 shadow-lg cursor-pointer hover:scale-105 z-35"
+                      >
+                        <ChevronRight className="w-5 h-5 shrink-0" />
+                      </button>
+
+                      {/* Navigation Dots */}
+                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 z-20 flex gap-1">
+                        {availableSlides.map((_: any, i: number) => (
+                          <button
+                            key={i}
+                            onClick={() => setActiveSlideIndex(i)}
+                            className={cn(
+                              "h-1 rounded-full transition-all duration-300 focus:outline-none",
+                              i === activeSlideIndex ? "bg-[#f43f5e] w-4" : "bg-white/30 w-1 hover:bg-white/50"
+                            )}
+                          />
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="w-full py-12 flex flex-col items-center justify-center rounded-3xl bg-black/10 border border-white/5 text-slate-400 text-xs font-semibold">
+                      등록된 상세 카드뉴스가 없습니다.
+                    </div>
+                  )}
                 </div>
 
               </motion.div>
@@ -415,7 +443,7 @@ export default function LocationAnalysis() {
       {/* 2. Bottom 40% Area: Premium Minimalist Classic Light Base - Handled dynamically when open to prevent overlap and push down */}
       <div className={cn(
         "w-full bg-white border-0 flex flex-col justify-start md:justify-center items-center relative z-10 overflow-visible md:overflow-hidden px-6 pt-0 pb-6 md:py-0 transition-all duration-300 shrink-0",
-        activeCategory ? "h-auto py-12 md:py-16 md:h-auto" : "h-auto md:h-[35dvh]"
+        activeCategory ? "h-auto py-6 md:py-8 md:h-auto" : "h-auto md:h-[35dvh]"
       )}>
         <div className={cn(
           "w-full max-w-md md:max-w-4xl text-left font-sans select-text mt-2 md:mt-0 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-16 items-start",
@@ -472,14 +500,14 @@ export default function LocationAnalysis() {
       <div className="sr-only" aria-hidden="true">
         <h2>e편한세상시티 고색 입지분석 및 프리미엄 상권 상세안내</h2>
         {cardNewsData && cardNewsData.map((item: any, index: number) => (
-          <article key={index}>
+          <article key={item.id || `seo-theme-${index}`}>
             <h3>{item.title} - {item.mainTitle}</h3>
             <p>{item.headline}</p>
             {item.slides && item.slides.map((slide: any, slideIdx: number) => (
               <div key={slideIdx}>
                 <h4>{slide.title}</h4>
                 <p>{slide.desc}</p>
-                <img src={slide.image} alt={slide.title} />
+                {slide.image ? <img src={slide.image} alt={slide.title} /> : null}
               </div>
             ))}
           </article>
