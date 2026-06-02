@@ -115,6 +115,29 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
     reader.readAsDataURL(file);
   };
   
+  const parseYoutubeUrlHelper = (url: string): string => {
+    if (!url) return "";
+    const trimmed = url.trim();
+    
+    // Match youtube shorts
+    // e.g., https://www.youtube.com/shorts/VIDEO_ID or http://youtube.com/shorts/VIDEO_ID?xxxx or https://youtube.com/shorts/VIDEO_ID
+    const shortsRegex = /\/shorts\/([a-zA-Z0-9_-]+)/i;
+    const shortsMatch = trimmed.match(shortsRegex);
+    if (shortsMatch && shortsMatch[1]) {
+      return `https://www.youtube.com/embed/${shortsMatch[1]}`;
+    }
+    
+    // Match standard youtube watching
+    // e.g. https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID or https://youtube.com/embed/VIDEO_ID
+    const standardRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/i;
+    const standardMatch = trimmed.match(standardRegex);
+    if (standardMatch && standardMatch[1]) {
+      return `https://www.youtube.com/embed/${standardMatch[1]}`;
+    }
+    
+    return trimmed;
+  };
+  
   // Mapping for existing markup references
   const isAuthenticated = isAdminVerified;
 
@@ -404,7 +427,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
       title: sanitizeHTML(item.title || ""),
       desc: sanitizeHTML(item.desc || ""),
       images: (item.images || [])
-        .map((img: string) => sanitizeHTML(img || ""))
+        .map((img: string) => parseYoutubeUrlHelper(sanitizeHTML(img || "")))
         .filter((img: string) => img.trim() !== ""),
       updatedAt: currentIsoString,
     }));
@@ -1560,24 +1583,29 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
 
                                   <div className="space-y-2 pt-2 border-t border-gray-150">
                                     <label className="text-[10px] font-extrabold text-gray-700 block mb-1">
-                                      이미지 슬라이드 리스트 (최대 3장 등록 가능 - URL 형식)
+                                      {idx === 0 
+                                        ? "1번 카드 미디어 목록 (첫 번째 항목은 세로형 유튜브 쇼츠 링크 입력 권장, 2~3번째는 일반 이미지)"
+                                        : "이미지 슬라이드 리스트 (최대 3장 등록 가능 - URL 형식)"}
                                     </label>
                                     {[0, 1, 2].map((imgIdx) => (
                                       <div key={imgIdx} className="flex flex-col sm:flex-row sm:items-center gap-2">
                                         <span className="text-[10px] font-bold text-gray-400 w-16 shrink-0 font-sans">
-                                          이미지 #{imgIdx + 1}
+                                          {idx === 0 && imgIdx === 0 ? "영상/이미지 #1" : `이미지 #${imgIdx + 1}`}
                                         </span>
                                         <div className="flex-1 flex gap-2">
                                           <input
                                             type="text"
-                                            placeholder="https://images.unsplash.com/... 이미지 복사 주소 또는 우측 파일 업로드"
+                                            placeholder={idx === 0 && imgIdx === 0 
+                                              ? "예: https://www.youtube.com/shorts/영상ID 주소 입력 시 자동 임베드 연동" 
+                                              : "https://images.unsplash.com/... 이미지 복사 주소 또는 우측 파일 업로드"}
                                             value={item.images && item.images[imgIdx] ? item.images[imgIdx] : ""}
                                             onChange={(e) => {
+                                              const parsedValue = parseYoutubeUrlHelper(e.target.value);
                                               const updated = [...customOfficetel];
                                               if (!updated[idx].images) {
                                                 updated[idx].images = [];
                                               }
-                                              updated[idx].images[imgIdx] = e.target.value;
+                                              updated[idx].images[imgIdx] = parsedValue;
                                               setCustomOfficetel(updated);
                                             }}
                                             className="flex-1 px-3 py-1.5 border border-gray-200 rounded text-[11px] font-mono bg-white"

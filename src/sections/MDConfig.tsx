@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronDown, MapPin, Sparkles, Building, ArrowRight, Settings, Upload } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, MapPin, Sparkles, Building, ArrowRight, Settings, Upload } from 'lucide-react';
 import { officetelData, mdData, DEFAULT_MD_DATA } from '../constants';
 
 interface StoreUnit {
@@ -1101,10 +1101,23 @@ export default function MDConfig() {
               </div>
             </div>
 
-            <div className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 gap-y-12 md:gap-8 -mx-6 w-[calc(100%+3rem)] md:mx-0 md:w-full">
-              {officetelData.map((unit: any, idx: number) => (
-                <OfficetelProductCard key={idx} unit={unit} idx={idx} />
-              ))}
+            {/* Pyramid Structure Grid Layout */}
+            <div className="flex flex-col gap-10 md:gap-14 w-full">
+              {/* 1. 상단 섹션 (Hero 영역): 쇼츠 + 1번 텍스트 단독 배치 */}
+              {officetelData[0] && (
+                <div className="w-full">
+                  <OfficetelHeroCard unit={officetelData[0]} idx={0} />
+                </div>
+              )}
+
+              {/* 2. 하단 섹션 (Sub 영역): 2번 & 3번 카드 나란히 배치 */}
+              {officetelData.length > 1 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full md:max-w-6xl md:mx-auto">
+                  {officetelData.slice(1).map((unit: any, subIdx: number) => (
+                    <OfficetelProductCard key={subIdx + 1} unit={unit} idx={subIdx + 1} />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1224,6 +1237,135 @@ function OfficetelProductCard({ unit, idx }: { unit: any; idx: number; key?: any
             <p className="text-sm sm:text-[15px] text-[#555555] leading-relaxed font-semibold">{unit.desc}</p>
           </div>
         </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function OfficetelHeroCard({ unit, idx }: { unit: any; idx: number }) {
+  const images = unit.images && unit.images.length > 0 
+    ? unit.images.filter((img: string) => img && img.trim() !== '') 
+    : ['https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=800'];
+
+  const mediaSource = images[0] || '';
+  
+  // Robust internal embed parser to safeguard runtime compatibility
+  const getEmbedUrl = (url: string): string => {
+    if (!url) return "";
+    const trimmed = url.trim();
+    
+    // Match youtube shorts
+    const shortsRegex = /\/shorts\/([a-zA-Z0-9_-]+)/i;
+    const shortsMatch = trimmed.match(shortsRegex);
+    if (shortsMatch && shortsMatch[1]) {
+      return `https://www.youtube.com/embed/${shortsMatch[1]}`;
+    }
+    
+    // Match standard youtube
+    const standardRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/i;
+    const standardMatch = trimmed.match(standardRegex);
+    if (standardMatch && standardMatch[1]) {
+      return `https://www.youtube.com/embed/${standardMatch[1]}`;
+    }
+    
+    return trimmed;
+  };
+
+  const embedUrl = getEmbedUrl(mediaSource);
+  const isYoutube = embedUrl && embedUrl.includes('youtube.com/embed/');
+
+  // Slider state for fallback images
+  const [currentImgIndex, setCurrentImgIndex] = useState(0);
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImgIndex((prev) => (prev + 1) % images.length);
+  };
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImgIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full flex flex-col items-center"
+    >
+      <div className="w-full bg-white border border-stone-200/60 p-6 md:p-10 rounded-2xl md:rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.04)] flex flex-col items-center">
+        
+        {/* 미디어 영역: 유튜브 쇼츠 또는 이미지 슬라이더 */}
+        <div className="w-full max-w-[360px] md:max-w-[400px] mx-auto select-none overflow-hidden relative">
+          {isYoutube ? (
+            <div className="w-full aspect-[9/16] relative bg-[#020914] rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.15)] border border-stone-200/20 overflow-hidden">
+              <iframe
+                src={`${embedUrl}?autoplay=0&mute=1&loop=1&playlist=${embedUrl.split('/embed/')[1] || ''}`}
+                title="YouTube Shorts video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-view-mode; web-share"
+                allowFullScreen
+                className="absolute top-0 left-0 w-full h-full object-cover rounded-2xl"
+              />
+            </div>
+          ) : (
+            // Fallback Image Slider if no YouTube URL is specified
+            <div className="w-full aspect-[9/16] overflow-hidden relative group/slider bg-stone-50 rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.06)]">
+              <img 
+                src={images[currentImgIndex]} 
+                alt={unit.title} 
+                className="w-full h-full object-cover transition-transform duration-700 scale-100 group-hover/slider:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              {images.length > 1 && (
+                <>
+                  <button 
+                    onClick={handlePrev}
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-10"
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={handleNext}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-10"
+                    aria-label="Next image"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </>
+              )}
+              {images.length > 1 && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                  {images.map((_: any, imgIdx: number) => (
+                    <button
+                      key={imgIdx}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentImgIndex(imgIdx);
+                      }}
+                      className={`h-[2px] transition-all duration-300 ${
+                        currentImgIndex === imgIdx ? 'bg-white w-6' : 'bg-white/40 w-1.5'
+                      }`}
+                      aria-label={`Go to slide ${imgIdx + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* 중앙 정렬 텍스트 영역 */}
+        <div className="mt-8 text-center max-w-2xl px-2 sm:px-4">
+          <h4 className="font-extrabold text-[20px] sm:text-[22px] md:text-[24px] text-gray-900 mb-3 md:mb-3.5 tracking-tight leading-tight">
+            {unit.title}
+          </h4>
+          <p className="text-xs sm:text-sm sm:text-[15px] md:text-[15.5px] text-[#555555] leading-relaxed font-semibold break-keep">
+            {unit.desc}
+          </p>
+        </div>
+
       </div>
     </motion.div>
   );

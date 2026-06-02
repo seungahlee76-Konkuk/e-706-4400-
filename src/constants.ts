@@ -325,7 +325,7 @@ export const DEFAULT_OFFICETEL_DATA = [
     title: '아파트를 대체하는 3룸 특화 설계',
     desc: '전 호실이 채광과 통풍이 우수한 3룸 구조로 설계되었습니다. 이에 더해 현관 팬트리, 넉넉한 드레스룸, 파우더룸 등 혁신적인 수납 특화 설계를 적용하여 주거 쾌적성과 공간 활용성을 극대화했습니다.',
     images: [
-      'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=800',
+      'https://www.youtube.com/embed/g2J1rB3XpG8',
       'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&q=80&w=800'
     ],
