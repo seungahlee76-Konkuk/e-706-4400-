@@ -48,7 +48,6 @@ export default function App() {
       try {
         if ((window as any)._site_code_updated) {
           const localProject = localStorage.getItem('site_custom_project_info');
-          const localAnalysis = localStorage.getItem('site_custom_analysis_data');
           const localMd = localStorage.getItem('site_custom_md_data');
           const localOfficetel = localStorage.getItem('site_custom_officetel_data');
           const localCardnews = localStorage.getItem('site_custom_cardnews_data');
@@ -56,7 +55,6 @@ export default function App() {
 
           await Promise.all([
             setDoc(doc(db, 'site_config', 'project_info'), { data: localProject ? JSON.parse(localProject) : null, updatedAt: currentIsoString }),
-            setDoc(doc(db, 'site_config', 'analysis_data'), { data: localAnalysis ? JSON.parse(localAnalysis) : null, updatedAt: currentIsoString }),
             setDoc(doc(db, 'site_config', 'md_data'), { data: localMd ? JSON.parse(localMd) : null, updatedAt: currentIsoString }),
             setDoc(doc(db, 'site_config', 'officetel_data'), { data: localOfficetel ? JSON.parse(localOfficetel) : null, updatedAt: currentIsoString }),
             setDoc(doc(db, 'site_config', 'cardnews_data'), { data: localCardnews ? JSON.parse(localCardnews) : null, updatedAt: currentIsoString })
@@ -67,14 +65,12 @@ export default function App() {
         }
 
         const projectRef = doc(db, 'site_config', 'project_info');
-        const analysisRef = doc(db, 'site_config', 'analysis_data');
         const mdRef = doc(db, 'site_config', 'md_data');
         const officetelRef = doc(db, 'site_config', 'officetel_data');
         const cardnewsRef = doc(db, 'site_config', 'cardnews_data');
 
-        const [projSnap, analSnap, mdSnap, offSnap, cardnewsSnap] = await Promise.all([
+        const [projSnap, mdSnap, offSnap, cardnewsSnap] = await Promise.all([
           getDoc(projectRef),
-          getDoc(analysisRef),
           getDoc(mdRef),
           getDoc(officetelRef),
           getDoc(cardnewsRef)
@@ -82,9 +78,6 @@ export default function App() {
 
         let serverProjectRaw = projSnap.exists() ? projSnap.data().data : null;
         let serverProjectTime = projSnap.exists() ? projSnap.data().updatedAt : null;
-
-        let serverAnalysisRaw = analSnap.exists() ? analSnap.data().data : null;
-        let serverAnalysisTime = analSnap.exists() ? analSnap.data().updatedAt : null;
 
         let serverMd = mdSnap.exists() ? mdSnap.data().data : null;
         let serverMdTime = mdSnap.exists() ? mdSnap.data().updatedAt : null;
@@ -96,20 +89,18 @@ export default function App() {
         let serverCardnewsTime = cardnewsSnap.exists() ? cardnewsSnap.data().updatedAt : null;
 
         // Fallback to legacy single document
-        if (!serverProjectRaw && !serverAnalysisRaw && !serverMd && !serverOfficetel && !serverCardnews) {
+        if (!serverProjectRaw && !serverMd && !serverOfficetel && !serverCardnews) {
           const legacyRef = doc(db, 'site_config', 'current');
           const legacySnap = await getDoc(legacyRef);
           if (legacySnap.exists()) {
             const legacyData = legacySnap.data();
             serverProjectRaw = legacyData.projectInfo || null;
-            serverAnalysisRaw = legacyData.analysisData || null;
             serverMd = legacyData.mdData || null;
             serverOfficetel = legacyData.officetelData || null;
             serverCardnews = legacyData.cardnewsData || null;
             
             const legacyTime = legacyData.updatedAt || null;
             serverProjectTime = serverProjectTime || legacyTime;
-            serverAnalysisTime = serverAnalysisTime || legacyTime;
             serverMdTime = serverMdTime || legacyTime;
             serverOfficetelTime = serverOfficetelTime || legacyTime;
             serverCardnewsTime = serverCardnewsTime || legacyTime;
@@ -129,31 +120,27 @@ export default function App() {
         };
 
         const currentProject = localStorage.getItem('site_custom_project_info');
-        const currentAnalysis = localStorage.getItem('site_custom_analysis_data');
         const currentMd = localStorage.getItem('site_custom_md_data');
         const currentOfficetel = localStorage.getItem('site_custom_officetel_data');
         const currentCardnews = localStorage.getItem('site_custom_cardnews_data');
         const localLastSaved = localStorage.getItem('site_custom_last_saved');
 
         let localProject = null;
-        let localAnalysis = null;
         let localMd = null;
         let localOfficetel = null;
         let localCardnews = null;
 
         try { if (currentProject) localProject = JSON.parse(currentProject); } catch (e) {}
-        try { if (currentAnalysis) localAnalysis = JSON.parse(currentAnalysis); } catch (e) {}
         try { if (currentMd) localMd = JSON.parse(currentMd); } catch (e) {}
         try { if (currentOfficetel) localOfficetel = JSON.parse(currentOfficetel); } catch (e) {}
         try { if (currentCardnews) localCardnews = JSON.parse(currentCardnews); } catch (e) {}
 
         const isProjectDifferent = serverProjectRaw && isServerNewer(serverProjectTime, localLastSaved) && !isSameObject(localProject, serverProjectRaw);
-        const isAnalysisDifferent = serverAnalysisRaw && isServerNewer(serverAnalysisTime, localLastSaved) && !isSameObject(localAnalysis, serverAnalysisRaw);
         const isMdDifferent = serverMd && isServerNewer(serverMdTime, localLastSaved) && !isSameObject(localMd, serverMd);
         const isOfficetelDifferent = serverOfficetel && isServerNewer(serverOfficetelTime, localLastSaved) && !isSameObject(localOfficetel, serverOfficetel);
         const isCardnewsDifferent = serverCardnews && isServerNewer(serverCardnewsTime, localLastSaved) && !isSameObject(localCardnews, serverCardnews);
 
-        if (isProjectDifferent || isAnalysisDifferent || isMdDifferent || isOfficetelDifferent || isCardnewsDifferent) {
+        if (isProjectDifferent || isMdDifferent || isOfficetelDifferent || isCardnewsDifferent) {
           // Check session reload rate-limiting (circuit-breaker) to fully block visual flickering pools
           const now = Date.now();
           const lastReloadStr = sessionStorage.getItem('site_last_automatic_reload');
@@ -161,13 +148,12 @@ export default function App() {
           
           if (now - lastReload > 6000) { // minimum 6 seconds cool-down between automatic reloads
             if (serverProjectRaw) localStorage.setItem('site_custom_project_info', JSON.stringify(serverProjectRaw));
-            if (serverAnalysisRaw) localStorage.setItem('site_custom_analysis_data', JSON.stringify(serverAnalysisRaw));
             if (serverMd) localStorage.setItem('site_custom_md_data', JSON.stringify(serverMd));
             if (serverOfficetel) localStorage.setItem('site_custom_officetel_data', JSON.stringify(serverOfficetel));
             if (serverCardnews) localStorage.setItem('site_custom_cardnews_data', JSON.stringify(serverCardnews));
             
             // Also store the updated newest server timestamp locally to keep them in sync
-            const newestServerTime = [serverProjectTime, serverAnalysisTime, serverMdTime, serverOfficetelTime, serverCardnewsTime]
+            const newestServerTime = [serverProjectTime, serverMdTime, serverOfficetelTime, serverCardnewsTime]
               .filter(Boolean)
               .sort()
               .pop() || new Date().toISOString();

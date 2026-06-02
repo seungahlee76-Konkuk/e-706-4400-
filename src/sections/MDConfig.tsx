@@ -193,15 +193,15 @@ function MDImageSlider({ images: rawImages, title, badgeText, isMobile = false }
       {/* Dark overlay gradient only on PC view */}
       {!isMobile && <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent pointer-events-none" />}
 
-      {/* Badge / Indicator overlays */}
-      <div className={`absolute top-2.5 bg-accent text-white px-2 py-0.5 text-[9px] font-black tracking-widest uppercase z-10 ${isMobile ? 'left-5' : 'left-4'}`}>
+      {/* Badge / Indicator overlays - Restyled with a modern semi-transparent dark glassmorphism container, tracking, and modest weight */}
+      <div className={`absolute top-2.5 bg-black/45 backdrop-blur-[4px] text-white/95 px-2.5 py-1 text-[10px] font-medium tracking-[1.5px] uppercase z-10 rounded shadow-[0_2px_8px_rgba(0,0,0,0.15)] ${isMobile ? 'left-5' : 'left-4'}`}>
         {badgeText}
       </div>
 
       {!isMobile && (
         <div className="absolute bottom-3 left-4 flex items-center gap-1.5 text-white pointer-events-none z-10">
-          <MapPin className="w-3.5 h-3.5 text-accent" />
-          <span className="text-xs font-black tracking-widest uppercase">Concept Image ({safeIndex + 1}/{finalImages.length})</span>
+          <MapPin className="w-3.5 h-3.5 text-accent drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
+          <span className="text-xs font-medium tracking-[1.5px] uppercase text-white/95 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">Concept Image ({safeIndex + 1}/{finalImages.length})</span>
         </div>
       )}
 
@@ -345,10 +345,8 @@ export default function MDConfig() {
     >
       {/* 선 애니메이션용 CSS 인젝션 */}
       <style>{`
-        @media (min-width: 768px) {
-          .split-bg-container {
-            background: linear-gradient(to right, #F4F5F7 55%, #FFFFFF 55%) !important;
-          }
+        .split-bg-container {
+          background-color: #F8F9FA !important;
         }
         @keyframes dash-flow {
           from {
@@ -426,11 +424,10 @@ export default function MDConfig() {
 
       {/* 2. 하단 독립된 스플릿 영역 (반반 배경 적용) */}
       <div className="split-bg-container pt-3 pb-10 md:py-20 px-6 relative">
-        <div className="max-w-[1600px] mx-auto w-full px-6 lg:px-12">
+        <div className="max-w-[1600px] mx-auto w-full px-0 md:px-6 lg:px-12">
 
-          {/* 모바일 (md 미만) 전용 고급스러운 프롭테크 대시보드 리스트 뷰 */}
-          <div className="block md:hidden mb-8 -mx-6 w-[calc(100%+3rem)]">
-          <div className="bg-transparent">
+          {/* 모바일 (md 미만) 전용 고급스러운 프롭테크 대시보드 리스트 뷰 - 연한 회색 배경 위에서 순백색 독립된 플로팅 카드 */}
+          <div className="block md:hidden mb-8 px-4">
             <div className="flex flex-col">
               <AnimatePresence initial={false}>
                 {(isMobileExpanded ? units : units.slice(0, 3)).map((unit, index) => (
@@ -440,11 +437,11 @@ export default function MDConfig() {
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.4, ease: "easeInOut" }}
-                    className="bg-transparent py-5 border-b border-stone-200/60 last:border-b-0 flex flex-col overflow-hidden"
+                    className="bg-white rounded-[12px] shadow-[0_4px_20px_rgba(0,0,0,0.05)] border-0 mb-[16px] flex flex-col overflow-hidden"
                   >
                     
                     {/* 1. 카탈로그 메타데이터 상단 배치 */}
-                    <div className="flex items-center justify-between mb-3 py-3 px-5 bg-[#F5F3ED] border-y border-stone-200/40">
+                    <div className="flex items-center justify-between mb-3.5 py-3 px-5 bg-slate-50/80 border-b border-slate-100/60">
                       <span className="text-[15px] font-bold text-stone-950 tracking-tight font-sans">
                         {unit.id} <span className="mx-2 text-stone-300 font-normal">|</span> 전용 {unit.area}
                       </span>
@@ -454,7 +451,7 @@ export default function MDConfig() {
                     </div>
 
                     {/* 2. 에셋 타이틀 */}
-                    <h4 className="text-[17px] sm:text-[19px] font-bold text-stone-950 leading-snug mb-3 tracking-tight break-keep px-5">
+                    <h4 className="text-[16px] sm:text-[18px] font-extrabold text-stone-950 leading-snug mb-3 tracking-tight break-keep px-5">
                       {unit.desc}
                     </h4>
 
@@ -469,14 +466,11 @@ export default function MDConfig() {
                     </div>
 
                     {/* 4. 입지 공학적 데이터 분석 정보 */}
-                    {/* 권장 MD 디스플레이 */}
-                    <div className="w-full bg-accent/5 border-y border-accent/15 py-4 px-5 mb-4 space-y-3">
-                      <span className="text-[14px] sm:text-[15px] font-black text-accent block font-sans tracking-wide">▷ 권장 테넌트:</span>
-                      <div className="pt-2 border-t border-accent/10">
-                        <p className="text-[14px] sm:text-[15px] font-extrabold text-stone-950 leading-relaxed font-sans antialiased select-none">
-                          {unit.recommendation}
-                        </p>
-                      </div>
+                    <div className="w-full bg-accent/5 border-t border-accent/10 py-4 px-5 space-y-3">
+                      <span className="text-[13px] font-black text-accent block font-sans tracking-wide">▷ 권장 테넌트:</span>
+                      <p className="text-[14px] sm:text-[15px] font-extrabold text-[#000E26] leading-relaxed font-sans antialiased select-none">
+                        {unit.recommendation}
+                      </p>
                     </div>
 
                     {/* 모바일 실시간 편집 폼 */}
@@ -529,8 +523,8 @@ export default function MDConfig() {
 
                         {/* 이미지 관리 */}
                         <div className="space-y-1.5 border-t border-stone-100 pt-3">
-                          <span className="block text-[10px] font-semibold text-stone-500">📸 실사 분위기 슬라이더 업로드 (최대 4장)</span>
-                          {[0, 1, 2, 3].map((imgIdx) => {
+                          <span className="block text-[10px] font-semibold text-stone-500">📸 실사 분위기 슬라이더 업로드 (최대 6장)</span>
+                          {[0, 1, 2, 3, 4, 5].map((imgIdx) => {
                             const imgUrl = unit.images && unit.images[imgIdx] ? unit.images[imgIdx] : '';
                             return (
                               <div key={imgIdx} className="flex gap-2 items-center">
@@ -589,7 +583,6 @@ export default function MDConfig() {
                 </button>
               </div>
             )}
-          </div>
           </div>
 
         {/* 1. 최상위 부모 컨테이너 (★ items-start가 핵심입니다) */}
@@ -855,8 +848,8 @@ export default function MDConfig() {
           {/* ★ 좌측 정렬(justify-start)로 원복하여 좁은 공간이나 고해상도 전체화면에서도 왼쪽이 절대 잘리지 않도록 안전을 가합니다 */}
           <div className="w-full md:w-[45%] flex justify-start pb-12 md:pl-10 lg:pl-14 xl:pl-20 md:pr-4 lg:pr-8">
             
-            {/* ★ 진짜 콘텐츠가 담기는 이너 박스 (가로 폭을 유연하게 잡고, max-w-xl로 자연물 정돈합니다) */}
-            <div className="w-full max-w-xl flex flex-col gap-6 md:bg-white md:border md:border-gray-200 md:rounded-[20px] md:p-8 md:px-6 md:shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+            {/* ★ 진짜 콘텐츠가 담기는 이너 박스 - 좌측 지도 카드와 똑같은 순백색 및 그림자/테두리 가중치 적용 */}
+            <div className="w-full max-w-xl flex flex-col gap-6 bg-white border border-slate-100 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden">
               {/* PC/Tablet 전용 안내 멘트: 👉 우측 리스트의 호실을 클릭하면 동선이 표시됩니다 */}
               <div 
                 className="hidden md:inline-flex self-start items-center justify-center px-4 py-2 mt-1 rounded-full bg-[#000E26] border border-white/10 shadow-sm"
@@ -877,25 +870,25 @@ export default function MDConfig() {
               <span className="text-[10px] font-bold tracking-wider text-slate-400 select-none pb-0.5">전용면적 기준</span>
             </div>
 
-            {/* 아코디언 컨테이너 (부드러운 열기/닫기 상호배타 구조) */}
-            <div className="flex-1 p-4 sm:p-5 lg:p-0 flex flex-col gap-3.5 sm:gap-4 lg:gap-0 bg-slate-50 lg:bg-transparent divide-y divide-stone-200/60 lg:divide-y">
+            {/* 아코디언 컨테이너 - 리스트 영역의 전체 배경색을 #F8F9FA 연한 회색으로 채우고 독립된 화이트 카드형 리스트 구성 */}
+            <div className="flex-1 p-4 sm:p-5 flex flex-col bg-[#F8F9FA] rounded-[16px]">
               {units.map((unit) => {
                 const isOpen = unit.id === activeUnit;
                 return (
                   <div 
                     key={unit.id} 
-                    className={`w-full overflow-hidden transition-all duration-300 ${
+                    className={`w-full overflow-hidden transition-all duration-300 bg-white rounded-[12px] shadow-[0_4px_20px_rgba(0,0,0,0.05)] mb-4 ${
                       isOpen 
-                        ? 'border-accent shadow-md ring-1 ring-accent/5 rounded-2xl bg-white lg:border-none lg:shadow-none lg:ring-0 lg:rounded-none lg:bg-transparent' 
-                        : 'border-slate-100 shadow-sm hover:border-accent/40 hover:shadow-md rounded-2xl bg-white lg:border-none lg:shadow-none lg:rounded-none lg:bg-transparent'
+                        ? 'ring-2 ring-accent/30' 
+                        : 'hover:translate-y-[-2px] hover:shadow-[0_6px_24px_rgba(0,0,0,0.08)]'
                     }`}
                   >
                     
                     {/* 아코디언 헤더 (클릭 가능한 행) */}
                     <button
                       onClick={() => setActiveUnit(activeUnit === unit.id ? '' : unit.id)}
-                      className={`w-full text-left py-5 sm:py-6.5 lg:py-6 px-4 sm:px-5 lg:px-4 flex items-center justify-between transition-all duration-300 group ${
-                        isOpen ? 'bg-amber-50/10 lg:bg-stone-50/80' : 'bg-white lg:bg-transparent hover:bg-slate-50/40 lg:hover:bg-stone-50/40'
+                      className={`w-full text-left py-4 sm:py-5 px-4 sm:px-5 flex items-center justify-between transition-all duration-300 group ${
+                        isOpen ? 'bg-amber-50/20' : 'bg-white hover:bg-slate-50/50'
                       }`}
                     >
                       <div className="flex items-center gap-4 sm:gap-6 lg:gap-5">
@@ -952,7 +945,7 @@ export default function MDConfig() {
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.35, ease: 'easeInOut' }}
-                          className="overflow-hidden bg-slate-50/50 lg:bg-stone-50/20 border-t border-slate-100 lg:border-stone-100"
+                          className="overflow-hidden bg-slate-50/30 border-t border-slate-100"
                         >
                           <div className="flex flex-col p-5 sm:p-6 gap-6">
                             {/* 풀 와이드 시네마틱 이미지 (직사각형 16:9 비율) */}
@@ -1035,8 +1028,8 @@ export default function MDConfig() {
 
                                 {/* 이미지 업로드 */}
                                 <div className="space-y-1.5 border-t border-stone-100 pt-3">
-                                  <span className="block text-[10px] font-semibold text-stone-500">📸 실사 분위기 슬라이더 업로드 (최대 4장)</span>
-                                  {[0, 1, 2, 3].map((imgIdx) => {
+                                  <span className="block text-[10px] font-semibold text-stone-500">📸 실사 분위기 슬라이더 업로드 (최대 6장)</span>
+                                  {[0, 1, 2, 3, 4, 5].map((imgIdx) => {
                                     const imgUrl = unit.images && unit.images[imgIdx] ? unit.images[imgIdx] : '';
                                     return (
                                       <div key={imgIdx} className="flex gap-2 items-center">

@@ -161,7 +161,12 @@ export default function LocationAnalysis() {
   return (
     <section 
       id="location" 
-      className="w-full h-auto md:h-screen md:h-[100dvh] md:min-h-[100dvh] flex flex-col relative overflow-visible md:overflow-hidden bg-white select-none"
+      className={cn(
+        "w-full flex flex-col relative select-none bg-white",
+        activeCategory 
+          ? "h-auto overflow-visible" 
+          : "h-auto md:h-screen md:h-[100dvh] md:min-h-[100dvh] overflow-visible md:overflow-hidden"
+      )}
       style={{ scrollSnapAlign: 'start' }}
     >
       <style>{`
@@ -187,10 +192,10 @@ export default function LocationAnalysis() {
 
       {/* 2. Upper 60% Area: Deep Navy Background, Edge-to-Edge Full Bleed */}
       <div className={cn(
-        "w-full bg-[#F8F9FA] md:bg-[#030F26] flex flex-col py-3 select-none relative shadow-[inset_0_-30px_60px_rgba(0,0,0,0.01)] md:shadow-[inset_0_-30px_60px_rgba(0,0,0,0.25)] border-b-0 md:border-b md:border-stone-850 overflow-visible md:overflow-hidden transition-all duration-300 shrink-0",
+        "w-full bg-[#F8F9FA] md:bg-[#030F26] flex flex-col select-none relative shadow-[inset_0_-30px_60px_rgba(0,0,0,0.01)] md:shadow-[inset_0_-30px_60px_rgba(0,0,0,0.25)] border-b-0 md:border-b md:border-stone-850 overflow-visible md:overflow-hidden transition-all duration-300 shrink-0",
         activeCategory 
-          ? "h-auto py-12 md:h-[75dvh] justify-center items-center" 
-          : "h-auto pb-6 mb-3 md:mb-0 md:pb-2 md:h-[65dvh] justify-between"
+          ? "h-auto py-12 md:py-20 md:min-h-[78vh] justify-center items-center" 
+          : "h-auto pb-6 mb-3 md:mb-0 md:pb-2 md:h-[65dvh] justify-between py-3"
       )}>
         
         {/* Section Heading over dark background */}
@@ -317,82 +322,86 @@ export default function LocationAnalysis() {
 
               </motion.div>
             ) : (
-              /* [DETAILED INSTA-STYLE SLIDER VIEW] - Simplified Full-Bleed 1:1 Slide aspect ratio containing image with Contain strategy */
+              /* [DETAILED INSTA-STYLE SLIDER VIEW] - Perfect alignment with the exact image container width */
               <motion.div
                 key="detail"
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                className="w-full h-full relative flex items-center justify-center select-none overflow-hidden"
+                className="w-full h-auto relative flex flex-col items-center justify-center select-none"
               >
-                
-                {/* 1. UI 요소의 절대 위치 지정 (position: absolute;) 또는 상단 여백 확보 */}
-                {/* [◁ 뒤로 가기] 버튼 */}
-                <button
-                  id="detail-back-button"
-                  onClick={() => {
-                    setActiveCategory(null);
-                    setActiveSlideIndex(0);
-                  }}
-                  className="absolute top-[16px] left-[20px] sm:top-[90px] sm:left-[40px] z-50 text-[#f43f5e] hover:text-[#f43f5e]/80 text-xs font-bold tracking-tight flex items-center gap-1 transition-all focus:outline-none cursor-pointer animate-fadeIn"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  뒤로 가기
-                </button>
-                
-                {/* 우측 페이지네이션 텍스트 */}
-                <span 
-                  id="detail-pagination"
-                  className="absolute top-[20px] right-[20px] sm:top-[94px] sm:right-[40px] z-50 text-black font-bold text-xs select-none tracking-tight animate-fadeIn"
-                >
-                  {selectedCategory.title} ({activeSlideIndex + 1} / {selectedCategory.slides.length})
-                </span>
-
-                {/* 2. 1:1 상세 이미지 크기 극대화 (화면 꽉 채우기) - 버튼들과 겹치지 않게 여백 추가 */}
-                <div 
-                  onTouchStart={handleTouchStart}
-                  onTouchMove={handleTouchMove}
-                  onTouchEnd={handleTouchEnd}
-                  className="h-[50vh] sm:h-[56vh] aspect-square max-w-[92vw] max-h-[92vw] sm:max-w-none sm:max-h-none relative overflow-hidden bg-[#020914] rounded-3xl shadow-[0_25px_50px_rgba(0,0,0,0.65)] border border-white/10 flex items-center justify-center mx-auto mt-20 sm:mt-28"
-                >
-                  <motion.img 
-                    key={activeSlideIndex}
-                    src={selectedCategory.slides[activeSlideIndex].image}
-                    alt={`${selectedCategory.slides[activeSlideIndex].title} - ${selectedCategory.slides[activeSlideIndex].desc}`}
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4 }}
-                    className="w-full h-full object-contain aspect-square block select-none pointer-events-none"
-                    referrerPolicy="no-referrer"
-                  />
+                {/* Unified width wrapper that aligns pagination & slide tightly and close together */}
+                <div className="flex flex-col items-center justify-center w-full max-w-[92vw] sm:max-w-[480px] md:max-w-[500px] lg:max-w-[520px] mx-auto space-y-4 z-30 relative py-4 select-none animate-fadeIn">
                   
-                  {/* Left/Right overlay controls (Persistent & Classic) */}
-                  <button 
-                    onClick={handlePrev}
-                    className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-black/60 text-white rounded-full hover:bg-black/80 transition-all border border-white/10 shadow-lg cursor-pointer hover:scale-105"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={handleNext}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-black/60 text-white rounded-full hover:bg-black/80 transition-all border border-white/10 shadow-lg cursor-pointer hover:scale-105"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
+                  {/* Top Bar directly touching image width bound */}
+                  <div className="w-full flex justify-between items-center px-4 py-2 sm:py-1 rounded-xl bg-black/40 sm:bg-transparent backdrop-blur-sm sm:backdrop-blur-none">
+                    <button
+                      id="detail-back-button"
+                      onClick={() => {
+                        setActiveCategory(null);
+                        setActiveSlideIndex(0);
+                      }}
+                      className="text-[#f43f5e] hover:text-[#f43f5e]/80 text-xs sm:text-sm font-black tracking-tight flex items-center gap-1 transition-all focus:outline-none cursor-pointer"
+                    >
+                      <ChevronLeft className="w-4 h-4 text-[#f43f5e]" />
+                      뒤로 가기
+                    </button>
+                    
+                    {/* 우측 페이지네이션 텍스트 - 다 하얀색으로 폰트 바꿔줘 */}
+                    <span 
+                      id="detail-pagination"
+                      className="text-white font-extrabold text-xs sm:text-sm select-none tracking-tight block drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] sm:drop-shadow-none"
+                    >
+                      {selectedCategory.title} ({activeSlideIndex + 1} / {selectedCategory.slides.length})
+                    </span>
+                  </div>
 
-                  {/* Dot indicator Overlay */}
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 z-20 flex gap-1 animate-fadeIn">
-                    {selectedCategory.slides.map((_: any, i: number) => (
-                      <button
-                        key={i}
-                        onClick={() => setActiveSlideIndex(i)}
-                        className={cn(
-                          "h-1 rounded-full transition-all duration-300 focus:outline-none",
-                          i === activeSlideIndex ? "bg-[#f43f5e] w-4" : "bg-white/30 w-1 hover:bg-white/50"
-                        )}
-                      />
-                    ))}
+                  {/* 1:1 Image Container */}
+                  <div 
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    className="w-full aspect-square relative overflow-hidden bg-[#020914] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/10 flex items-center justify-center"
+                  >
+                    <motion.img 
+                      key={activeSlideIndex}
+                      src={selectedCategory.slides[activeSlideIndex].image}
+                      alt={`${selectedCategory.slides[activeSlideIndex].title} - ${selectedCategory.slides[activeSlideIndex].desc}`}
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.4 }}
+                      className="w-full h-full object-contain aspect-square block select-none pointer-events-none"
+                      referrerPolicy="no-referrer"
+                    />
+                    
+                    {/* Persistent Arrow Controls */}
+                    <button 
+                      onClick={handlePrev}
+                      className="absolute left-3.5 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-black/65 text-white rounded-full hover:bg-black/80 transition-all border border-white/10 shadow-lg cursor-pointer hover:scale-105 z-35"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={handleNext}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-black/65 text-white rounded-full hover:bg-black/80 transition-all border border-white/10 shadow-lg cursor-pointer hover:scale-105 z-35"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+
+                    {/* Navigation Dots */}
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 z-20 flex gap-1">
+                      {selectedCategory.slides.map((_: any, i: number) => (
+                        <button
+                          key={i}
+                          onClick={() => setActiveSlideIndex(i)}
+                          className={cn(
+                            "h-1 rounded-full transition-all duration-300 focus:outline-none",
+                            i === activeSlideIndex ? "bg-[#f43f5e] w-4" : "bg-white/30 w-1 hover:bg-white/50"
+                          )}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -403,12 +412,15 @@ export default function LocationAnalysis() {
         </div>
       </div>
 
-      {/* 2. Bottom 40% Area: Premium Minimalist Classic Light Base - Seamlessly integrated with pure white background */}
+      {/* 2. Bottom 40% Area: Premium Minimalist Classic Light Base - Handled dynamically when open to prevent overlap and push down */}
       <div className={cn(
         "w-full bg-white border-0 flex flex-col justify-start md:justify-center items-center relative z-10 overflow-visible md:overflow-hidden px-6 pt-0 pb-6 md:py-0 transition-all duration-300 shrink-0",
-        activeCategory ? "h-auto md:h-[25dvh]" : "h-auto md:h-[35dvh]"
+        activeCategory ? "h-auto py-12 md:py-16 md:h-auto" : "h-auto md:h-[35dvh]"
       )}>
-        <div className="w-full max-w-md md:max-w-4xl text-left font-sans select-text mt-2 md:mt-0 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-16 items-start md:-translate-y-12">
+        <div className={cn(
+          "w-full max-w-md md:max-w-4xl text-left font-sans select-text mt-2 md:mt-0 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-16 items-start",
+          activeCategory ? "md:translate-y-0" : "md:-translate-y-12"
+        )}>
           {/* Left Side: 상담전화, 번호, 연결안내 */}
           <div className="space-y-1.5 sm:space-y-2 md:space-y-4">
             {/* Label Title */}
