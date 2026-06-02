@@ -205,7 +205,7 @@ export const DEFAULT_MD_DATA = [
       'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80&w=800'
     ],
-    recommendation: '돈코츠 라멘 전문점, 키토 김밥 델리, 수제 디저트 공방, 1:1 기구 필라테스 클래스',
+    recommendation: '돈코츠 라멘 전문점, 키토 김밥 델리, 1:1 기구 필라테스 클래스',
     coords: { x: 37, y: 38 },
     category: 'F&B/스포츠',
     categoryStyle: 'bg-orange-50 text-orange-600 border border-orange-100/60',
@@ -276,7 +276,7 @@ export const DEFAULT_MD_DATA = [
       'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80&w=800'
     ],
-    recommendation: '회전식 1인 팟 샤브샤브 식당, 모던 안동찜닭 패밀리 레스토랑, 정갈한 캐주얼 한식 정찬',
+    recommendation: '트렌디한 개인화(1인 팟) 전골 전문점 및 모던 한식 다이닝(예: 1인 팟 샤브샤브 식당, 안동찜닭, 곱창전문점)',
     coords: { x: 48, y: 84.5 },
     category: '퍼스널다이닝',
     categoryStyle: 'bg-rose-50 text-rose-600 border border-rose-100/60',
@@ -294,7 +294,7 @@ export const DEFAULT_MD_DATA = [
       'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&q=80&w=800'
     ],
-    recommendation: '수제 화덕 피자 픽업 전문점, 프리미엄 토스트 & 에그 브랜드, 아웃백/가구수제 도시락 전문점',
+    recommendation: '배달/포장 회전율 최상위 업종 권장, 유명 수제버거 프랜차이즈 및 프리미엄 피자·도시락 전문점',
     coords: { x: 51, y: 84.5 },
     category: '테이크아웃/배달',
     categoryStyle: 'bg-emerald-50 text-emerald-600 border border-emerald-100/60',
