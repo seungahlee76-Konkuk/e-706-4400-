@@ -205,24 +205,24 @@ function MDImageSlider({ images: rawImages, title, badgeText, isMobile = false }
         </div>
       )}
 
-      {/* Chevron down with 90/-90 degree rotation for sliders */}
+      {/* Prev/next buttons shown always on mobile and on hover on PC */}
       {finalImages.length > 1 && (
         <>
           <button
             type="button"
             onClick={prevSlide}
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-20"
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-20"
             aria-label="Previous slide"
           >
-            <ChevronDown className="w-4 h-4 rotate-90" />
+            <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             type="button"
             onClick={nextSlide}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-20"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-20"
             aria-label="Next slide"
           >
-            <ChevronDown className="w-4 h-4 -rotate-90" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </>
       )}
@@ -1190,22 +1190,22 @@ function OfficetelProductCard({ unit, idx }: { unit: any; idx: number; key?: any
             referrerPolicy="no-referrer"
           />
           
-          {/* 이전/다음 버튼 */}
+          {/* 이전/다음 버튼 - 모바일에서는 상시 노출 */}
           {images.length > 1 && (
             <>
               <button 
                 onClick={handlePrev}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-none bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-10"
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-none bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-10"
                 aria-label="Previous image"
               >
-                <ChevronDown className="w-4 h-4 rotate-90" />
+                <ChevronLeft className="w-4 h-4" />
               </button>
               <button 
                 onClick={handleNext}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-none bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-10"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-none bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-10"
                 aria-label="Next image"
               >
-                <ChevronDown className="w-4 h-4 -rotate-90" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </>
           )}
@@ -1321,14 +1321,14 @@ function OfficetelHeroCard({ unit, idx }: { unit: any; idx: number }) {
                 <>
                   <button 
                     onClick={handlePrev}
-                    className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-10"
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-10"
                     aria-label="Previous image"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={handleNext}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-10"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-auto z-10"
                     aria-label="Next image"
                   >
                     <ChevronRight className="w-4 h-4" />
