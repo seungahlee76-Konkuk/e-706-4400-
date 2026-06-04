@@ -138,46 +138,6 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
     return trimmed;
   };
   
-  const sortSlidesAdmin = (categoryId: string, slides: any[]): any[] => {
-    if (!Array.isArray(slides)) return [];
-    const cloned = [...slides];
-    
-    if (categoryId === 'medical') {
-      cloned.sort((a, b) => {
-        const getRank = (item: any) => {
-          const title = item.title || '';
-          if (title.includes('원스톱') || title.includes('메머드') || title.includes('TOP') || title.includes('규모')) return 1;
-          if (title.includes('존스홉킨스') || title.includes('의료진') || title.includes('최상위')) return 2;
-          if (title.includes('중증') || title.includes('거점') || title.includes('질환') || title.includes('남부')) return 3;
-          return 99;
-        };
-        return getRank(a) - getRank(b);
-      });
-    } else if (categoryId === 'traffic' || categoryId === 'traffic-infra') {
-      cloned.sort((a, b) => {
-        const getRank = (item: any) => {
-          const title = item.title || '';
-          if (title.includes('도보') || title.includes('역세권') || title.includes('직접')) return 1;
-          if (title.includes('수원역') || title.includes('GTX') || title.includes('KTX') || title.includes('1정거장')) return 2;
-          if (title.includes('신분당선') || title.includes('구운역')) return 3;
-          return 99;
-        };
-        return getRank(a) - getRank(b);
-      });
-    } else if (categoryId === 'valley' || categoryId === 'topdong') {
-      cloned.sort((a, b) => {
-        const getRank = (item: any) => {
-          const title = item.title || '';
-          if (title.includes('맞닿은') || title.includes('첨단업무') || title.includes('1만') || title.includes('일선')) return 1;
-          if (title.includes('비율') || title.includes('억제') || title.includes('희소성') || title.includes('공급')) return 2;
-          return 99;
-        };
-        return getRank(a) - getRank(b);
-      });
-    }
-    return cloned;
-  };
-  
   // Mapping for existing markup references
   const isAuthenticated = isAdminVerified;
 
@@ -198,16 +158,12 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
   const [customAnalysis, setCustomAnalysis] = useState<any[]>(() => {
     const defaultIds = ['medical', 'traffic', 'topdong', 'admin'];
     
-    const applySort = (data: any[]) => {
+    const addIds = (data: any[]) => {
       if (!Array.isArray(data)) return data;
-      return data.map((item: any, idx: number) => {
-        const catId = item.id || defaultIds[idx] || `theme-${idx}`;
-        return {
-          ...item,
-          id: catId,
-          slides: sortSlidesAdmin(catId, item.slides || [])
-        };
-      });
+      return data.map((item: any, idx: number) => ({
+        ...item,
+        id: item.id || defaultIds[idx] || `theme-${idx}`
+      }));
     };
 
     const saved = localStorage.getItem('site_custom_cardnews_data');
@@ -215,13 +171,13 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
       try {
         const parsed = deepDecode(JSON.parse(saved));
         if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].slides) {
-          return applySort(parsed);
+          return addIds(parsed);
         }
       } catch (e) {
         console.error("Failed to parse site_custom_cardnews_data in Admin init:", e);
       }
     }
-    return applySort(DEFAULT_CARDNEWS_DATA);
+    return addIds(DEFAULT_CARDNEWS_DATA);
   });
 
   const [customMd, setCustomMd] = useState<any[]>(() => {

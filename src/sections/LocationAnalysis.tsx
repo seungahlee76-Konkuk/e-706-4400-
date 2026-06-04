@@ -4,60 +4,16 @@ import { ChevronLeft, ChevronRight, Phone, Clock } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { DEFAULT_CARDNEWS_DATA } from '../constants';
 
-const sortSlides = (categoryId: string, slides: any[]): any[] => {
-  if (!Array.isArray(slides)) return [];
-  const cloned = [...slides];
-  
-  if (categoryId === 'medical') {
-    cloned.sort((a, b) => {
-      const getRank = (item: any) => {
-        const title = item.title || '';
-        if (title.includes('원스톱') || title.includes('메머드') || title.includes('TOP') || title.includes('규모')) return 1;
-        if (title.includes('존스홉킨스') || title.includes('의료진') || title.includes('최상위')) return 2;
-        if (title.includes('중증') || title.includes('거점') || title.includes('질환') || title.includes('남부')) return 3;
-        return 99;
-      };
-      return getRank(a) - getRank(b);
-    });
-  } else if (categoryId === 'traffic' || categoryId === 'traffic-infra') {
-    cloned.sort((a, b) => {
-      const getRank = (item: any) => {
-        const title = item.title || '';
-        if (title.includes('도보') || title.includes('역세권') || title.includes('직접')) return 1;
-        if (title.includes('수원역') || title.includes('GTX') || title.includes('KTX') || title.includes('1정거장')) return 2;
-        if (title.includes('신분당선') || title.includes('구운역')) return 3;
-        return 99;
-      };
-      return getRank(a) - getRank(b);
-    });
-  } else if (categoryId === 'valley' || categoryId === 'topdong') {
-    cloned.sort((a, b) => {
-      const getRank = (item: any) => {
-        const title = item.title || '';
-        if (title.includes('맞닿은') || title.includes('첨단업무') || title.includes('1만') || title.includes('일선')) return 1;
-        if (title.includes('비율') || title.includes('억제') || title.includes('희소성') || title.includes('공급')) return 2;
-        return 99;
-      };
-      return getRank(a) - getRank(b);
-    });
-  }
-  return cloned;
-};
-
 export default function LocationAnalysis() {
   const [cardNewsData] = useState(() => {
     const defaultIds = ['medical', 'traffic', 'topdong', 'admin'];
     
-    const applySort = (data: any[]) => {
+    const addIds = (data: any[]) => {
       if (!Array.isArray(data)) return data;
-      return data.map((item: any, idx: number) => {
-        const catId = item.id || defaultIds[idx] || `theme-${idx}`;
-        return {
-          ...item,
-          id: catId,
-          slides: sortSlides(catId, item.slides || [])
-        };
-      });
+      return data.map((item: any, idx: number) => ({
+        ...item,
+        id: item.id || defaultIds[idx] || `theme-${idx}`
+      }));
     };
 
     // 1. Try to load site_custom_cardnews_data
@@ -66,7 +22,7 @@ export default function LocationAnalysis() {
       try {
         const parsed = JSON.parse(savedCardnews);
         if (Array.isArray(parsed) && parsed.length > 0 && parsed[0] && Array.isArray(parsed[0].slides)) {
-          return applySort(parsed);
+          return addIds(parsed);
         }
       } catch (e) {
         console.error("Failed to parse site_custom_cardnews_data in LocationAnalysis:", e);
@@ -79,13 +35,13 @@ export default function LocationAnalysis() {
       try {
         const parsedAnalysis = JSON.parse(savedAnalysis);
         if (Array.isArray(parsedAnalysis) && parsedAnalysis.length > 0 && parsedAnalysis[0] && Array.isArray(parsedAnalysis[0].slides)) {
-          return applySort(parsedAnalysis);
+          return addIds(parsedAnalysis);
         }
       } catch (e) {
         console.error("Failed to parse legacy site_custom_analysis_data in LocationAnalysis:", e);
       }
     }
-    return applySort(DEFAULT_CARDNEWS_DATA);
+    return addIds(DEFAULT_CARDNEWS_DATA);
   });
 
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
