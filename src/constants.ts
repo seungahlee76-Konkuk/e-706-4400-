@@ -15,8 +15,7 @@ export const DEFAULT_PROJECT_INFO = {
     { value: '상업시설-128호', label: '128호 (국밥집 / 육개장)', group: '상업시설 (1F)' },
     { value: '상업시설-129호', label: '129호 (프랜차이즈 맥주전문점)', group: '상업시설 (1F)' },
     { value: '상업시설-기타', label: '기타 상업시설 문의', group: '상업시설 (1F)' },
-    { value: '오피스텔-3룸', label: '3룸 혁신평면', group: '주거용 오피스텔' },
-    { value: '오피스텔-기타', label: '일반 오피스텔 문의', group: '주거용 오피스텔' },
+    { value: '오피스텔-기타', label: '오피스텔 문의', group: '주거용 오피스텔' },
     { value: '기타', label: '기타 문의', group: '일반' }
   ],
   overview: [
@@ -39,7 +38,7 @@ export const DEFAULT_PROJECT_INFO = {
   heroSubtitle: '서수원의 미래 가치를 선점하는 압도적 브랜드 파워',
   heroFeatures: [
     { id: "01", label: "4,400세대 항아리 상권", desc: "고색 1·2지구 4,400여 세대의 중심 상업시설" },
-    { id: "02", label: "706병상 메디컬 수요", desc: "수원덕산병원 바로 앞 메인 스트리트" },
+    { id: "02", label: "706병상 메디컬 수요", desc: "1차 457병상 2차 259병상 수원덕산병원 바로 앞 메인 스트리트" },
     { id: "03", label: "1군 브랜드 랜드마크", desc: "서수원의 가치를 리딩하는 e편한세상 상가" },
     { id: "04", label: "행정타운 365일 상권", desc: "권선구청 등 공공기관 500m 이내 직장인 수요" },
   ],
@@ -106,22 +105,22 @@ export const DEFAULT_CARDNEWS_DATA = [
     subTitle: 'MEDICAL PREMIUM',
     mainTitle: '수원덕산병원 프리미엄',
     headline: '706병상 수원 최대 핵심 메디컬 타워 바로 앞 초밀착 입지',
-    coverImage: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800',
+    coverImage: 'https://i.ibb.co/mC3QHvwv/1.png',
     slides: [
       {
         title: '수원 TOP 3 메머드급 규모 및 원스톱 진료 체계',
         desc: '1차 457병상, 최종 706병상 규모로 30여 개의 다양한 진료과를 운영합니다. 필수 진료과가 한곳에집결되어 완벽한 원스톱 진료가 가능합니다.',
-        image: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800'
+        image: 'https://i.ibb.co/ks3wxMWL/2.png'
       },
       {
         title: '존스홉킨스·빅5 출신 등 최상위 의료진 포진',
         desc: '해외 유수 의료기관 및 국내 빅5 출신 전문의가 상주합니다. 대형 수술 및 각 진료 분과 전문의들이 대거 상주하여 최고 의료 서비스를 제공합니다.',
-        image: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=800'
+        image: 'https://i.ibb.co/kgtLsCDS/3.png'
       },
       {
         title: '경기 남부 중증 질환 치료의 거점 상가',
         desc: '심뇌혈관, 중증외상 등 특화 센터를 통해 경기 남부권 의료 중심지로 활약하며 메디컬 연계 상가의 풍부한 배후수요와 연중 안정적 유입을 견인합니다.',
-        image: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=800'
+        image: 'https://i.ibb.co/SX3WB99F/4.png'
       }
     ]
   },
@@ -131,22 +130,22 @@ export const DEFAULT_CARDNEWS_DATA = [
     subTitle: 'TRAFFIC INFRASTRUCTURE',
     mainTitle: '고색역 초역세권 입지',
     headline: '수인분당선 직통 주파 및 광역 신설 교통망의 초강력 집결형 노선',
-    coverImage: 'https://i.ibb.co/S4VygwN5/400-250.jpg',
+    coverImage: 'https://i.ibb.co/ZzcZLsTS/5.png',
     slides: [
       {
         title: '수인분당선 고색역 직접 도보 역세권',
         desc: '강남, 분당, 인천을 관통하는 수인분당선 고색역이 고작 도보 200m에 인접해 있어, 수도권 전역에서 역세권 중심지로의 유입이 탁월합니다.',
-        image: 'https://i.ibb.co/S4VygwN5/400-250.jpg'
+        image: 'https://i.ibb.co/XxgM5xHz/6.png'
       },
       {
         title: '수원역 1정거장 (GTX-C·KTX 광역교통망)',
         desc: '고색역에서 단 한정거장 위치의 수원역 교통 허브를 통해 KTX와 2028년 개통 예정인 GTX-C 전국 광역교통 수혜를 입체적으로 향유합니다.',
-        image: 'https://i.ibb.co/SGYJfXb/2026-05-29-150925.png'
+        image: 'https://i.ibb.co/cXRdmyrL/7.png'
       },
       {
         title: '신분당선 연장선 (구운역 신설 유치 확정)',
         desc: '구운역 신설 확정에 이어 신분당선 연계 호재로 강남권 및 판교 테크노밸리와의 공간적 대칭성이 획기적으로 개선될 전망입니다.',
-        image: 'https://i.ibb.co/gFwLkKnv/2026-05-29-152645.png'
+        image: 'https://i.ibb.co/mFRFYLgp/8.png'
       }
     ]
   },
@@ -156,17 +155,22 @@ export const DEFAULT_CARDNEWS_DATA = [
     subTitle: 'INNOVATION VALLEY',
     mainTitle: '첨단 산업 혁신 주거 지구',
     headline: '고부가 지식 인조이 인력과 직접 소통하며 수혜를 거머쥐는 중심',
-    coverImage: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=800',
+    coverImage: 'https://i.ibb.co/qLd1tPFQ/9.png',
     slides: [
       {
         title: '1만 8천 평 첨단업무블록과 맞닿은 최일선 배후',
         desc: '탑동 이노베이션밸리 전체 8만 평 중 핵심인 업무용지 A2·A3 블록과 경계를 맞대 수만 명의 첨단산업 인력을 직접적인 독점 배후로 흡수합니다.',
-        image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=800'
+        image: 'https://i.ibb.co/d4PJWsX0/10.png'
       },
       {
         title: '내부 상가 공급 비율 법적 억제에 따른 높은 희소성',
         desc: '밸리 지구 내 지원시설 법정 용량 30% 한계 및 지상 1,2층만 제한된 상가 구성으로 인해, 가용 F&B 매장 면적과 희소가치가 급히 집중됩니다.',
-        image: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=800'
+        image: 'https://i.ibb.co/gFLmqdLb/11.png'
+      },
+      {
+        title: '서수원 개발의 핵심 축, 탑동지구의 가치 상승',
+        desc: '서수원의 새로운 중심상권으로서 대기업 연구소 입주 및 지식산업센터 활성화에 따른 자산 가치 프리미엄이 지속적으로 반영됩니다.',
+        image: 'https://i.ibb.co/bM7f6CXx/12.png'
       }
     ]
   },
@@ -176,17 +180,17 @@ export const DEFAULT_CARDNEWS_DATA = [
     subTitle: 'GOVERNMENT TOWN',
     mainTitle: '권선행정타운 복합상권',
     headline: '구청·보건소·우체국을 밀착하여 품은 평일/주말 365일 배후지',
-    coverImage: 'https://images.unsplash.com/photo-1577416414929-7a4c9f17f6b4?auto=format&fit=crop&q=80&w=800',
+    coverImage: 'https://i.ibb.co/sdRRHnLq/13.png',
     slides: [
       {
         title: '행정 벨트와 교통 배후수요의 공조 복합 상권',
         desc: '종합병원 의료 수요에 서수원의 핵심 행정 중추 권선행정타운 공직 상주인구 유입을 합작하여 최고의 안정적인 매출을 지지합니다.',
-        image: 'https://images.unsplash.com/photo-1577416414929-7a4c9f17f6b4?auto=format&fit=crop&q=80&w=800'
+        image: 'https://i.ibb.co/ZzWN27y8/14.png'
       },
       {
         title: '관공서 쾌속 중심의 넘쳐나는 비즈니스 독점권',
         desc: '우체국, 구청, 보건소 등 500m 반경 공공 타운 밀도 중심지에 위치해 공공무원, 수속 내방 고객 등 365일 안정적인 매출 사이클을 누립니다.',
-        image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800'
+        image: 'https://i.ibb.co/ZzWN27y8/14.png'
       }
     ]
   }
@@ -198,14 +202,14 @@ export const DEFAULT_MD_DATA = [
     type: '1인 타겟 컴팩트 상가(라멘집 / 개인 필라테스)', 
     area: '15.99평', 
     desc: '[1인 타겟 컴팩트 상가] 바쁜 일상 속 가볍고 트렌디한 한 끼',
-    image: 'https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&q=80&w=800',
+    image: 'https://i.ibb.co/gZ0Q6sSD/image.jpg',
     images: [
-      'https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80&w=800'
+      'https://i.ibb.co/gZ0Q6sSD/image.jpg',
+      'https://i.ibb.co/wZrBqB76/image.png',
+      'https://i.ibb.co/Vc4G735p/image.jpg',
+      'https://i.ibb.co/twxMT8CL/image.jpg'
     ],
-    recommendation: '돈코츠 라멘 전문점, 키토 김밥 델리, 1:1 기구 필라테스 클래스',
+    recommendation: '돈코츠 라멘 전문점, 트렌디 토스트 카페, 1:1 기구 필라테스 클래스, 프리미엄 분식전문점',
     coords: { x: 37, y: 38 },
     category: 'F&B/스포츠',
     categoryStyle: 'bg-orange-50 text-orange-600 border border-orange-100/60',
@@ -216,14 +220,14 @@ export const DEFAULT_MD_DATA = [
     type: '대형 휴식 공간(브런치 / 베이커리 카페)', 
     area: '36.35평', 
     desc: '[프리미엄 F&B 공간] 면회객과 대기 손님의 발길이 머무는 필수 방문 코스',
-    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=800',
+    image: 'https://i.ibb.co/6V689mB/image.jpg',
     images: [
-      'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1513442542250-854d436a73f2?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=800'
+      'https://i.ibb.co/6V689mB/image.jpg',
+      'https://i.ibb.co/NnYPp37M/image.jpg',
+      'https://i.ibb.co/1fYyjGs3/image.jpg',
+      'https://i.ibb.co/p6Cd8Kng/image.jpg'
     ],
-    recommendation: '올데이 브런치 플레이트, 페이스트리 전문 베이커리 카페, 스페셜티 커피 로스터리',
+    recommendation: '대형 프리미엄 베이커리 카페, 유명 프랜차이즈 브런치 다이닝, 스페셜티 로스터리 카페',
     coords: { x: 28, y: 33 },
     category: 'F&B/디저트',
     categoryStyle: 'bg-amber-50 text-amber-700 border border-amber-100/60',
@@ -234,12 +238,12 @@ export const DEFAULT_MD_DATA = [
     type: '1번 약국', 
     area: '58.81평', 
     desc: '[상권의 중심] 처방전 동선이 모이는 독점적 입지',
-    image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?auto=format&fit=crop&q=80&w=800',
+    image: 'https://i.ibb.co/q33pVKhM/image.jpg',
     images: [
-      'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?auto=format&fit=crop&q=80&w=800'
+      'https://i.ibb.co/q33pVKhM/image.jpg',
+      'https://i.ibb.co/fzBLqfp7/image.jpg',
+      'https://i.ibb.co/q33pVKhM/image.jpg',
+      'https://i.ibb.co/fzBLqfp7/image.jpg'
     ],
     recommendation: '수원 덕산병원 365일 메인 동선 확보, 처방 조제 및 H&B(헬스앤뷰티) 결합형 하이엔드 드럭스토어, 기업형 메디컬 대형 약국',
     coords: { x: 28, y: 45 },
@@ -252,14 +256,14 @@ export const DEFAULT_MD_DATA = [
     type: '빠른 회전율(국밥 / 설렁탕 전문점)', 
     area: '23.44평', 
     desc: '[빠른 회전율] 주문하면 5분 만에 나오는 든든한 식사',
-    image: 'https://images.unsplash.com/photo-1634047462615-ca805e243956?auto=format&fit=crop&q=80&w=800',
+    image: 'https://i.ibb.co/1f2DyqLR/image.jpg',
     images: [
-      'https://images.unsplash.com/photo-1634047462615-ca805e243956?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1616166311666-8805f6e87a28?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1594911773177-3e4b77f10fc1?auto=format&fit=crop&q=80&w=800'
+      'https://i.ibb.co/1f2DyqLR/image.jpg',
+      'https://i.ibb.co/SXhgyLKC/image.png',
+      'https://i.ibb.co/5xwypcr8/image.jpg',
+      'https://i.ibb.co/27NdBp9n/image.png'
     ],
-    recommendation: '전통 명품 곰탕·설렁탕 전문점, 남녀노소 집객력이 높은 든든한 한식 가마솥 국밥',
+    recommendation: '전통 명품 곰탕·더진국 국밥, 대형 육대장 육개장 전문점, 신선설농탕 및 큰맘할매 한식',
     coords: { x: 44, y: 84.5 },
     category: 'F&B/한식',
     categoryStyle: 'bg-red-50 text-red-600 border border-red-100/60',
@@ -270,13 +274,13 @@ export const DEFAULT_MD_DATA = [
     type: '가족 맞춤 식당(중소형 샤브샤브 / 찜닭)', 
     area: '25.47평', 
     desc: '[트렌디 다이닝] 혼자서도, 여럿이도 부담 없는 든든한 한 끼',
-    image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=800',
+    image: 'https://i.ibb.co/hF9C1Kyt/1.png',
     images: [
-      'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80&w=800'
+      'https://i.ibb.co/hF9C1Kyt/1.png',
+      'https://i.ibb.co/0yRSFQ3V/image.jpg',
+      'https://i.ibb.co/YYbTXJ8/image.png'
     ],
-    recommendation: '트렌디한 개인화(1인 팟) 전골 전문점 및 모던 한식 다이닝(예: 1인 팟 샤브샤브 식당, 안동찜닭, 곱창전문점)',
+    recommendation: '프리미엄 1인 편백찜·샤브샤브 다이닝, 곱창전문점, 모던 한식 정찬 (찜닭, 불고기 반상 등), 트렌디 퓨전 카츠·덮밥 전문점',
     coords: { x: 48, y: 84.5 },
     category: '퍼스널다이닝',
     categoryStyle: 'bg-rose-50 text-rose-600 border border-rose-100/60',
@@ -287,14 +291,13 @@ export const DEFAULT_MD_DATA = [
     type: '포장·배달 특화(피자 / 에그 샌드위치)', 
     area: '16.5평', 
     desc: '[포장·배달 특화] 병원 상권의 필수, 끊기지 않는 테이크아웃',
-    image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&q=80&w=800',
+    image: 'https://i.ibb.co/vvY0Dq7r/image.jpg',
     images: [
-      'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&q=80&w=800'
+      'https://i.ibb.co/vvY0Dq7r/image.jpg',
+      'https://i.ibb.co/mVdHdrjM/image.jpg',
+      'https://i.ibb.co/RTV7Trt2/image.png'
     ],
-    recommendation: '배달/포장 회전율 최상위 업종 권장, 유명 수제버거 프랜차이즈 및 프리미엄 피자·도시락 전문점',
+    recommendation: '배달/포장 회전율 최상위 업종 권장, 피자 포장 및 에그 샌드위치, 웰빙 건강 도시락 카페',
     coords: { x: 51, y: 84.5 },
     category: '테이크아웃/배달',
     categoryStyle: 'bg-emerald-50 text-emerald-600 border border-emerald-100/60',
@@ -305,14 +308,12 @@ export const DEFAULT_MD_DATA = [
     type: '시선 집중 코너(생활맥주 / 프랜차이즈 맥주)', 
     area: '18.47평', 
     desc: '[시선 집중 코너] 낮부터 밤까지 발길을 끄는 간판 자리',
-    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800',
+    image: 'https://i.ibb.co/zHfWGbJ0/image.jpg',
     images: [
-      'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1532634922-8fe0b757fb13?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&q=80&w=800'
+      'https://i.ibb.co/zHfWGbJ0/image.jpg',
+      'https://i.ibb.co/CK4M8jtt/image.png'
     ],
-    recommendation: '퇴근길 유도를 위한 수제 맥주 다이닝 펍, 역전할머니맥주식 스몰비어 프랜차이즈',
+    recommendation: '생활맥주 크래프트 다이닝 펍, 시원한 살얼음맥주 프랜차이즈 스몰비어 코너 숍',
     coords: { x: 54, y: 84.5 },
     category: 'F&B/주류',
     categoryStyle: 'bg-indigo-50 text-indigo-600 border border-indigo-100/60',
@@ -325,7 +326,7 @@ export const DEFAULT_OFFICETEL_DATA = [
     title: '아파트를 대체하는 3룸 특화 설계',
     desc: '전 호실이 채광과 통풍이 우수한 3룸 구조로 설계되었습니다. 이에 더해 현관 팬트리, 넉넉한 드레스룸, 파우더룸 등 혁신적인 수납 특화 설계를 적용하여 주거 쾌적성과 공간 활용성을 극대화했습니다.',
     images: [
-      'https://www.youtube.com/embed/g2J1rB3XpG8',
+      'https://www.youtube.com/embed/oDZdsDofxx4',
       'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=800',
       'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&q=80&w=800'
     ],
@@ -335,9 +336,8 @@ export const DEFAULT_OFFICETEL_DATA = [
     title: '하이엔드 라이프를 위한 프라이빗 커뮤니티',
     desc: '스크린골프룸, 피트니스, 라운지 카페, 개인 오피스 등 어른들을 위한 프리미엄 여가 공간부터, 실내놀이터와 키즈스테이션 등 어린 자녀를 위한 보육 특화 시설까지 입주민의 다양한 라이프스타일을 지원합니다.',
     images: [
-      'https://images.unsplash.com/photo-1540555700478-4be289fbecee?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&q=80&w=800'
+      'https://i.ibb.co/Fk820Y18/image.jpg',
+      'https://i.ibb.co/YsJ3mXd/image.jpg'
     ],
     updatedAt: '2026-05-29T08:08:00Z'
   },
@@ -345,9 +345,7 @@ export const DEFAULT_OFFICETEL_DATA = [
     title: '365일 쾌적함을 지키는 에코·클린 시스템',
     desc: '단지 내 미세먼지 저감 식재와 미스트 분사 시설물을 비롯해, 각 동 출입구의 에어커튼 및 날씨 정보를 제공하는 웨더 스테이션을 도입하여 입주민의 호흡기 건강과 쾌적한 일상을 빈틈없이 케어합니다.',
     images: [
-      'https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1563770660941-20978e870e26?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1585776245991-cf89dd7fc73a?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&q=80&w=800'
     ],
     updatedAt: '2026-05-29T08:08:00Z'
   }

@@ -190,8 +190,7 @@ export default function ContactForm() {
                         { value: '상업시설-128호', label: '128호 (국밥집 / 육개장)', group: '상업시설 (1F)' },
                         { value: '상업시설-129호', label: '129호 (프랜차이즈 맥주전문점)', group: '상업시설 (1F)' },
                         { value: '상업시설-기타', label: '기타 상업시설 문의', group: '상업시설 (1F)' },
-                        { value: '오피스텔-3룸', label: '3룸 혁신평면', group: '주거용 오피스텔' },
-                        { value: '오피스텔-기타', label: '일반 오피스텔 문의', group: '주거용 오피스텔' },
+                        { value: '오피스텔-기타', label: '오피스텔 문의', group: '주거용 오피스텔' },
                         { value: '기타', label: '기타 문의', group: '일반' }
                       ];
                       

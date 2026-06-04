@@ -51,6 +51,18 @@ export default function LocationAnalysis() {
   const coverScrollRef = useRef<HTMLDivElement>(null);
   const [activeCoverIndex, setActiveCoverIndex] = useState(0);
 
+  // Disable scroll snap globally when detailed card is active to prevent page sliding issue
+  useEffect(() => {
+    if (activeCategory) {
+      document.documentElement.style.scrollSnapType = 'none';
+    } else {
+      document.documentElement.style.scrollSnapType = '';
+    }
+    return () => {
+      document.documentElement.style.scrollSnapType = '';
+    };
+  }, [activeCategory]);
+
   const handleCoverScroll = () => {
     if (coverScrollRef.current) {
       const { scrollLeft, clientWidth } = coverScrollRef.current;
@@ -180,11 +192,11 @@ export default function LocationAnalysis() {
           ? "h-auto overflow-visible" 
           : "h-auto md:h-screen md:h-[100dvh] md:min-h-[100dvh] overflow-visible md:overflow-hidden"
       )}
-      style={{ scrollSnapAlign: 'start' }}
+      style={{ scrollSnapAlign: activeCategory ? 'none' : 'start' }}
     >
       <style>{`
         #location {
-          scroll-snap-align: start;
+          scroll-snap-align: ${activeCategory ? 'none' : 'start'};
           scroll-margin-top: 0px;
         }
         @keyframes pulseOpacity {
@@ -207,7 +219,7 @@ export default function LocationAnalysis() {
       <div className={cn(
         "w-full bg-[#F8F9FA] md:bg-[#030F26] flex flex-col select-none relative shadow-[inset_0_-30px_60px_rgba(0,0,0,0.01)] md:shadow-[inset_0_-30px_60px_rgba(0,0,0,0.25)] border-b-0 md:border-b md:border-stone-850 overflow-visible md:overflow-hidden transition-all duration-300 shrink-0",
         activeCategory 
-          ? "h-auto py-6 md:py-10 md:min-h-[62vh] justify-center items-center" 
+          ? "h-auto py-6 md:pt-14 md:pb-32 md:min-h-[75vh] md:justify-start items-center" 
           : "h-auto pb-6 mb-3 md:mb-0 md:pb-2 md:h-[65dvh] justify-between py-3"
       )}>
         
@@ -348,31 +360,33 @@ export default function LocationAnalysis() {
                 transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                 className="w-full h-auto relative flex flex-col items-center justify-center select-none"
               >
-                {/* Unified width wrapper that aligns pagination & slide tightly and close together */}
-                <div className="flex flex-col items-center justify-center w-full max-w-[92vw] sm:max-w-[480px] md:max-w-[500px] lg:max-w-[520px] mx-auto space-y-4 z-30 relative py-4 select-none animate-fadeIn">
-                  
-                  {/* Top Bar directly touching image width bound */}
-                  <div className="w-full flex justify-between items-center px-4 py-2 sm:py-1 rounded-xl bg-black/40 sm:bg-transparent backdrop-blur-sm sm:backdrop-blur-none">
+                {/* Top Sticky Bar - Always floats at the very top of view on mobile, but relative on desktop */}
+                <div className="w-full sticky md:relative top-[56px] md:top-0 left-0 right-0 md:left-auto md:right-auto z-40 bg-white md:bg-transparent border-b border-gray-100 md:border-b-0 shadow-[0_2px_12px_rgba(0,0,0,0.05)] md:shadow-none py-3 md:py-2 px-4 sm:px-[4vw] md:px-0 flex justify-between items-center transition-all">
+                  <div className="w-full max-w-[480px] md:max-w-[500px] lg:max-w-[520px] mx-auto flex justify-between items-center">
                     <button
                       id="detail-back-button"
                       onClick={() => {
                         setActiveCategory(null);
                         setActiveSlideIndex(0);
                       }}
-                      className="text-[#f43f5e] hover:text-[#f43f5e]/80 text-xs sm:text-sm font-black tracking-tight flex items-center gap-1 transition-all focus:outline-none cursor-pointer"
+                      className="text-[#f43f5e] md:text-white hover:text-[#f43f5e]/80 md:hover:text-white/80 text-xs sm:text-sm font-bold tracking-tight flex items-center gap-1 transition-all focus:outline-none cursor-pointer p-1"
                     >
-                      <ChevronLeft className="w-4 h-4 text-[#f43f5e]" />
+                      <ChevronLeft className="w-4 h-4 text-[#f43f5e] md:text-white" strokeWidth={3} />
                       뒤로 가기
                     </button>
                     
-                    {/* 우측 페이지네이션 텍스트 - 다 하얀색으로 폰트 바꿔줘 */}
+                    {/* Right pagination text in premium deep teal brand color */}
                     <span 
                       id="detail-pagination"
-                      className="text-white font-extrabold text-xs sm:text-sm select-none tracking-tight block drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] sm:drop-shadow-none"
+                      className="text-[#005B5B] md:text-white font-black text-xs sm:text-sm select-none tracking-tight block"
                     >
                       {selectedCategory.title} ({availableSlides.length > 0 ? activeSlideIndex + 1 : 0} / {availableSlides.length})
                     </span>
                   </div>
+                </div>
+
+                {/* Unified width wrapper that aligns slide tightly and close together */}
+                <div className="flex flex-col items-center justify-center w-full max-w-[92vw] sm:max-w-[480px] md:max-w-[500px] lg:max-w-[520px] mx-auto space-y-4 z-30 relative py-6 select-none animate-fadeIn">
 
                   {/* 1:1 Image Container with Arrows Absolutely Positioned Outside */}
                   {availableSlides.length > 0 ? (

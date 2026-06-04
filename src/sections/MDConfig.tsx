@@ -253,6 +253,7 @@ function MDImageSlider({ images: rawImages, title, badgeText, isMobile = false }
 export default function MDConfig() {
   // 기본적으로 118호를 활성화
   const [activeUnit, setActiveUnit] = useState<string>('118호');
+  const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
   const [isMobileExpanded, setIsMobileExpanded] = useState<boolean>(false);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [sectionTitle, setSectionTitle] = useState<string>(() => {
@@ -654,7 +655,7 @@ export default function MDConfig() {
                   className="white-premium-frame relative w-full h-auto md:h-max"
                 >
                   {/* 도면 캔버스 내부 컨테이너 - 이미지 크기에 정확히 동기화되어 SVG 오버레이 자리를 보존 */}
-                  <div className="relative w-full h-auto">
+                  <div className="relative w-full h-auto group overflow-hidden rounded-lg">
                     {/* 이미지의 원본 비율과 100% 투명도 수치를 복원하고 기본 여백이 없도록 block 적용, 겉 액자에 대응하는 모서리 라운딩 적용 */}
                     <img 
                       src={blueprintImg || "https://i.ibb.co/pjDBc2bh/image.png"} 
@@ -662,11 +663,21 @@ export default function MDConfig() {
                       className="blueprint-matching-img w-full h-auto pointer-events-none select-none opacity-100 block object-cover"
                     />
 
+                    {/* PC-only Hover Overlay & Click Lightbox trigger */}
+                    <div 
+                      className="absolute inset-0 z-20 bg-black/0 group-hover:bg-black/55 transition-all duration-300 hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-zoom-in"
+                      onClick={() => setIsLightboxOpen(true)}
+                    >
+                      <span className="text-white font-black text-sm tracking-tight bg-black/75 px-5 py-3 rounded-full border border-white/20 select-none pointer-events-none transition-transform duration-300 scale-90 group-hover:scale-100 shadow-[0_12px_30px_rgba(0,0,0,0.5)] flex items-center gap-2 break-keep">
+                        🔍 클릭해서 도면 크게 보기
+                      </span>
+                    </div>
+
                   {/* SVG 오버레이 애니메이션 레이어 (viewBox 0 0 100 100 백분율 상대좌표 동기화 및 찌그러짐 방지 잠금) */}
                   <svg 
                     viewBox="0 0 100 100" 
                     preserveAspectRatio="none"
-                    className="absolute inset-0 w-full h-full z-10 select-none pointer-events-auto"
+                    className="absolute inset-0 w-full h-full z-30 select-none pointer-events-none"
                   >
                     {/* 1. 보행 유도 앵커 포인트 그리기 */}
                     {TRAFFIC_ANCHORS.map((anchor) => {
@@ -747,26 +758,30 @@ export default function MDConfig() {
                       const isBottomRow = ['126호', '127호', '128호', '129호'].includes(unit.id);
                       
                       // 스태거(Stagger) 설정을 적용하여 밀집된 126~129호 라벨 겹침 방지
-                      let labelYOffset = isActive ? 5.2 : 4.4;
+                      let labelYOffset = isActive ? 6.5 : 5.2;
                       if (isBottomRow) {
                         if (unit.id === '126호' || unit.id === '128호') {
-                          labelYOffset = isActive ? 7.2 : 6.2; // 126, 128호는 위로 스태거
+                          labelYOffset = isActive ? 9.5 : 8.0; // 126, 128호는 위로 스태거
                         } else {
-                          labelYOffset = isActive ? 3.4 : 2.6; // 127, 129호는 아래로 스태거
+                          labelYOffset = isActive ? 3.8 : 2.8; // 127, 129호는 아래로 스태거
                         }
                       }
 
-                      const rectWidth = isActive ? 6.2 : 5.0;
-                      const rectHeight = isActive ? 2.3 : 1.8;
+                      const rectWidth = isActive ? 8.6 : 7.0;
+                      const rectHeight = isActive ? 3.2 : 2.5;
                       const rectX = unit.coords.x - rectWidth / 2;
                       const rectY = unit.coords.y - labelYOffset;
-                      const textY = rectY + (isActive ? 1.65 : 1.35);
+                      const textY = rectY + (isActive ? 2.25 : 1.85);
                       
                       return (
                         <g 
                           key={`pin-${unit.id}`} 
-                          className="cursor-pointer group"
-                          onClick={() => setActiveUnit(unit.id)}
+                          className="cursor-pointer group pointer-events-auto transition-all duration-200 hover:scale-[1.12]"
+                          style={{ transformOrigin: `${unit.coords.x}% ${rectY + rectHeight / 2}%` }}
+                          onClick={(e) => {
+                            e.stopPropagation(); // Lightbox 방지
+                            setActiveUnit(unit.id);
+                          }}
                         >
                           {/* 가느다란 스태거 커넥터 선 (밀집 구역 y축 이동 시 연결선 시각화) */}
                           {isBottomRow && (
@@ -781,6 +796,15 @@ export default function MDConfig() {
                               opacity="0.8"
                             />
                           )}
+
+                          {/* 터치 영역 패딩 (안 보이는 넓은 클릭 타겟박스) */}
+                          <rect
+                            x={rectX - 1.5}
+                            y={rectY - 1.0}
+                            width={rectWidth + 3.0}
+                            height={rectHeight + 2.0}
+                            fill="transparent"
+                          />
 
                           {/* 위치 마커 */}
                           <circle 
@@ -810,7 +834,7 @@ export default function MDConfig() {
                             x={unit.coords.x} 
                             y={textY} 
                             fill={isActive ? "#FFFFFF" : "#0f172a"} 
-                            fontSize={isActive ? "1.5" : "1.25"} 
+                            fontSize={isActive ? "2.1" : "1.75"} 
                             fontWeight="900" 
                             textAnchor="middle"
                             className="select-none font-sans font-black"
@@ -1148,6 +1172,199 @@ export default function MDConfig() {
               <ChevronDown className="w-4 h-4 rotate-180 text-white" />
               <span>리스트 닫기</span>
             </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Lightbox Modal for Blueprint Drawing Map */}
+      <AnimatePresence>
+        {isLightboxOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 md:p-8 select-none"
+            onClick={() => setIsLightboxOpen(false)}
+          >
+            {/* Close Button ('X') - Outside premium card */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsLightboxOpen(false);
+              }}
+              className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center bg-black/60 hover:bg-black text-white rounded-full transition-all border border-white/10 cursor-pointer hover:scale-105 z-[110] shadow-2xl"
+              aria-label="닫기"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Premium Interactive Content Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.93 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.93 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="relative w-full max-w-[95vw] md:max-w-[75vw] xl:max-w-[65vw] max-h-[85vh] md:max-h-[88vh] overflow-hidden rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] bg-white border border-slate-200 p-4 md:p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative w-full h-auto rounded-lg overflow-hidden">
+                <img 
+                  src={blueprintImg || "https://i.ibb.co/pjDBc2bh/image.png"} 
+                  alt="1F Blueprint Map Layout" 
+                  className="w-full h-auto max-h-[75vh] object-contain block select-none rounded-lg mx-auto"
+                  referrerPolicy="no-referrer"
+                />
+
+                {/* SVG overlay animation layer inside Lightbox! */}
+                <svg 
+                  viewBox="0 0 100 100" 
+                  preserveAspectRatio="none"
+                  className="absolute inset-0 w-full h-full z-10 select-none pointer-events-auto"
+                >
+                  {/* Traffic Anchors */}
+                  {TRAFFIC_ANCHORS.map((anchor) => (
+                    <g key={`lb-anchor-${anchor.id}`} className="cursor-help">
+                      <circle cx={anchor.x} cy={anchor.y} r="2.5" fill={anchor.color} opacity="0.15" />
+                      <circle cx={anchor.x} cy={anchor.y} r="0.8" fill={anchor.color} />
+                      <circle cx={anchor.x} cy={anchor.y} r="0.1" fill="#fff" />
+                    </g>
+                  ))}
+
+                  {/* Active paths */}
+                  {getFlowPaths(selectedUnit.id).map((flow) => {
+                    const pathD = buildPathData(flow.points);
+                    return (
+                      <g key={`lb-flow-grp-${flow.startId}-${selectedUnit.id}`}>
+                        {/* Quiet base trail */}
+                        <path 
+                          d={pathD} 
+                          fill="none" 
+                          stroke={flow.color} 
+                          strokeWidth="1.0" 
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          opacity="0.15" 
+                        />
+                        {/* Active segment */}
+                        <path 
+                          d={pathD} 
+                          fill="none" 
+                          stroke={flow.color} 
+                          strokeWidth="1.0" 
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          opacity="0.85" 
+                          className="flow-active-dash"
+                        />
+                      </g>
+                    );
+                  })}
+
+                  <path
+                    d="M 22 35 L 22 84.5"
+                    fill="none"
+                    stroke="#0D9488"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    opacity={0.35}
+                    strokeDasharray="2 3"
+                  />
+
+                  {/* Room Markers in Lightbox! */}
+                  {units.map((unit) => {
+                    const isActive = unit.id === activeUnit;
+                    const isBottomRow = ['126호', '127호', '128호', '129호'].includes(unit.id);
+                    
+                    let labelYOffset = isActive ? 6.5 : 5.2;
+                    if (isBottomRow) {
+                      if (unit.id === '126호' || unit.id === '128호') {
+                        labelYOffset = isActive ? 9.5 : 8.0;
+                      } else {
+                        labelYOffset = isActive ? 3.8 : 2.8;
+                      }
+                    }
+
+                    const rectWidth = isActive ? 8.6 : 7.0;
+                    const rectHeight = isActive ? 3.2 : 2.5;
+                    const rectX = unit.coords.x - rectWidth / 2;
+                    const rectY = unit.coords.y - labelYOffset;
+                    const textY = rectY + (isActive ? 2.25 : 1.85);
+                    
+                    return (
+                      <g 
+                        key={`lb-pin-${unit.id}`} 
+                        className="cursor-pointer group transition-all duration-200 hover:scale-[1.12]"
+                        style={{ transformOrigin: `${unit.coords.x}% ${rectY + rectHeight / 2}%` }}
+                        onClick={() => setActiveUnit(unit.id)}
+                      >
+                        {isBottomRow && (
+                          <line 
+                            x1={unit.coords.x} 
+                            y1={unit.coords.y} 
+                            x2={unit.coords.x} 
+                            y2={rectY + (labelYOffset > 4 ? rectHeight : 0)} 
+                            stroke={isActive ? "#e66400" : "#002C5F"} 
+                            strokeWidth="0.12" 
+                            strokeDasharray="0.3 0.3"
+                            opacity="0.8"
+                          />
+                        )}
+
+                        {/* Extra touch hitbox */}
+                        <rect
+                          x={rectX - 1.5}
+                          y={rectY - 1.0}
+                          width={rectWidth + 3.0}
+                          height={rectHeight + 2.0}
+                          fill="transparent"
+                        />
+
+                        <circle 
+                          cx={unit.coords.x} 
+                          cy={unit.coords.y} 
+                          r={isActive ? "1.3" : "0.85"} 
+                          fill={isActive ? "#e66400" : "#002C5F"} 
+                          stroke="#FFF" 
+                          strokeWidth={isActive ? "0.3" : "0.18"}
+                        />
+                        
+                        <rect 
+                          x={rectX} 
+                          y={rectY} 
+                          width={rectWidth} 
+                          height={rectHeight} 
+                          rx="0.4" 
+                          fill={isActive ? "#002C5F" : "#FFFFFF"} 
+                          stroke={isActive ? "#e66400" : "#1e293b"} 
+                          strokeWidth={isActive ? "0.35" : "0.22"} 
+                          className="shadow-md"
+                        />
+                        <text 
+                          x={unit.coords.x} 
+                          y={textY} 
+                          fill={isActive ? "#FFFFFF" : "#0f172a"} 
+                          fontSize={isActive ? "2.1" : "1.75"} 
+                          fontWeight="900" 
+                          textAnchor="middle"
+                          className="select-none font-sans font-black"
+                        >
+                          {unit.id.replace('호', '')}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
+              </div>
+            </motion.div>
+
+            {/* Bottom Guide Subtext */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/70 font-semibold text-xs md:text-sm select-none tracking-tight block pointer-events-none text-center bg-black/40 backdrop-blur-md py-1.5 px-4 rounded-full border border-white/5 shadow-xl">
+              배경 또는 우측 상단 'X' 버튼을 누르면 닫힙니다.
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

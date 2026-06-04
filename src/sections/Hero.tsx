@@ -109,7 +109,7 @@ export default function Hero() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 w-full">
           {(PROJECT_INFO.heroFeatures || [
             { id: "01", label: "4,400세대 항아리 상권", desc: "고색 1·2지구 4,400여 세대의 중심 상업시설" },
-            { id: "02", label: "706병상 메디컬 수요", desc: "수원덕산병원 바로 앞 메인 스트리트" },
+            { id: "02", label: "706병상 메디컬 수요", desc: "1차 457병상 2차 259병상 수원덕산병원 바로 앞 메인 스트리트" },
             { id: "03", label: "1군 브랜드 프리미엄", desc: "e편한세상 브랜드 프리미엄의 가치" },
             { id: "04", label: "행정타운 365일 상권", desc: "권선구청 등 공공기관 500m 이내 직장인 수요" },
           ]).map((item: any, idx: number) => (

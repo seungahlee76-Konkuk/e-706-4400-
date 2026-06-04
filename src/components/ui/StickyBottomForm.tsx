@@ -154,8 +154,7 @@ export default function StickyBottomForm() {
                   <option value="상업시설-129호">129호 (맥주전문점)</option>
                 </optgroup>
                 <optgroup label="오피스텔">
-                  <option value="오피스텔-3룸">3룸 평면</option>
-                  <option value="오피스텔-기타">일반문의</option>
+                  <option value="오피스텔-기타">오피스텔 문의</option>
                 </optgroup>
               </select>
 
