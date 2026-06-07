@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, ChevronLeft, ChevronRight, MapPin, Sparkles, Building, ArrowRight, Settings, Upload } from 'lucide-react';
 import { officetelData, mdData, DEFAULT_MD_DATA } from '../constants';
@@ -266,6 +266,18 @@ export default function MDConfig() {
   const [blueprintImg, setBlueprintImg] = useState<string>(() => {
     return localStorage.getItem('site_custom_md_blueprint_img') || 'https://i.ibb.co/pjDBc2bh/image.png';
   });
+
+  const [aspectRatio, setAspectRatio] = useState<number>(1.6);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = blueprintImg || "https://i.ibb.co/pjDBc2bh/image.png";
+    img.onload = () => {
+      if (img.naturalWidth && img.naturalHeight) {
+        setAspectRatio(img.naturalWidth / img.naturalHeight);
+      }
+    };
+  }, [blueprintImg]);
 
   const [units, setUnits] = useState<StoreUnit[]>(STORE_UNITS);
 
@@ -1210,11 +1222,19 @@ export default function MDConfig() {
               className="relative w-full max-w-[95vw] md:max-w-[75vw] xl:max-w-[65vw] max-h-[85vh] md:max-h-[88vh] overflow-hidden rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] bg-white border border-slate-200 p-4 md:p-6"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="relative w-full h-auto rounded-lg overflow-hidden">
+              <div 
+                className="relative mx-auto rounded-lg overflow-hidden max-h-[72vh] md:max-h-[75vh]"
+                style={{
+                  aspectRatio: aspectRatio || 1.6,
+                  width: '100%',
+                  height: 'auto',
+                  maxWidth: aspectRatio ? `calc(72vh * ${aspectRatio})` : '100%',
+                }}
+              >
                 <img 
                   src={blueprintImg || "https://i.ibb.co/pjDBc2bh/image.png"} 
                   alt="1F Blueprint Map Layout" 
-                  className="w-full h-auto max-h-[75vh] object-contain block select-none rounded-lg mx-auto"
+                  className="w-full h-full object-cover block select-none rounded-lg"
                   referrerPolicy="no-referrer"
                 />
 
