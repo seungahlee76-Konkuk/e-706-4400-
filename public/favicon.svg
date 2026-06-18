@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Deep Navy Rounded Square Background matching the web theme -->
+  <rect width="512" height="512" rx="112" fill="#030F26" />
+  
+  <!-- "e편한세상 (e-Life)" Signature Orange Soft Cloud Shape -->
+  <path d="M 160 330 
+           C 120 330, 90 300, 90 260 
+           C 90 215, 130 190, 165 195 
+           C 185 145, 230 120, 280 120 
+           C 335 120, 380 155, 395 205 
+           C 415 205, 435 220, 445 240 
+           C 455 260, 455 285, 440 305 
+           C 425 325, 400 330, 380 330 
+           Z" 
+        fill="#FF6A00" />
+</svg>
