@@ -53,15 +53,23 @@ export default function App() {
           const localCardnews = localStorage.getItem('site_custom_cardnews_data');
           const currentIsoString = new Date().toISOString();
 
-          await Promise.all([
-            setDoc(doc(db, 'site_config', 'project_info'), { data: localProject ? JSON.parse(localProject) : null, updatedAt: currentIsoString }),
-            setDoc(doc(db, 'site_config', 'md_data'), { data: localMd ? JSON.parse(localMd) : null, updatedAt: currentIsoString }),
-            setDoc(doc(db, 'site_config', 'officetel_data'), { data: localOfficetel ? JSON.parse(localOfficetel) : null, updatedAt: currentIsoString }),
-            setDoc(doc(db, 'site_config', 'cardnews_data'), { data: localCardnews ? JSON.parse(localCardnews) : null, updatedAt: currentIsoString })
-          ]);
-          localStorage.setItem('site_custom_last_saved', currentIsoString);
-          delete (window as any)._site_code_updated;
-          console.log("☁️ Successfully auto-synced local code changes to Firestore!");
+          try {
+            await Promise.all([
+              setDoc(doc(db, 'site_config', 'project_info'), { data: localProject ? JSON.parse(localProject) : null, updatedAt: currentIsoString }),
+              setDoc(doc(db, 'site_config', 'md_data'), { data: localMd ? JSON.parse(localMd) : null, updatedAt: currentIsoString }),
+              setDoc(doc(db, 'site_config', 'officetel_data'), { data: localOfficetel ? JSON.parse(localOfficetel) : null, updatedAt: currentIsoString }),
+              setDoc(doc(db, 'site_config', 'cardnews_data'), { data: localCardnews ? JSON.parse(localCardnews) : null, updatedAt: currentIsoString })
+            ]);
+            localStorage.setItem('site_custom_last_saved', currentIsoString);
+            delete (window as any)._site_code_updated;
+            console.log("☁️ Successfully auto-synced local code changes to Firestore!");
+          } catch (writeErr: any) {
+            if (writeErr?.code === 'permission-denied' || writeErr?.message?.includes('permission')) {
+              console.log("ℹ️ Auto-syncing of local code changes to Firestore is skipped or restricted to administrators.");
+            } else {
+              console.warn("⚠️ Failed to auto-sync local code changes to Firestore:", writeErr);
+            }
+          }
         }
 
         const projectRef = doc(db, 'site_config', 'project_info');
