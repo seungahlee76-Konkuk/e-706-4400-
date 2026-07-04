@@ -173,8 +173,12 @@ export default function App() {
             console.warn('Prevented potentially recursive fast-reload loop.');
           }
         }
-      } catch (err) {
-        console.error('Failed to sync remote site config: ', err);
+      } catch (err: any) {
+        if (err?.code === 'permission-denied' || err?.message?.toLowerCase().includes('permission')) {
+          console.warn('ℹ️ Remote site config read access is skipped or rules are propagating: ', err.message || err);
+        } else {
+          console.warn('⚠️ Failed to sync remote site config: ', err.message || err);
+        }
       }
     };
 
