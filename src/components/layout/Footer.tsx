@@ -29,6 +29,17 @@ export default function Footer({ onAdminOpen }: { onAdminOpen: () => void }) {
               <h4 className="text-primary text-xs font-bold uppercase tracking-widest mb-6">Support</h4>
               <ul className="space-y-4 text-sm">
                 <li><a href={`tel:${PROJECT_INFO.representativeNumber.replace(/[^0-9]/g, '')}`} className="hover:text-accent transition-colors font-bold text-primary">대표문의</a></li>
+                <li>
+                  <a 
+                    href="https://blog.naver.com/placebusiness" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="hover:text-accent transition-colors text-emerald-700 font-semibold inline-flex items-center gap-1"
+                  >
+                    상가고민해결사 블로그
+                    <span className="text-xs">↗</span>
+                  </a>
+                </li>
                 <li><a href="#" className="hover:text-accent transition-colors">이용약관</a></li>
                 <li><a href="#" className="hover:text-accent transition-colors text-accent">개인정보처리방침</a></li>
               </ul>
