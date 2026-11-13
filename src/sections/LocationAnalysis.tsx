@@ -7,41 +7,10 @@ import { DEFAULT_CARDNEWS_DATA } from '../constants';
 export default function LocationAnalysis() {
   const [cardNewsData] = useState(() => {
     const defaultIds = ['medical', 'traffic', 'topdong', 'admin'];
-    
-    const addIds = (data: any[]) => {
-      if (!Array.isArray(data)) return data;
-      return data.map((item: any, idx: number) => ({
-        ...item,
-        id: item.id || defaultIds[idx] || `theme-${idx}`
-      }));
-    };
-
-    // 1. Try to load site_custom_cardnews_data
-    const savedCardnews = localStorage.getItem('site_custom_cardnews_data');
-    if (savedCardnews) {
-      try {
-        const parsed = JSON.parse(savedCardnews);
-        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0] && Array.isArray(parsed[0].slides)) {
-          return addIds(parsed);
-        }
-      } catch (e) {
-        console.error("Failed to parse site_custom_cardnews_data in LocationAnalysis:", e);
-      }
-    }
-
-    // 2. Fallback to site_custom_analysis_data only if it contains actual slide structures
-    const savedAnalysis = localStorage.getItem('site_custom_analysis_data');
-    if (savedAnalysis) {
-      try {
-        const parsedAnalysis = JSON.parse(savedAnalysis);
-        if (Array.isArray(parsedAnalysis) && parsedAnalysis.length > 0 && parsedAnalysis[0] && Array.isArray(parsedAnalysis[0].slides)) {
-          return addIds(parsedAnalysis);
-        }
-      } catch (e) {
-        console.error("Failed to parse legacy site_custom_analysis_data in LocationAnalysis:", e);
-      }
-    }
-    return addIds(DEFAULT_CARDNEWS_DATA);
+    return DEFAULT_CARDNEWS_DATA.map((item: any, idx: number) => ({
+      ...item,
+      id: item.id || defaultIds[idx] || `theme-${idx}`
+    }));
   });
 
   const [activeCategory, setActiveCategory] = useState<string | null>(null);

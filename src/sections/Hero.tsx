@@ -13,9 +13,10 @@ export default function Hero() {
   
   // Fallback if no images are specified
   const finalHeroImages = heroImages.length > 0 ? heroImages : [
-    'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=2200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2200&auto=format&fit=crop',
+    '/photos/hero-1.jpg',
+    '/photos/hero-2.jpg',
+    '/photos/hero-3.jpg',
+    '/photos/hero-4.jpg',
   ];
 
   const nextSlide = useCallback(() => {

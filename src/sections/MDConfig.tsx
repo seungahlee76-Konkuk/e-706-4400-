@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronDown, ChevronLeft, ChevronRight, MapPin, Sparkles, Building, ArrowRight, Settings, Upload } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, MapPin, Sparkles, Building, ArrowRight } from 'lucide-react';
 import { officetelData, mdData, DEFAULT_MD_DATA } from '../constants';
 
 interface StoreUnit {
@@ -255,23 +255,14 @@ export default function MDConfig() {
   const [activeUnit, setActiveUnit] = useState<string>('118호');
   const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
   const [isMobileExpanded, setIsMobileExpanded] = useState<boolean>(false);
-  const [isEditMode, setIsEditMode] = useState<boolean>(false);
-  const [sectionTitle, setSectionTitle] = useState<string>(() => {
-    const raw = localStorage.getItem('site_custom_md_section_title');
-    if (raw === '수원덕산병원 상가 입점 가이드' || !raw) {
-      return 'e편한세상시티 고색 상가 입점 가이드';
-    }
-    return raw;
-  });
-  const [blueprintImg, setBlueprintImg] = useState<string>(() => {
-    return localStorage.getItem('site_custom_md_blueprint_img') || 'https://i.ibb.co/pjDBc2bh/image.png';
-  });
+  const sectionTitle = 'e편한세상시티 고색 상가 입점 가이드';
+  const blueprintImg = 'https://i.ibb.co/pjDBc2bh/image.png';
 
   const [aspectRatio, setAspectRatio] = useState<number>(1.6);
 
   useEffect(() => {
     const img = new Image();
-    img.src = blueprintImg || "https://i.ibb.co/pjDBc2bh/image.png";
+    img.src = blueprintImg;
     img.onload = () => {
       if (img.naturalWidth && img.naturalHeight) {
         setAspectRatio(img.naturalWidth / img.naturalHeight);
@@ -279,76 +270,9 @@ export default function MDConfig() {
     };
   }, [blueprintImg]);
 
-  const [units, setUnits] = useState<StoreUnit[]>(STORE_UNITS);
+  const units = STORE_UNITS;
 
   const selectedUnit = units.find(u => u.id === activeUnit) || units[0];
-
-  const updateUnitValue = (id: string, field: keyof StoreUnit, value: any) => {
-    const updated = units.map(u => {
-      if (u.id === id) {
-        return { ...u, [field]: value };
-      }
-      return u;
-    });
-    setUnits(updated);
-
-    // Sync to sitewise mdData for Admin panel compatibility
-    const adminFormat = updated.map(u => ({
-      id: u.id,
-      type: u.type,
-      area: u.area,
-      desc: u.desc,
-      image: u.images[0] || '',
-      coords: u.coords,
-      images: u.images,
-      category: u.category,
-      categoryStyle: u.categoryStyle,
-      recommendation: u.recommendation
-    }));
-    localStorage.setItem('site_custom_md_data', JSON.stringify(adminFormat));
-  };
-
-  const handleImageUpload = (file: File, callback: (base64: string) => void) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 1200;
-        const MAX_HEIGHT = 800;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          const compressed = canvas.toDataURL('image/jpeg', 0.7);
-          callback(compressed);
-        } else {
-          callback(e.target?.result as string);
-        }
-      };
-      img.onerror = () => {
-        callback(reader.result as string);
-      };
-      img.src = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  };
 
   return (
     <section 
@@ -410,26 +334,11 @@ export default function MDConfig() {
             className="text-center"
           >
             <span className="text-accent font-bold tracking-[0.2em] text-[11px] uppercase block">Premium MD Curation</span>
-            {isEditMode ? (
-              <div className="max-w-2xl mx-auto mb-4 px-6">
-                <label className="block text-[10px] font-bold text-accent mb-1 uppercase tracking-wider">대시보드 메인 타이틀 편집</label>
-                <input 
-                  type="text" 
-                  className="w-full text-center text-xl sm:text-2xl md:text-3xl font-bold border border-accent/40 bg-white px-4 py-2 text-stone-900 rounded-md focus:outline-none focus:ring-1 focus:ring-accent"
-                  value={sectionTitle} 
-                  onChange={(e) => {
-                    setSectionTitle(e.target.value);
-                    localStorage.setItem('site_custom_md_section_title', e.target.value);
-                  }} 
-                />
-              </div>
-            ) : (
-              <div className="flex flex-col items-center">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-stone-900 mt-4 tracking-tight leading-tight break-keep">
-                  {sectionTitle}
-                </h2>
-              </div>
-            )}
+            <div className="flex flex-col items-center">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-stone-900 mt-4 tracking-tight leading-tight break-keep">
+                {sectionTitle}
+              </h2>
+            </div>
             <div className="w-16 h-1 bg-accent mx-auto mt-4 rounded-full" />
           </motion.div>
         </div>
@@ -486,98 +395,6 @@ export default function MDConfig() {
                       </p>
                     </div>
 
-                    {/* 모바일 실시간 편집 폼 */}
-                    {isEditMode && (
-                      <div className="mx-5 p-4 bg-white border border-accent/20 rounded-xl space-y-4 shadow-sm mb-4">
-                        <h5 className="text-xs font-semibold text-accent flex items-center gap-1">
-                          <Sparkles className="w-3.5 h-3.5" /> {unit.id} 정보 및 미디어 실시간 수정
-                        </h5>
-                        
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">전용면적</label>
-                            <input 
-                              type="text" 
-                              value={unit.area} 
-                              onChange={(e) => updateUnitValue(unit.id, 'area', e.target.value)}
-                              className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2 py-1"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">대표 샵 업종</label>
-                            <input 
-                              type="text" 
-                              value={unit.type} 
-                              onChange={(e) => updateUnitValue(unit.id, 'type', e.target.value)}
-                              className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2 py-1"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">상가 비주얼 카피라이팅</label>
-                          <input 
-                            type="text" 
-                            value={unit.desc} 
-                            onChange={(e) => updateUnitValue(unit.id, 'desc', e.target.value)}
-                            className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2 py-1"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-[10px] font-semibold text-stone-500 mb-0.5">권장 테넌트(MD) 리스트</label>
-                          <textarea 
-                            rows={2}
-                            value={unit.recommendation} 
-                            onChange={(e) => updateUnitValue(unit.id, 'recommendation', e.target.value)}
-                            className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2 py-1"
-                          />
-                        </div>
-
-                        {/* 이미지 관리 */}
-                        <div className="space-y-1.5 border-t border-stone-100 pt-3">
-                          <span className="block text-[10px] font-semibold text-stone-500">📸 실사 분위기 슬라이더 업로드 (최대 6장)</span>
-                          {[0, 1, 2, 3, 4, 5].map((imgIdx) => {
-                            const imgUrl = unit.images && unit.images[imgIdx] ? unit.images[imgIdx] : '';
-                            return (
-                              <div key={imgIdx} className="flex gap-2 items-center">
-                                <span className="text-[10px] font-semibold text-stone-400 w-3">#{imgIdx + 1}</span>
-                                <input 
-                                  type="text" 
-                                  value={imgUrl} 
-                                  placeholder="이미지 URL 주소 또는 우측 파일 업로드"
-                                  onChange={(e) => {
-                                    const newImages = [...(unit.images || [])];
-                                    newImages[imgIdx] = e.target.value;
-                                    updateUnitValue(unit.id, 'images', newImages);
-                                  }}
-                                  className="flex-1 text-[10px] font-mono border border-stone-300 rounded px-2 py-1 bg-white"
-                                />
-                                <label className="flex items-center gap-1 px-2.5 py-1 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded text-[10px] font-bold cursor-pointer whitespace-nowrap">
-                                  <Upload className="w-3 h-3 text-stone-600" />
-                                  <input 
-                                    type="file" 
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) {
-                                        handleImageUpload(file, (base64) => {
-                                          const newImages = [...(unit.images || [])];
-                                          newImages[imgIdx] = base64;
-                                          updateUnitValue(unit.id, 'images', newImages);
-                                        });
-                                      }
-                                    }}
-                                  />
-                                </label>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -614,32 +431,6 @@ export default function MDConfig() {
                   </h2>
                 </div>
 
-                {/* 도면 도색 관리 퀵 컨트롤 */}
-                {isEditMode && (
-                  <div className="bg-amber-50/50 border border-accent/20 p-2.5 rounded-lg flex items-center gap-2 max-w-xs shrink-0 z-20">
-                    <div className="text-[10px] text-stone-700 leading-none">
-                      <span className="font-bold text-accent block mb-1">🗺️ 1층 도면 평면도 교체</span>
-                      <label className="flex items-center gap-1 px-2 py-1 bg-white hover:bg-stone-50 border border-stone-300 rounded text-[9px] font-bold cursor-pointer transition-colors">
-                        <Upload className="w-2.5 h-2.5 text-stone-600" />
-                        파일 선택
-                        <input 
-                          type="file" 
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              handleImageUpload(file, (base64) => {
-                                setBlueprintImg(base64);
-                                localStorage.setItem('site_custom_md_blueprint_img', base64);
-                              });
-                            }
-                          }}
-                        />
-                      </label>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* 이미지와 SVG 애니메이션 코드가 들어가는 영역 (액자 외부 여백 추가) */}
@@ -1014,97 +805,6 @@ export default function MDConfig() {
                                 </div>
                               </div>
 
-                              {/* PC 실시간 편집 폼 */}
-                              {isEditMode && (
-                              <div className="p-4 bg-white border border-accent/20 rounded-xl mt-4 space-y-4 shadow-inner">
-                                <h5 className="text-xs font-semibold text-accent flex items-center gap-1">
-                                  <Sparkles className="w-3.5 h-3.5" /> {unit.id} 정보 및 미디어 실시간 수정
-                                </h5>
-                                
-                                <div className="grid grid-cols-2 gap-3">
-                                  <div>
-                                    <label className="block text-[10px] font-semibold text-stone-500 mb-1">전용면적</label>
-                                    <input 
-                                      type="text" 
-                                      value={unit.area} 
-                                      onChange={(e) => updateUnitValue(unit.id, 'area', e.target.value)}
-                                      className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2.5 py-1.5"
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="block text-[10px] font-semibold text-stone-500 mb-1">대표 샵 업종</label>
-                                    <input 
-                                      type="text" 
-                                      value={unit.type} 
-                                      onChange={(e) => updateUnitValue(unit.id, 'type', e.target.value)}
-                                      className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2.5 py-1.5"
-                                    />
-                                  </div>
-                                </div>
-
-                                <div>
-                                  <label className="block text-[10px] font-semibold text-stone-500 mb-1">상가 비주얼 카피라이팅</label>
-                                  <input 
-                                    type="text" 
-                                    value={unit.desc} 
-                                    onChange={(e) => updateUnitValue(unit.id, 'desc', e.target.value)}
-                                    className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2.5 py-1.5"
-                                  />
-                                </div>
-
-                                <div>
-                                  <label className="block text-[10px] font-semibold text-stone-500 mb-1">권장 테넌트(MD) 리스트</label>
-                                  <textarea 
-                                    rows={2}
-                                    value={unit.recommendation} 
-                                    onChange={(e) => updateUnitValue(unit.id, 'recommendation', e.target.value)}
-                                    className="w-full text-xs font-semibold bg-white border border-stone-300 rounded px-2.5 py-1.5"
-                                  />
-                                </div>
-
-                                {/* 이미지 업로드 */}
-                                <div className="space-y-1.5 border-t border-stone-100 pt-3">
-                                  <span className="block text-[10px] font-semibold text-stone-500">📸 실사 분위기 슬라이더 업로드 (최대 6장)</span>
-                                  {[0, 1, 2, 3, 4, 5].map((imgIdx) => {
-                                    const imgUrl = unit.images && unit.images[imgIdx] ? unit.images[imgIdx] : '';
-                                    return (
-                                      <div key={imgIdx} className="flex gap-2 items-center">
-                                        <span className="text-[10px] font-semibold text-stone-400 w-3">#{imgIdx + 1}</span>
-                                        <input 
-                                          type="text" 
-                                          value={imgUrl} 
-                                          placeholder="이미지 URL 주소 또는 우측 파일 업로드"
-                                          onChange={(e) => {
-                                            const newImages = [...(unit.images || [])];
-                                            newImages[imgIdx] = e.target.value;
-                                            updateUnitValue(unit.id, 'images', newImages);
-                                          }}
-                                          className="flex-1 text-[10px] font-mono border border-stone-300 rounded px-2 py-1 bg-white"
-                                        />
-                                        <label className="flex items-center gap-1 px-2.5 py-1 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded text-[10px] font-bold cursor-pointer whitespace-nowrap">
-                                          <Upload className="w-3 h-3 text-stone-600" />
-                                          <input 
-                                            type="file" 
-                                            accept="image/*"
-                                            className="hidden"
-                                            onChange={(e) => {
-                                              const file = e.target.files?.[0];
-                                              if (file) {
-                                                handleImageUpload(file, (base64) => {
-                                                  const newImages = [...(unit.images || [])];
-                                                  newImages[imgIdx] = base64;
-                                                  updateUnitValue(unit.id, 'images', newImages);
-                                                });
-                                              }
-                                            }}
-                                          />
-                                        </label>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            )}
                           </div>
                         </div>
                       </motion.div>
