@@ -27,7 +27,7 @@ const COLS: { up: boolean; top: number; tiles: Tile[] }[] = [
   ] },
   { up: true, top: -10, tiles: [
     { src: '/photos/stores/shop-124-1.jpg', cap: '우지커피 · 124호' },
-    { src: '/photos/stores/food-124-1.jpg', cap: '우지커피 시그니처 라떼' },
+    { src: '/photos/stores/food-124-1.jpg', cap: '우지커피 프루티 슈페너' },
     { src: '/photos/stores/shop-123-in-1.jpg', cap: '메가커피 · 123호' },
     { src: '/photos/street-08.jpg', pos: '22% 50%', cap: '닭한상 · 12월 오픈' },
   ] },

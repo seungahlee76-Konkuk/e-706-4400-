@@ -22,7 +22,7 @@ type Row = { unit: string; tag: TagKey; title: string; sub: string };
 
 // 왼쪽 카드: 입점 소식
 const NEWS: Row[] = [
-  { unit: '129호', tag: 'work', title: '닭한상 (삼계탕·닭볶음탕·닭개장)', sub: '잔금 완료, 11월 14일 인테리어 착공' },
+  { unit: '129호', tag: 'work', title: '닭한상 (삼계탕·닭볶음탕·닭개장)', sub: '인테리어 중' },
   { unit: '129호', tag: 'soon', title: '닭한상 오픈', sub: '12월 말 예정' },
   { unit: '127호', tag: 'nego', title: '베이커리 프랜차이즈', sub: '매장을 운영하실 가맹 임차인 모집 중' },
 ];
