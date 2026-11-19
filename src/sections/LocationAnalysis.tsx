@@ -445,15 +445,15 @@ export default function LocationAnalysis() {
             {/* Giant Number (Styled with custom Deep Teal #005B5B & thick Extra Bold weight) */}
             <div className="group relative block">
               <a 
-                href="tel:010-3370-8602"
+                href="tel:031-293-1073"
                 className="font-sans font-black text-4xl sm:text-5xl md:text-5xl lg:text-5xl tracking-tighter leading-none inline-block transition-all duration-200 cursor-pointer text-[#005B5B] hover:text-[#006666] hover:underline hover:scale-[1.01]"
               >
-                010-3370-8602
+                031)293-1073
               </a>
               
               {/* [전화 연결 안내 카피 추가] */}
               <a 
-                href="tel:010-3370-8602"
+                href="tel:031-293-1073"
                 className="mt-3 flex items-center gap-1.5 text-sm sm:text-base font-semibold tracking-tight transition-all duration-200 cursor-pointer hover:underline text-[#64748b]"
               >
                 <span className="text-[#005B5B] font-bold mr-0.5">📞</span>

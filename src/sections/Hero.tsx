@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ArrowDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { PROJECT_INFO } from '../constants';
+import { Link } from '../lib/router';
 
 export default function Hero() {
   const [currentImage, setCurrentImage] = useState(0);
@@ -91,18 +92,18 @@ export default function Hero() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-xs mx-auto sm:max-w-none">
-            <a 
-              href="#contact" 
+            <Link 
+              to="/store#contact" 
               className="w-full sm:w-auto px-6 py-3.5 sm:px-10 sm:py-5 bg-accent text-white font-bold rounded shadow-2xl transition-all hover:bg-[#e66400] hover:scale-105 active:scale-95 text-xs sm:text-sm md:text-base text-center"
             >
               상담 신청하기
-            </a>
-            <a 
-              href="#overview" 
+            </Link>
+            <Link 
+              to="/store/overview" 
               className="w-full sm:w-auto px-6 py-3.5 sm:px-10 sm:py-5 bg-white/10 backdrop-blur-md text-white font-bold border border-white/20 rounded transition-all hover:bg-white/20 shadow-xl text-xs sm:text-sm md:text-base text-center"
             >
               자세히 보기
-            </a>
+            </Link>
           </div>
         </motion.div>
 

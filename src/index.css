@@ -1,10 +1,19 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
 @import "tailwindcss";
 
+@font-face { font-family: 'Paperlogy'; src: url('/fonts/Paperlogy-7Bold.woff2') format('woff2'); font-weight: 600 700; font-display: swap; }
+@font-face { font-family: 'Paperlogy'; src: url('/fonts/Paperlogy-8ExtraBold.woff2') format('woff2'); font-weight: 800 900; font-display: swap; }
+
 @theme {
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
-  --color-primary: #002C5F;
+  --color-primary: #0F1C3A;
   --color-accent: #FF6F00;
+  --color-accent-dark: #D24A0E;
+  --color-deepgreen: #1F4E3D;
+  --color-deepgreen-dark: #163A2D;
+  --color-mint: #7FD3CB;
+  --color-mint-soft: #D9F3EF;
+  --color-mint-ink: #0B3B37;
   --color-dark-bg: #001a3a;
   --color-dark-surface: #00254d;
 }
@@ -13,17 +22,26 @@
   html {
     scroll-behavior: smooth;
   }
-  @media (min-width: 1024px) {
-    html {
-      scroll-snap-type: y mandatory;
-    }
+  section[id], div[id] {
+    scroll-margin-top: 84px;
   }
   html, body {
     font-family: var(--font-sans);
     letter-spacing: -0.025em;
   }
+  h1, h2, .font-title {
+    font-family: 'Paperlogy', var(--font-sans);
+  }
   body {
     @apply text-gray-900;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  h1, h2, h3, p {
+    text-wrap: pretty;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
   }
 }
 

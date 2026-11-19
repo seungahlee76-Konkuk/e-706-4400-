@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { motion } from 'motion/react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { PROJECT_INFO } from '../constants';
@@ -14,22 +14,154 @@ interface ContactFormData {
   privacy: boolean;
 }
 
+const PREFERRED_TIME_OPTIONS = [
+  '평일 오전',
+  '평일 오후',
+  '평일 저녁',
+  '주말',
+  '언제든 가능',
+];
+
+function findInterestValueForRoom(room: string): string | undefined {
+  const clean = room.trim().replace(/호$/, '');
+  if (!clean) return undefined;
+  const options = PROJECT_INFO.interestOptions || [];
+  const exact = options.find((opt) => opt.value === `상업시설-${clean}호` || opt.value === room);
+  if (exact) return exact.value;
+  const byMatch = options.find((opt) => opt.value.includes(`${clean}호`) || opt.label.startsWith(`${clean}호`));
+  return byMatch?.value;
+}
+
 export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
+  const [customTime, setCustomTime] = useState('');
+  const [timeError, setTimeError] = useState('');
+  const [isRoomAutoHighlighted, setIsRoomAutoHighlighted] = useState(false);
+  const [isFlashing, setIsFlashing] = useState(false);
+  const flashTimerRef = useRef<number | null>(null);
   
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<ContactFormData>();
+  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<ContactFormData>();
+
+  const triggerCardFlash = () => {
+    if (flashTimerRef.current !== null) {
+      window.clearTimeout(flashTimerRef.current);
+    }
+    setIsFlashing(false);
+    window.requestAnimationFrame(() => {
+      setIsFlashing(true);
+      flashTimerRef.current = window.setTimeout(() => {
+        setIsFlashing(false);
+        flashTimerRef.current = null;
+      }, 950);
+    });
+  };
+
+  const applyAskedRoom = (room: string) => {
+    const matched = findInterestValueForRoom(room);
+    if (!matched) return;
+    setIsSuccess(false);
+    setValue('interest', matched, { shouldValidate: true, shouldDirty: true });
+    setIsRoomAutoHighlighted(true);
+    triggerCardFlash();
+  };
+
+  useEffect(() => {
+    try {
+      const savedRoom = sessionStorage.getItem('storeAskRoom');
+      if (savedRoom) {
+        applyAskedRoom(savedRoom);
+        window.setTimeout(() => {
+          try {
+            sessionStorage.removeItem('storeAskRoom');
+          } catch {
+            /* 무시 */
+          }
+        }, 0);
+      }
+    } catch {
+      /* 무시 */
+    }
+
+    const handleStoreAsk = (e: Event) => {
+      const room = (e as CustomEvent<{ room?: string }>).detail?.room;
+      if (room) {
+        applyAskedRoom(room);
+        window.setTimeout(() => {
+          try {
+            sessionStorage.removeItem('storeAskRoom');
+          } catch {
+            /* 무시 */
+          }
+        }, 0);
+      }
+    };
+
+    window.addEventListener('store-ask', handleStoreAsk);
+    return () => {
+      window.removeEventListener('store-ask', handleStoreAsk);
+      if (flashTimerRef.current !== null) {
+        window.clearTimeout(flashTimerRef.current);
+      }
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const toggleTimeOption = (option: string) => {
+    setSelectedTimes((prev) => {
+      const next = prev.includes(option)
+        ? prev.filter((item) => item !== option)
+        : [...prev, option];
+      if (next.length > 0 || customTime.trim()) {
+        setTimeError('');
+      }
+      return next;
+    });
+  };
+
+  const buildPreferredTime = () => {
+    const parts: string[] = [];
+    if (selectedTimes.length > 0) {
+      parts.push(selectedTimes.join(', '));
+    }
+    const trimmedCustom = customTime.trim();
+    if (trimmedCustom) {
+      parts.push(trimmedCustom);
+    }
+    return parts.join(' · ').slice(0, 80);
+  };
+
+  const onInvalid = () => {
+    if (selectedTimes.length === 0 && !customTime.trim()) {
+      setTimeError('희망 시간을 선택하거나 적어 주세요.');
+    }
+  };
 
   const onSubmit = async (data: ContactFormData) => {
+    const preferredTime = buildPreferredTime();
+    if (!preferredTime) {
+      setTimeError('희망 시간을 선택하거나 적어 주세요.');
+      return;
+    }
+
+    const cleanName = data.name.trim().slice(0, 64);
+    const cleanPhone = data.phone.trim().slice(0, 24);
+    const cleanInterest = data.interest.trim().slice(0, 64);
+    if (!cleanName || !cleanPhone || !cleanInterest) {
+      alert('성함, 연락처, 관심 호실을 모두 입력해주세요.');
+      return;
+    }
+
     setIsSubmitting(true);
     const leadId = 'lead-' + Math.random().toString(36).substring(2, 11);
     try {
       // 1. Submit to Firestore database
       await setDoc(doc(db, 'leads', leadId), {
         id: leadId,
-        name: data.name,
-        phone: data.phone,
-        interest: data.interest,
+        name: cleanName,
+        phone: cleanPhone,
+        interest: cleanInterest,
+        preferredTime,
         createdAt: serverTimestamp(),
       });
 
@@ -42,10 +174,11 @@ export default function ContactForm() {
             Accept: "application/json",
           },
           body: JSON.stringify({
-            name: data.name,
-            phone: data.phone,
-            interest: data.interest,
-            _subject: `[${PROJECT_INFO.name}] 상담 신청 - ${data.name}`,
+            name: cleanName,
+            phone: cleanPhone,
+            interest: cleanInterest,
+            희망시간: preferredTime,
+            _subject: `[${PROJECT_INFO.name}] 상담 신청 - ${cleanName}`,
           }),
         });
       } catch (err) {
@@ -53,6 +186,10 @@ export default function ContactForm() {
       }
 
       setIsSuccess(true);
+      setSelectedTimes([]);
+      setCustomTime('');
+      setTimeError('');
+      setIsRoomAutoHighlighted(false);
       reset();
     } catch (error) {
       console.error('Submission failed:', error);
@@ -68,11 +205,22 @@ export default function ContactForm() {
   };
 
   return (
-    <section 
-      id="contact" 
-      className="relative py-10 md:py-16 text-gray-905 px-6 bg-gradient-to-b from-white to-slate-50/70 overflow-hidden"
-      style={{ scrollSnapAlign: 'start' }}
-    >
+    <>
+      <style>{`
+        @keyframes cfAskFlash {
+          0% { box-shadow: 0 45px 100px -20px rgba(15,29,45,0.08), 0 0 0 0 rgba(255,111,0,0.55); }
+          100% { box-shadow: 0 45px 100px -20px rgba(15,29,45,0.08), 0 0 0 18px rgba(255,111,0,0); }
+        }
+        .cf-flash {
+          animation: cfAskFlash 0.9s ease-out 1;
+        }
+      `}</style>
+      <span id="consult-form" aria-hidden="true" className="block h-0 scroll-mt-[72px]" />
+      <section 
+        id="contact" 
+        className="relative scroll-mt-[72px] py-10 md:py-16 text-gray-905 px-6 bg-gradient-to-b from-white to-slate-50/70 overflow-hidden"
+        style={{ scrollSnapAlign: 'start' }}
+      >
       {/* Decorative Blur BG Orb */}
       <div className="absolute bottom-0 left-0 w-[450px] h-[450px] bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
 
@@ -86,7 +234,7 @@ export default function ContactForm() {
           <span className="text-accent font-bold tracking-[0.2em] text-[11px] uppercase">Consultation</span>
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-gray-900 mt-4 tracking-tight leading-tight break-keep">상담 신청 및 예약</h2>
           <p className="mt-4 text-gray-550 font-bold break-keep text-base max-w-lg mx-auto whitespace-pre-line leading-relaxed">
-            {"하단에 정보를 남겨주시면,\n실시간 잔여 호실 현황과 분양가를\n안내해 드리겠습니다."}
+            {"하단에 정보를 남겨 주시면,\n실시간 잔여 호실 현황과 함께\n이 상권을 직접 보고 판단하실 수 있게 안내해 드립니다."}
           </p>
           <div className="w-14 h-1 bg-accent mx-auto mt-4 md:mt-6 rounded-full" />
         </motion.div>
@@ -112,7 +260,10 @@ export default function ContactForm() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-120px" }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="bg-white text-gray-900 overflow-hidden rounded-3xl flex flex-col md:flex-row shadow-[0_45px_100px_-20px_rgba(15,29,45,0.08)] border border-gray-100/90 relative z-10"
+            className={cn(
+              "bg-white text-gray-900 overflow-hidden rounded-3xl flex flex-col md:flex-row shadow-[0_45px_100px_-20px_rgba(15,29,45,0.08)] border border-gray-100/90 relative z-10",
+              isFlashing && "cf-flash"
+            )}
           >
             {/* Elegant Warm Beige Info Panel */}
             <div className="md:w-1/3 bg-[#EBEBE4] p-10 flex flex-col justify-between relative overflow-hidden border-b md:border-b-0 md:border-r border-gray-200/60">
@@ -124,24 +275,29 @@ export default function ContactForm() {
                   </div>
                   <div>
                     <label className="text-[10px] text-gray-500 font-black tracking-widest uppercase mb-1.5 block">운영시간</label>
-                    <p className="text-base sm:text-lg font-bold text-stone-700 tracking-tight">{PROJECT_INFO.businessHours}</p>
+                    <p className="text-base sm:text-lg font-bold text-stone-700 tracking-tight leading-snug">
+                      전화 상담 연중무휴
+                      <span className="block mt-1">10:00 - 18:00</span>
+                    </p>
+                    <p className="mt-2 text-xs text-gray-500 leading-relaxed font-medium break-keep">
+                      홍보관 방문은 100% 사전 예약제예요. 전화나 상담 신청으로 날짜를 먼저 잡아 주세요.
+                    </p>
                   </div>
                 </div>
-              </div>
-              <div className="mt-14 pt-10 border-t border-gray-300 relative z-10">
-                <p className="text-[11px] text-gray-500 leading-relaxed font-semibold italic">
-                  * 정밀한 상담을 위해 담당자 지정제로 운영되고 있습니다. 방문 전 미리 예약해주시면 더욱 편리합니다.
-                </p>
               </div>
             </div>
  
             {/* Form Panel */}
-            <form onSubmit={handleSubmit(onSubmit)} className="md:w-2/3 p-10 space-y-6">
+            <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="md:w-2/3 p-10 space-y-6">
               <div className="grid sm:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs font-black text-gray-500 mb-2 uppercase tracking-wider">성함</label>
                   <input
-                    {...register('name', { required: '성함을 입력해주세요.' })}
+                    {...register('name', {
+                      required: '성함을 입력해주세요.',
+                      maxLength: { value: 64, message: '성함은 64자 이내로 입력해주세요.' }
+                    })}
+                    maxLength={64}
                     className={cn(
                       "w-full px-4 py-3 bg-slate-50/50 border rounded-xl text-gray-900 focus:outline-none focus:border-accent focus:bg-white transition-all font-semibold",
                       errors.name ? 'border-red-500' : 'border-gray-200'
@@ -155,8 +311,10 @@ export default function ContactForm() {
                   <input
                     {...register('phone', { 
                       required: '연락처를 입력해주세요.',
+                      maxLength: { value: 24, message: '연락처는 24자 이내로 입력해주세요.' },
                       pattern: { value: /^[0-9-]+$/, message: '숫자와 하이픈만 입력 가능합니다.' }
                     })}
+                    maxLength={24}
                     className={cn(
                       "w-full px-4 py-3 bg-slate-50/50 border rounded-xl text-gray-900 focus:outline-none focus:border-accent focus:bg-white transition-all font-semibold",
                       errors.phone ? 'border-red-300' : 'border-gray-200'
@@ -173,10 +331,17 @@ export default function ContactForm() {
                 </label>
                 <div className="relative">
                   <select
-                    {...register('interest', { required: '항목을 선택해주세요.' })}
+                    {...register('interest', {
+                      required: '항목을 선택해주세요.',
+                      onChange: () => setIsRoomAutoHighlighted(false),
+                    })}
                     className={cn(
-                      "w-full px-4 py-3 bg-slate-50/50 border rounded-xl text-gray-900 focus:outline-none focus:border-accent focus:bg-white transition-all appearance-none font-semibold",
-                      errors.interest ? 'border-red-500' : 'border-gray-200'
+                      "w-full px-4 py-3 bg-slate-50/50 border rounded-xl focus:outline-none focus:bg-white transition-all appearance-none font-semibold",
+                      isRoomAutoHighlighted
+                        ? "border-[#FF6F00] text-[#D24A0E] focus:border-[#FF6F00]"
+                        : errors.interest
+                          ? "border-red-500 text-gray-900 focus:border-accent"
+                          : "border-gray-200 text-gray-900 focus:border-accent"
                     )}
                   >
                     <option value="">항목을 선택하세요</option>
@@ -217,6 +382,50 @@ export default function ContactForm() {
                 </div>
                 {errors.interest && <p className="mt-1 text-xs text-red-500">{errors.interest.message}</p>}
               </div>
+
+              <div>
+                <label className="block text-xs font-black text-gray-500 mb-2 uppercase tracking-wider">
+                  연락·방문 희망 시간
+                </label>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {PREFERRED_TIME_OPTIONS.map((option) => {
+                    const isSelected = selectedTimes.includes(option);
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => toggleTimeOption(option)}
+                        className={cn(
+                          "h-10 px-4 rounded-full text-xs sm:text-sm font-semibold border transition-colors cursor-pointer",
+                          isSelected
+                            ? "bg-deepgreen text-white border-deepgreen"
+                            : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
+                        )}
+                      >
+                        {option}
+                      </button>
+                    );
+                  })}
+                </div>
+                <input
+                  type="text"
+                  maxLength={60}
+                  value={customTime}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setCustomTime(val);
+                    if (selectedTimes.length > 0 || val.trim()) {
+                      setTimeError('');
+                    }
+                  }}
+                  className={cn(
+                    "w-full px-4 py-3 bg-slate-50/50 border rounded-xl text-gray-900 focus:outline-none focus:border-accent focus:bg-white transition-all font-semibold text-sm",
+                    timeError ? 'border-red-500' : 'border-gray-200'
+                  )}
+                  placeholder="구체적인 날짜·시간이 있으면 적어 주세요 (예: 토요일 11시 홍보관 방문)"
+                />
+                {timeError && <p className="mt-1 text-xs text-red-500">{timeError}</p>}
+              </div>
  
               <div className="pt-4">
                 <label className="flex items-start gap-3 cursor-pointer group">
@@ -253,5 +462,6 @@ export default function ContactForm() {
         )}
       </div>
     </section>
+    </>
   );
 }

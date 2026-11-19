@@ -17,58 +17,75 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email == "seungahlee76@gmail.com" && request.auth.token.email_verified == true)
+      );
     }
 
     // --- Entity-Level Validation Helpers ---
     function isValidLead(data) {
       return data.keys().hasAll(['id', 'name', 'phone', 'interest', 'createdAt'])
-        && data.keys().size() == 5
+        && data.keys().hasOnly(['id', 'name', 'phone', 'interest', 'createdAt', 'preferredTime'])
         && data.id is string && data.id.size() <= 128 && data.id.matches('^[a-zA-Z0-9_\\-]+$')
         && data.name is string && data.name.size() > 0 && data.name.size() <= 64
         && data.phone is string && data.phone.size() > 0 && data.phone.size() <= 24
         && data.interest is string && data.interest.size() > 0 && data.interest.size() <= 64
+        && (!('preferredTime' in data) || (data.preferredTime is string && data.preferredTime.size() <= 80))
         && data.createdAt == request.time;
+    }
+
+    function isValidAdmin(data) {
+      return data.keys().hasAll(['email', 'role'])
+        && data.keys().hasOnly(['email', 'role'])
+        && data.email is string && data.email.size() > 0 && data.email.size() <= 128
+        && data.role is string && data.role == 'admin';
     }
 
     // --- Collection matching ---
     
-    // Leaded registration submissions
+    // Lead registration submissions
     match /leads/{leadId} {
       // Create is open to any user/guest as long as they provide a valid schema structure
-      allow create: if isValidId(leadId) && isValidLead(request.resource.data);
+      allow create: if isValidId(leadId)
+        && isValidLead(request.resource.data)
+        && request.resource.data.id == leadId
+        && request.resource.data.createdAt == request.time;
       
       // Reading, updating and deleting leads is restricted to verified administrators
-      allow get, list, update, delete: if isAdmin();
-    }
-
-    // Site configuration updates stored centrally
-    match /site_config/{configId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow get, list: if isAdmin();
+      allow update: if isAdmin()
+        && isValidId(leadId)
+        && isValidLead(request.resource.data)
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'phone', 'interest']);
+      allow delete: if isAdmin() && isValidId(leadId);
     }
 
     // Administrators catalog mapping table
     match /admins/{adminId} {
       // Admins can be looked up by signed-in users matching their own ID, or any existing admin
-      allow get: if isSignedIn() && (request.auth.uid == adminId || exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
-      allow list: if isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      allow get: if isSignedIn() && (request.auth.uid == adminId || isAdmin());
+      allow list: if false;
       
       // Bootstrap creation allows signing in with the designated admin email
-      allow create: if isSignedIn() 
-        && request.auth.uid == adminId 
+      allow create: if isSignedIn()
+        && isValidId(adminId)
+        && isValidAdmin(request.resource.data)
+        && request.auth.uid == adminId
         && request.auth.token.email == "seungahlee76@gmail.com"
-        && request.auth.token.email_verified == true;
+        && request.auth.token.email_verified == true
+        && request.resource.data.email == request.auth.token.email;
       
       // Allow modifying non-role properties or admin adjustments
-      allow update: if isSignedIn() 
-        && exists(/databases/$(database)/documents/admins/$(request.auth.uid)) 
+      allow update: if isAdmin()
+        && isValidId(adminId)
+        && isValidAdmin(request.resource.data)
         && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']);
       
       // Prevent self-lockout by forbidding deletion of own admin entry
-      allow delete: if isSignedIn() 
-        && exists(/databases/$(database)/documents/admins/$(request.auth.uid)) 
-        && request.auth.uid != adminId;
+      allow delete: if isAdmin() && isValidId(adminId) && request.auth.uid != adminId;
     }
   }
 }

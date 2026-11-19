@@ -4,18 +4,27 @@ export const DEFAULT_PROJECT_INFO = {
   brandSubName: 'CITY',
   location: '고색',
   businessHours: '연중무휴 10:00 - 18:00',
-  representativeNumber: '010.3370.8602',
-  interestLabel: '관심호실/품목',
+  representativeNumber: '031)293-1073',
+  showroomAddress: '경기도 수원시 고색동 서부로1670번길 11-9',
+  developer: '보원',
+  builder: 'DL이앤씨',
+  agency: '루에나파트너스 (대표 김지선)',
+  interestLabel: '관심 호실',
   interestOptions: [
-    { value: '상업시설-117호', label: '117호 (라멘집 / 개인 필라테스)', group: '상업시설 (1F)' },
-    { value: '상업시설-118호', label: '118호 (브런치카페 / 베이커리카페)', group: '상업시설 (1F)' },
-    { value: '상업시설-119호', label: '119호 (문전약국)', group: '상업시설 (1F)' },
-    { value: '상업시설-126호', label: '126호 (한식집 / 샤브샤브전문점)', group: '상업시설 (1F)' },
-    { value: '상업시설-127호', label: '127호 (한식집 / 샤브샤브전문점)', group: '상업시설 (1F)' },
-    { value: '상업시설-128호', label: '128호 (국밥집 / 육개장)', group: '상업시설 (1F)' },
-    { value: '상업시설-129호', label: '129호 (프랜차이즈 맥주전문점)', group: '상업시설 (1F)' },
-    { value: '상업시설-기타', label: '기타 상업시설 문의', group: '상업시설 (1F)' },
-    { value: '오피스텔-기타', label: '오피스텔 문의', group: '주거용 오피스텔' },
+    { value: '상업시설-117호', label: '117호 (1:1 필라테스)', group: '상업시설 (1F)' },
+    { value: '상업시설-118호', label: '118호 (갈비탕·냉면 / 브런치)', group: '상업시설 (1F)' },
+    { value: '상업시설-119호', label: '119호 (약국 · 분양)', group: '상업시설 (1F)' },
+    { value: '상업시설-120호', label: '120호 (약국 · 분양)', group: '상업시설 (1F)' },
+    { value: '상업시설-122호', label: '122호 (약국 · 임대·분양)', group: '상업시설 (1F)' },
+    { value: '상업시설-126호', label: '126호 (음식점 / 사무실)', group: '상업시설 (1F)' },
+    { value: '상업시설-127호', label: '127호 (베이커리)', group: '상업시설 (1F)' },
+    { value: '상업시설-128호', label: '128호 (쌀국수)', group: '상업시설 (1F)' },
+    { value: '상업시설-129호', label: '129호 (임차인 있는 수익형 분양)', group: '상업시설 (1F)' },
+    { value: '상업시설-132호', label: '132호 (1인 미용실 / 미술 교습소)', group: '상업시설 (1F)' },
+    { value: '상업시설-137호', label: '137호 (호프집 / 애견미용)', group: '상업시설 (1F)' },
+    { value: '상업시설-139호', label: '139호 (호프·이자카야)', group: '상업시설 (1F)' },
+    { value: '상업시설-추천', label: '아직 모름 · 맞는 호실 추천 원함', group: '상업시설 (1F)' },
+    { value: '오피스텔-기타', label: '오피스텔 84타입 문의', group: '주거용 오피스텔' },
     { value: '기타', label: '기타 문의', group: '일반' }
   ],
   overview: [
@@ -38,7 +47,7 @@ export const DEFAULT_PROJECT_INFO = {
   heroSubtitle: '서수원의 미래 가치를 선점하는 압도적 브랜드 파워',
   heroFeatures: [
     { id: "01", label: "4,400세대 항아리 상권", desc: "고색 1·2지구 4,400여 세대의 중심 상업시설" },
-    { id: "02", label: "706병상 메디컬 수요", desc: "1차 457병상 2차 259병상 수원덕산병원 바로 앞 메인 스트리트" },
+    { id: "02", label: "439병상 메디컬 수요", desc: "439병상 수원덕산병원 정문 바로 앞 메인 스트리트" },
     { id: "03", label: "1군 브랜드 랜드마크", desc: "서수원의 가치를 리딩하는 e편한세상 상가" },
     { id: "04", label: "행정타운 365일 상권", desc: "권선구청 등 공공기관 500m 이내 직장인 수요" },
   ],
@@ -54,9 +63,9 @@ export const DEFAULT_PROJECT_INFO = {
 export const DEFAULT_ANALYSIS_DATA = [
   {
     title: '수원덕산병원 프리미엄',
-    desc: `1. 수원 TOP 3 메머드급 규모 및 원스톱 진료 체계
+    desc: `1. 메머드급 규모 및 원스톱 진료 체계
 
-1차 457병상, 최종 706병상 규모로 30여 개의 다양한 진료과를 운영합니다. 내과, 외과, 응급의학과 등 필수 진료과가 한곳에 집결되어 수술부터 재활까지 완벽한 원스톱 진료가 가능합니다.
+439병상 규모로 30여 개의 다양한 진료과를 운영합니다. 내과, 외과, 응급의학과 등 필수 진료과가 한곳에 집결되어 수술부터 재활까지 완벽한 원스톱 진료가 가능합니다.
 
 2. 존스홉킨스·빅5 출신 등 최상위 의료진 포진
 
@@ -104,12 +113,12 @@ export const DEFAULT_CARDNEWS_DATA = [
     title: '의료',
     subTitle: 'MEDICAL PREMIUM',
     mainTitle: '수원덕산병원 프리미엄',
-    headline: '706병상 수원 최대 핵심 메디컬 타워 바로 앞 초밀착 입지',
+    headline: '439병상 핵심 메디컬 타워 바로 앞 초밀착 입지',
     coverImage: 'https://i.ibb.co/mC3QHvwv/1.png',
     slides: [
       {
-        title: '수원 TOP 3 메머드급 규모 및 원스톱 진료 체계',
-        desc: '1차 457병상, 최종 706병상 규모로 30여 개의 다양한 진료과를 운영합니다. 필수 진료과가 한곳에집결되어 완벽한 원스톱 진료가 가능합니다.',
+        title: '메머드급 규모 및 원스톱 진료 체계',
+        desc: '439병상 규모로 30여 개의 다양한 진료과를 운영합니다. 필수 진료과가 한곳에집결되어 완벽한 원스톱 진료가 가능합니다.',
         image: 'https://i.ibb.co/ks3wxMWL/2.png'
       },
       {

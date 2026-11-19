@@ -1,0 +1,611 @@
+[모바일 2 · 최종] 입점추천 휴대폰 화면 정리 + 휴대폰 하단 상담 바 줄이기
+
+PC 화면은 그대로 두고, 휴대폰(1024px 미만) 화면만 정리하는 작업입니다.
+(앞서 보낸 "모바일 수정" 요청문의 전화번호·줄바꿈 작업은 그대로 유지해 주세요. 이 요청문의 StoreUnits.tsx가 최신본입니다.)
+
+■ 1. 입점추천 (src/sections/StoreUnits.tsx 전체 교체)
+- src/sections/StoreUnits.tsx 의 내용을 맨 아래 코드로 "통째로" 바꿔 주세요. (한 글자도 바꾸지 말고 그대로)
+- 이전 단계에서 이 파일에 맞춰 둔 것(예: 헤더 높이에 맞춘 scroll-mt 값)이 있다면 그 숫자만 다시 맞춰 주세요.
+- 휴대폰에서 바뀌는 점:
+    · 평수·업종 칩이 각각 한 줄로 나오고 옆으로 밀어서 고릅니다. (6줄 → 2줄)
+    · 1층 배치도가 세로로 세워져 한 화면에 보입니다. 병원과 정문이 위쪽. 칸에는 호실 번호·매장 이름만 짧게, 상태는 색으로 구분.
+    · 배치도의 주황 호실을 누르면 아래 호실 상세로 자동으로 내려갑니다.
+    · 배치도 아래 "실제 거리 모습" 띠: 129호 닭한상, 134·135호 장호덕 사진 2장 (public/photos/street-08.jpg, street-10.jpg)
+    · 호실 카드는 사진 왼쪽 + 글 오른쪽의 납작한 카드로, 한 화면에 3~4개씩 보입니다.
+    · 127호 문구: '베이커리 (가맹 운영 임차인 모집)'
+- PC에서는 지금처럼 가로 배치도, 줄 바꿈되는 칩, 3열 카드가 그대로 나옵니다.
+
+■ 2. 휴대폰 하단 고정 상담 바 줄이기 (StickyBottomForm)
+지금 휴대폰 하단 바가 체크박스·전화번호·성함·연락처·관심호실·큰 버튼까지 있어서 화면의 약 4분의 1을 가립니다. 휴대폰(1024px 미만)에서만 아래처럼 바꿔 주세요.
+- 하단 바를 한 줄(높이 약 60px, 위아래 여백 포함)로 줄이고 버튼 두 개만 둡니다:
+    왼쪽: [📞 전화 상담]  — 흰 바탕, 남색(#0F1C3A) 테두리·글씨, 누르면 tel:031-293-1073
+    오른쪽: [상담 신청]   — 주황(#FF6F00) 바탕, 흰 글씨, 누르면 상담 폼(#consult-form)으로 부드럽게 스크롤
+  두 버튼은 같은 높이(48px)로 나란히, 폭은 4:6 비율, 모서리 6px.
+- 휴대폰 하단 바의 성함·연락처·관심호실·개인정보 체크박스 입력칸은 없앱니다. (휴대폰 손님은 아래 상담 폼에서 입력)
+- 하단 바가 상담 폼 위를 지나가는 동안에는(상담 폼이 화면에 보이는 동안) 하단 바를 숨겨서 폼 버튼과 겹치지 않게 해 주세요.
+- 페이지 맨 아래 내용(푸터)이 하단 바에 가려지지 않도록 아래 여백을 하단 바 높이만큼 맞춰 주세요.
+- PC(1024px 이상) 하단 바는 지금 그대로 둡니다. ("상담 신청" / 마우스 올리면 "GO GO 고색!" 효과 포함)
+- 하단 바에서 보내던 데이터 형식과 저장 방식(Firebase·Formspree)은 PC 쪽 그대로 유지합니다.
+
+■ 건드리지 말 것
+- PC 화면 배치, StoreHero.tsx, StoreCalendar.tsx, 상담 폼 디자인·기능
+- 저장 필드(id, name, phone, interest, createdAt, preferredTime), Formspree, Firebase, 관리자 페이지
+- Google Analytics, naver-site-verification, robots, 인증 파일, viewport 메타
+- public 폴더의 이미지·폰트 파일 (추가·수정·삭제 금지)
+- 새 라이브러리 설치 금지, GitHub 동기화 금지
+
+■ 끝나면
+- 바뀐 파일 목록과, 휴대폰 미리보기에서 (1) 배치도 137호를 누르면 상세로 내려가는지, (2) 하단 "상담 신청"을 누르면 상담 폼으로 가는지 확인한 결과를 알려 주세요.
+
+────────── src/sections/StoreUnits.tsx (전체 교체) ──────────
+import { useMemo, useRef, useState, type CSSProperties } from 'react';
+
+/* ───────── 입점추천 (#units) + 호실 상세 (#detail) ─────────
+   호실 정보를 바꿀 때는 아래 ROOMS 데이터만 고치면 됩니다. */
+
+type Mode = 'rent' | 'sale';
+type TagKey = 'open' | 'nego' | 'done' | 'work' | 'soon' | 'income' | 'reserved' | 'saleonly' | 'rentonly';
+type Room = {
+  id: string;
+  name?: string;            // 표시 이름 (없으면 '118호')
+  mapName?: string;         // 배치도에 보일 이름 (약국 호실은 '약국')
+  size: '10' | '20' | '30'; // 평수 구간
+  uses: string[];           // 업종 필터 키
+  rentOK?: boolean;         // false면 임대 불가
+  saleOK?: boolean;         // false면 분양 불가
+  rentTag?: TagKey;         // 임대 탭에서 보일 태그 (기본 open)
+  saleTag?: TagKey;         // 분양 탭에서 보일 태그 (기본 open)
+  useTitle: string; useText: string; area: string; rent: string; sale: string; tenant: string; point: string;
+  why: string[];
+};
+
+const ROOMS: Room[] = [
+  { id: '118', size: '30', uses: ['food', 'office', 'edu', 'service'], useTitle: '갈비탕·냉면 · 브런치 · 사무소', useText: '갈비탕·냉면, 브런치 레스토랑 / 손해사정·보험 GA·노무사 등 사무소', area: '전용 36.35평 · 계약 75.14평', rent: '보증금 5,000만 · 월 350만 (부가세 별도) · 조정 협의 가능', sale: '분양가 9억 4,430만 원', tenant: '임차인 모집 중', point: '병원 통행로 인접 · 36평 큰 면적',
+    why: ['병원통행로 정면이라 외래 환자·보호자·직원이 매일 지나가는 첫 자리예요.', '약국 호실과 붙어 있어, 병원 정문에서 약국으로 이어지는 동선 위에 있어요.', '전용 36평으로 홀 좌석이나 상담 공간을 넉넉히 둘 수 있어요.'] },
+  { id: '119', mapName: '약국', name: '119호', size: '30', uses: ['pharmacy'], rentOK: false, rentTag: 'saleonly', useTitle: '약국 (분양 전용)', useText: '약국', area: '전용 58.81평 · 계약 121.87평', rent: '임대 불가 · 분양만 가능', sale: '분양가 122억 2,000만 원', tenant: '공실 · 분양으로만 진행', point: '병원 통행로 바로 앞 · 118호 옆',
+    why: ['병원 통행로에 바로 붙어 있어, 정문에서 나온 처방전 동선 위에 있어요.', '118호와 함께 병원 쪽 첫 줄을 이루는 자리예요.'] },
+  { id: '120', mapName: '약국', name: '120호', size: '30', uses: ['pharmacy'], rentOK: false, rentTag: 'saleonly', useTitle: '약국 (분양 전용)', useText: '약국', area: '전용 56.73평 · 계약 117.26평', rent: '임대 불가 · 분양만 가능', sale: '분양가 87억 8,000만 원', tenant: '공실 · 분양으로만 진행', point: '병원 통행로 바로 앞',
+    why: ['병원 통행로를 따라 이어지는 약국 자리예요.', '119호와 나란히 있어 병원 쪽 동선을 함께 받아요.'] },
+  { id: '122', mapName: '약국', name: '122호', size: '30', uses: ['pharmacy'], useTitle: '약국 (임대·분양 모두 가능)', useText: '약국', area: '전용 44.25평 · 계약 91.47평', rent: '보증금·월세 협의 · 전화 주시면 바로 알려 드려요', sale: '분양가 69억 원', tenant: '현재 분양홍보관으로 사용 중 · 약국 임차인 모집', point: '정문 바로 앞 · 홍보관 자리',
+    why: ['병원 정문에서 가장 가까운 호실 가운데 하나예요.', '약국 중 유일하게 임차로 들어올 수 있는 자리예요.', '지금은 분양홍보관으로 쓰고 있어, 입점 시기는 협의로 정해요.'] },
+  { id: '126', size: '20', uses: ['food', 'office'], useTitle: '음식점 · 사무실', useText: '음식점, 사무실', area: '전용 23.44평 · 계약 48.45평', rent: '보증금 5,000만 · 월 320만 (부가세 별도) · 조정 협의 가능', sale: '분양가 8억 3,780만 원', tenant: '임차인 모집 중', point: '외부 노출 · 주차장 인접 · 후면 확장형',
+    why: ['밖에서 바로 보이고 주차장 입구와 가까워 차로 오는 손님도 들르기 쉬워요.', '뒤쪽으로 공간이 넓어지는 구조라 주방이나 창고, 상담실을 두기 좋아요.', '옆 127호에 베이커리 입점을 협의 중이라 오가는 손님이 함께 늘어날 자리예요.'] },
+  { id: '127', size: '20', uses: ['food'], saleOK: false, saleTag: 'reserved', useTitle: '베이커리 (가맹 운영 임차인 모집)', useText: '베이커리 프랜차이즈 · 매장을 운영하실 가맹 임차인 모집', area: '전용 25.47평 · 계약 52.65평 · 전면 7m', rent: '보증금 5,000만 · 월 350만 (부가세 별도) · 조정 협의 가능', sale: '분양 협의 고객 있음', tenant: '베이커리 가맹 운영 임차인 모집 중 (프랜차이즈 본사와 입점 협의 중)', point: '외부 노출 · 주차장 인접 · 전면 7m',
+    why: ['전면 7m로 간판과 진열이 넓게 보여 베이커리에 유리해요.', '102동 상가 줄 가운데라 양옆 매장 손님이 함께 지나가요.', '대형 베이커리 프랜차이즈 본사와 입점을 협의하고 있어, 매장을 운영하실 분만 찾으면 돼요.'] },
+  { id: '128', size: '10', uses: ['food'], useTitle: '쌀국수', useText: '쌀국수 등 한 그릇 식사', area: '전용 16.50평 · 계약 34.10평', rent: '보증금 5,000만 · 월 270만 (부가세 별도) · 조정 협의 가능', sale: '분양가 7억 290만 원', tenant: '임차인 모집 중', point: '외부 노출 · 주차장 인접 · 전면 6m',
+    why: ['밖에서 바로 보이고 주차장 입구와 가까워 차로 오는 손님도 들르기 쉬워요.', '베이커리 자리와 닭한상 사이라 두 매장 손님이 앞을 지나가요.', '16평대 실속형이라 회전이 빠른 한 그릇 메뉴에 맞아요.'] },
+  { id: '129', size: '10', uses: ['food'], rentOK: false, rentTag: 'done', saleTag: 'income', useTitle: '닭한상 (임차 완료)', useText: '닭한상 · 삼계탕·닭볶음탕·닭개장', area: '전용 18.47평 · 계약 38.18평', rent: '임차 완료 (닭한상)', sale: '분양가 7억 8,810만 원 · 현재 임대 보증금 5,000만 / 월 300만 (부가세 별도)', tenant: '닭한상 임차 확정 · 인테리어 시작', point: '외부 노출 · 주차장 인접 · 전면 5.9m',
+    why: ['닭한상이 잔금을 마치고 인테리어를 시작했어요.', '분양받으면 첫날부터 임대료가 나오는 수익형 호실이에요.'] },
+  { id: '117', size: '10', uses: ['edu', 'service', 'office'], useTitle: '1:1 필라테스', useText: '1:1 필라테스 등 예약제 소형 업종', area: '전용 15.99평 · 계약 33.05평', rent: '보증금 3,000만 · 월 170만 (부가세 별도) · 조정 협의 가능', sale: '분양가 4억 5,440만 원', tenant: '임차인 모집 중', point: '병원 통행로 변 · 101동 첫 호실',
+    why: ['병원 통행로에서 단지로 들어서는 첫 호실이라 병원 직원과 외래 손님이 오가요.', '15평대 소형이라 1:1 필라테스처럼 예약제로 운영하는 업종의 고정비 부담이 작아요.'] },
+  { id: '132', size: '10', uses: ['service', 'edu', 'office'], useTitle: '1인 미용실 · 미술 교습소', useText: '1인 미용실, 미술·공방 교습소 등 예약제 소형 업종', area: '전용 13.34평 · 계약 27.57평', rent: '보증금 3,000만 · 월 140만 (부가세 별도) · 조정 협의 가능', sale: '분양가 3억 8,340만 원', tenant: '임차인 모집 중', point: '중앙 광장 인접 · 소형 호실',
+    why: ['단지 중앙 광장에 붙어 있어 입주민이 오가는 길목이에요.', '13평 소형이라 1인 미용실이나 미술 교습소처럼 예약제로 운영하는 업종에 맞아요.'] },
+  { id: '137', size: '10', uses: ['bar', 'pet', 'service'], useTitle: '호프집 · 애견미용', useText: '호프집 (136호와 합쳐 넓게 운영 가능), 애견미용', area: '전용 18.85평 · 계약 38.96평', rent: '보증금 5,000만 · 월 250만 (부가세 별도) · 조정 협의 가능', sale: '분양가 6억 8,870만 원', tenant: '임차인 모집 중', point: '외부 노출 · CU 옆 · 전면 6m',
+    why: ['바로 옆 136호와 합치면 전용 36.64평으로 넓게 쓸 수 있어요. (136호 임차는 소유자와 별도 협의)', '밖에서 잘 보이고 CU 옆이라 저녁에도 사람이 오가요.', '103동 주거 동선 쪽이라 애견미용처럼 주민이 단골이 되는 업종에도 맞아요.'] },
+  { id: '139', size: '10', uses: ['bar', 'food'], useTitle: '호프 · 이자카야 (단독)', useText: '호프·이자카야 등 저녁 상권 업종', area: '전용 15.91평 · 계약 32.89평', rent: '보증금 5,000만 · 월 250만 (부가세 별도) · 조정 협의 가능', sale: '분양가 6억 8,160만 원', tenant: '임차인 모집 중', point: '103동 코너 · 편의점 옆',
+    why: ['103동 코너라 두 방향에서 보이고, 옆 편의점 덕분에 저녁에도 사람이 오가요.'] },
+];
+
+// 실제 거리 사진 띠 (배치도 아래). 사진 위 표시는 배치도의 호실 번호
+type Street = { src: string; ratio: string; pos?: string; marks: [string, string][]; cap: string; badge?: string; dark?: boolean };
+const STREET: Street[] = [
+  { src: '/photos/street-08.jpg', ratio: '1522/530', marks: [['4%', '129 닭한상']], badge: '12월 말 오픈 예정', cap: '102동 · 주차장 입구 옆', dark: true },
+  { src: '/photos/street-10.jpg', ratio: '4/3', pos: '50% 45%', marks: [['4%', '134·135 장호덕']], cap: '103동 · 주차장 입구 쪽' },
+];
+
+// 카드 목록 페이지 (한 페이지 6개)
+const PAGES: string[][] = [['117', '118', '126', '127', '128', '129'], ['132', '137', '139', '119', '120', '122']];
+
+// 카드 사진 (실사진이 생기면 경로만 바꾸면 됩니다)
+const CARD_IMG: Record<string, [string, string]> = {
+  '117': ['/photos/hero-3.jpg', '20% 50%'], '118': ['/photos/hero-3.jpg', '70% 50%'],
+  '119': ['/photos/hero-1.jpg', '15% 60%'], '120': ['/photos/hero-1.jpg', '35% 60%'], '122': ['/photos/hero-3.jpg', '45% 60%'],
+  '126': ['/photos/hero-1.jpg', '55% 55%'], '127': ['/photos/hero-1.jpg', '70% 55%'], '128': ['/photos/hero-1.jpg', '85% 55%'],
+  '129': ['/photos/street-08.jpg', '45% 50%'], '132': ['/photos/hero-4.jpg', '50% 50%'],
+  '137': ['/photos/hero-5.jpg', '30% 50%'], '139': ['/photos/hero-5.jpg', '75% 50%'],
+};
+
+// 상세 사진 칸 (호실별 실사진이 생기면 ROOM_PHOTOS['118'] = [...] 형태로 추가)
+type Slot = { cap: string; src?: string };
+const ROOM_PHOTOS: Record<string, Slot[]> = {};
+const DEFAULT_SLOTS: Slot[] = [
+  { cap: '빈 호실 내부' },
+  { cap: '밖에서 본 전면' },
+  { cap: '가게 앞 동선 (임시 투시도)', src: '/photos/hero-1.jpg' },
+  { cap: '주변 · 단지 전경 (임시 투시도)', src: '/photos/hero-4.jpg' },
+];
+
+const TAG: Record<TagKey, { text: string; cls: string }> = {
+  open:     { text: '모집 중',     cls: 'bg-[#FFF1E8] text-[#9A3412]' },
+  nego:     { text: '협의 중',     cls: 'bg-white text-[#3F3F46] border border-dashed border-[#71717A]' },
+  done:     { text: '입점 확정',   cls: 'bg-[#DDE1EC] text-[#0F1C3A]' },
+  work:     { text: '인테리어 시작', cls: 'bg-[#D9F3EF] text-[#0F6F68]' },
+  soon:     { text: '오픈 예정',   cls: 'bg-[#7FD3CB] text-[#0B3B37]' },
+  income:   { text: '수익형',      cls: 'bg-[#0F1C3A] text-white' },
+  reserved: { text: '분양 협의 중', cls: 'bg-[#E4E4E7] text-[#3F3F46]' },
+  saleonly: { text: '분양 전용',   cls: 'bg-[#E4E4E7] text-[#3F3F46]' },
+  rentonly: { text: '임대 전용',   cls: 'bg-[#E4E4E7] text-[#3F3F46]' },
+};
+
+const SIZES: [string, string][] = [['all', '전체'], ['10', '10평대'], ['20', '20평대'], ['30', '30평 이상']];
+const USES: [string, string][] = [['all', '전체'], ['pharmacy', '약국'], ['food', '음식점·카페'], ['bar', '주점'], ['office', '사무실'], ['edu', '교육·운동'], ['service', '미용·서비스'], ['pet', '반려동물']];
+
+// 배치도 좌표 (1100 × 520 기준)
+const POS: Record<string, [number, number, number, number]> = {
+  '118': [134, 20, 100, 90], '119': [134, 118, 100, 56], '120': [134, 180, 100, 50], '132': [244, 118, 46, 62], '122': [134, 400, 100, 70],
+  '117': [300, 20, 50, 62], '126': [456, 400, 70, 70], '127': [528, 400, 70, 70], '128': [600, 400, 50, 70], '129': [652, 400, 50, 70],
+  '137': [1000, 400, 50, 70], '139': [1052, 330, 46, 60],
+};
+const TENANTS: [string, string, number, number, number, number][] = [
+  ['약국', '121호 · 영업 중', 134, 250, 100, 80],
+  ['메가커피', '123호', 300, 400, 50, 70], ['우지커피', '124호', 352, 400, 50, 70], ['본죽', '125호', 404, 400, 50, 70],
+  ['부동산', '133호', 792, 400, 50, 70], ['장호덕 손만두', '134·135호', 844, 400, 102, 70], ['136호', '분양 완료', 948, 400, 50, 70], ['CU', '138호', 1052, 400, 46, 70],
+];
+const pct = (x: number, y: number, w: number, h: number): CSSProperties => ({
+  left: `${(x / 11).toFixed(2)}%`, top: `${(y / 5.2).toFixed(2)}%`, width: `${(w / 11).toFixed(2)}%`, height: `${(h / 5.2).toFixed(2)}%`,
+});
+
+const MODE_COLOR = {
+  rent: { bg: '#1F4E3D', fg: '#FFFFFF', line: '#1F4E3D', glow: 'rgba(31,78,61,0.45)' },
+  sale: { bg: '#7FD3CB', fg: '#0B3B37', line: '#2FA69A', glow: 'rgba(47,166,154,0.45)' },
+};
+
+const okIn = (r: Room, mode: Mode) => (mode === 'sale' ? r.saleOK !== false : r.rentOK !== false);
+const pageOf = (id: string) => Math.max(0, PAGES.findIndex((p) => p.includes(id)));
+const findRoom = (id: string) => ROOMS.find((r) => r.id === id)!;
+const roomName = (r: Room) => r.name || `${r.id}호`;
+
+function scrollToId(id: string) {
+  window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
+}
+
+export default function StoreUnits() {
+  const [mode, setMode] = useState<Mode>('rent');
+  const [size, setSize] = useState('all');
+  const [use, setUse] = useState('all');
+  const [sel, setSel] = useState('118');
+  const [page, setPage] = useState(0);
+  const [ph, setPh] = useState(0);
+  const [tick, setTick] = useState(0);   // 필터가 바뀔 때마다 강조 애니메이션 다시 재생
+  const [flash, setFlash] = useState(0); // 상세 패널 반짝임
+  const [noImg, setNoImg] = useState<string[]>([]); // 아직 올라가지 않은 거리 사진
+  const detailRef = useRef<HTMLElement>(null);
+
+  const sale = mode === 'sale';
+  const MC = MODE_COLOR[mode];
+  const filtering = size !== 'all' || use !== 'all';
+  const avail = (r: Room) => okIn(r, mode);
+  const hit = (r: Room) => filtering && avail(r) && (size === 'all' || r.size === size) && (use === 'all' || r.uses.includes(use));
+  const hits = ROOMS.filter(hit).length;
+  const tagOf = (r: Room) => TAG[sale ? (r.saleTag || 'open') : (r.rentTag || 'open')];
+  const cur = findRoom(sel) || ROOMS[0];
+  const ct = tagOf(cur);
+
+  // 필터 변경: 조건에 맞는 첫 호실을 자동 선택하고 그 페이지로 이동
+  const applyFilter = (next: { mode?: Mode; size?: string; use?: string }) => {
+    const m = next.mode ?? mode, s = next.size ?? size, u = next.use ?? use;
+    if (next.mode) setMode(next.mode);
+    if (next.size) setSize(next.size);
+    if (next.use) setUse(next.use);
+    const f = s !== 'all' || u !== 'all';
+    const first = f ? ROOMS.find((r) => okIn(r, m) && (s === 'all' || r.size === s) && (u === 'all' || r.uses.includes(u))) : undefined;
+    if (first) { setSel(first.id); setPage(pageOf(first.id)); }
+    setPh(0);
+    setTick((t) => t + 1);
+  };
+
+  const openDetail = (id: string) => {
+    setSel(id); setPage(pageOf(id)); setPh(0); setFlash((f) => f + 1);
+    scrollToId('detail');
+  };
+
+  const ask = () => {
+    // 6단계 상담 폼이 이 이벤트를 받아 관심 호실을 미리 선택합니다.
+    window.dispatchEvent(new CustomEvent('store-ask', { detail: { room: cur.id } }));
+    try { sessionStorage.setItem('storeAskRoom', cur.id); } catch { /* 무시 */ }
+    scrollToId(document.getElementById('consult-form') ? 'consult-form' : 'contact');
+  };
+
+  const slots = ROOM_PHOTOS[cur.id] || DEFAULT_SLOTS;
+  const pi = Math.min(ph, slots.length - 1);
+  const shot = slots[pi];
+
+  const priceShort = (r: Room) => {
+    if (sale) {
+      const m = /분양가\s*(.+?)\s*원/.exec(r.sale);
+      return m ? m[1] : r.saleOK === false ? '분양 협의 중' : '분양가 문의';
+    }
+    const m = /보증금\s*([\d,]+)만\s*·\s*월\s*([\d,]+만)/.exec(r.rent);
+    return m ? `${m[1]} / ${m[2]}` : r.rentOK === false ? (r.rentTag === 'saleonly' ? '분양만 가능' : '임차 완료') : '임대 조건 협의';
+  };
+  const pointShort = (r: Room) => {
+    const ps = r.point.split(' · ');
+    return ps[0] === '외부 노출' && ps.length > 1 ? ps[ps.length - 1] : ps[0];
+  };
+
+  const hitCls = (on: boolean) => (on ? (tick % 2 ? 'su-hit' : 'su-hit su-hit-b') : '');
+  const pagesHit = useMemo(() => PAGES.map((p) => filtering && p.some((id) => hit(findRoom(id)))), [filtering, size, use, mode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+
+  // 배치도: vertical=true 이면 휴대폰용 세로 배치도 (병원이 위쪽)
+  const renderPlan = (vertical: boolean) => {
+    const W = vertical ? 520 : 1100, H = vertical ? 1100 : 520;
+    const T = (x: number, y: number, w: number, h: number): [number, number, number, number] => (vertical ? [520 - y - h, x, h, w] : [x, y, w, h]);
+    const at = (x: number, y: number, w: number, h: number): CSSProperties => {
+      const [a, b, c, d] = T(x, y, w, h);
+      return { left: `${(a / W) * 100}%`, top: `${(b / H) * 100}%`, width: `${(c / W) * 100}%`, height: `${(d / H) * 100}%` };
+    };
+    const pt = (x: number, y: number): CSSProperties => ({ left: `${(x / W) * 100}%`, top: `${(y / H) * 100}%` });
+    return (
+      <div role="group" aria-label="1층 상가 배치도" className={`su-plan relative w-full overflow-hidden rounded-[6px] border border-[#ECEBE8] ${vertical ? 'su-v aspect-[520/1100]' : 'aspect-[1100/520]'}`}>
+        {vertical ? (
+          <div aria-hidden="true" className="absolute flex items-center justify-center gap-2 border-b border-[#D4D8E0] bg-[#EEF0F4]" style={at(0, 0, 92, 520)}>
+            <span className="text-[13px] font-extrabold text-[#3F4A63]">수원덕산병원</span><span className="text-[11px] text-[#8A93A6]">439병상</span>
+          </div>
+        ) : (
+          <div aria-hidden="true" className="absolute flex flex-col items-center justify-center gap-1 border-r border-[#D4D8E0] bg-[#EEF0F4] text-center" style={at(0, 0, 92, 520)}>
+            <span className="text-[12px] leading-[1.3] font-extrabold text-[#3F4A63]">수원<br />덕산병원</span><span className="text-[10px] text-[#8A93A6]">439병상</span>
+          </div>
+        )}
+        <span aria-hidden="true" className="absolute box-border flex items-center justify-center rounded-[3px] border-[1.5px] border-[#0F1C3A] bg-white text-[11px] font-extrabold whitespace-nowrap text-[#0F1C3A] sm:text-[12px]"
+          style={vertical ? { left: `${(18 / W) * 100}%`, top: `${(30 / H) * 100}%`, width: `${(76 / W) * 100}%`, height: `${(30 / H) * 100}%` } : at(14, 432, 64, 36)}>{vertical ? '정문 ▾' : '정문 ▸'}</span>
+        <span aria-hidden="true" className="su-walk absolute" style={at(102, 16, 22, 488)} />
+        <span aria-hidden="true" className="su-walk absolute" style={at(102, 486, 460, 20)} />
+        {vertical ? (
+          <>
+            <span aria-hidden="true" className="absolute flex items-center justify-center text-[10px] font-extrabold tracking-[2px] text-[#0F6F68]" style={at(102, 150, 22, 220)}>병원 통행로</span>
+            <span aria-hidden="true" className="absolute flex items-center justify-center text-[9px] font-extrabold tracking-[1px] text-[#0F6F68] [writing-mode:vertical-rl]" style={at(240, 486, 140, 20)}>병원 통행로 ↓</span>
+          </>
+        ) : (
+          <>
+            <span aria-hidden="true" className="absolute flex items-center justify-center text-[11px] font-extrabold tracking-[3px] text-[#0F6F68] [writing-mode:vertical-rl]" style={at(102, 200, 22, 140)}>병원 통행로</span>
+            <span aria-hidden="true" className="absolute text-[10px] font-extrabold tracking-[1px] text-[#0F6F68]" style={pt(240, 487)}>병원 통행로 →</span>
+          </>
+        )}
+        {([[130, 16, 108, 458], [240, 114, 54, 218], [296, 16, 58, 70], [296, 396, 410, 78], [788, 396, 312, 78], [1048, 326, 52, 68]] as [number, number, number, number][]).map((b, i) => (
+          <span key={i} aria-hidden="true" className="su-bldg absolute" style={at(...b)} />
+        ))}
+        <span aria-hidden="true" className={`absolute box-border flex rounded-[3px] border-[1.5px] border-dashed border-[#C4C9D4] bg-white/60 text-[#8A93A6] ${vertical ? 'flex-col items-center justify-center gap-1 text-center text-[10px] leading-[1.4]' : 'items-center pl-4 text-[12px]'}`} style={at(362, 16, 734, 72)}>
+          {vertical ? (<><strong className="text-[12px] text-[#3F4A63]">101동</strong>덕산간호학원<br />개원 예정<br />(105·106·<br />115·116호)</>) : (<><strong className="mr-2 text-[#3F4A63]">101동</strong> 덕산간호학원 개원 예정 (105·106·115·116호)</>)}
+        </span>
+        <span aria-hidden="true" className="absolute box-border flex items-center justify-center rounded-full border-[1.5px] border-dashed border-[#9CC7AE] bg-[rgba(220,236,226,0.35)] text-[11px] font-bold text-[#3F6B4A]" style={at(430, 160, 165, 165)}>중앙 정원</span>
+        <span aria-hidden="true" className={`su-lb absolute flex items-center justify-center text-[10px] text-[#A1A1AA] ${vertical ? '' : '[writing-mode:vertical-rl]'}`} style={vertical ? at(244, 186, 46, 92) : at(244, 186, 46, 142)}>130·131호</span>
+        {vertical ? (
+          <>
+            <span aria-hidden="true" className="absolute text-[11px] font-extrabold tracking-[1.5px] text-[#3F4A63]" style={pt(132, 280)}>102동</span>
+            <span aria-hidden="true" className="absolute text-[11px] font-extrabold tracking-[1.5px] text-[#3F4A63]" style={pt(132, 772)}>103동</span>
+          </>
+        ) : (
+          <>
+            <span aria-hidden="true" className="absolute text-[11px] font-extrabold tracking-[1.5px] text-[#3F4A63]" style={pt(298, 376)}>102동</span>
+            <span aria-hidden="true" className="absolute text-[11px] font-extrabold tracking-[1.5px] text-[#3F4A63]" style={pt(790, 376)}>103동</span>
+          </>
+        )}
+        <span aria-hidden="true" className="absolute box-border flex items-center justify-center rounded-[3px] border-[1.5px] border-dashed border-[#A1A1AA] text-center text-[10px] leading-[1.3] text-[#71717A]" style={at(712, 396, 70, 78)}>주차장<br />출입구</span>
+        {vertical ? (
+          <>
+            <span aria-hidden="true" className="absolute box-border flex items-center justify-center border-l-[1.5px] border-[#B9C2D0] text-[9px] tracking-[1px] text-[#8A93A6] [writing-mode:vertical-rl]" style={at(712, 490, 388, 18)}>차량 진출입</span>
+            <span aria-hidden="true" className="absolute text-[10px] font-bold whitespace-nowrap text-[#8A93A6]" style={pt(306, 1040)}>수원역 방면 ↘</span>
+            <span aria-hidden="true" className="absolute box-border flex items-center justify-center gap-px rounded-full border-[1.5px] border-[#3F4A63] text-[10px] font-extrabold text-[#3F4A63]" style={at(1060, 110, 30, 30)}><span className="text-[8px]">▶</span>N</span>
+          </>
+        ) : (
+          <>
+            <span aria-hidden="true" className="absolute flex justify-center border-t-[1.5px] border-[#B9C2D0] pt-[2px] text-[10px] tracking-[1px] text-[#8A93A6]" style={at(712, 488, 388, 18)}>차량 진출입</span>
+            <span aria-hidden="true" className="absolute text-[11px] font-bold text-[#8A93A6]" style={{ right: '1.5%', top: '38%' }}>수원역 방면 ↗</span>
+            <span aria-hidden="true" className="absolute box-border flex flex-col items-center justify-center rounded-full border-[1.5px] border-[#3F4A63] text-[10px] leading-none font-extrabold text-[#3F4A63]" style={at(1060, 110, 30, 30)}><span className="text-[8px]">▲</span>N</span>
+          </>
+        )}
+
+        {TENANTS.map(([name, sub, x, y, w, h]) => (
+          <span key={sub} aria-label={`${sub} ${name}`} className="su-tile absolute" style={{ ...at(x, y, w, h), ...(sub === '분양 완료' ? { background: '#F4F4F5', color: '#A1A1AA', boxShadow: 'inset 0 0 0 1px #E4E4E7' } : { background: '#E6E9F0', color: '#0F1C3A', boxShadow: 'inset 0 0 0 1px #CDD3E0' }) }}>
+            <span className="su-tn leading-[1.2] font-extrabold">{name}</span><span className="su-ts opacity-70">{sub}</span>
+          </span>
+        ))}
+
+        {ROOMS.map((r) => {
+          const isHit = hit(r);
+          const ok = avail(r);
+          const isSel = r.id === sel;
+          const t = tagOf(r);
+          const off = !ok && (r.rentTag === 'saleonly' || r.saleTag === 'rentonly' || r.saleTag === 'reserved');
+          const busy = !ok && !off;
+          const look: CSSProperties = isSel ? { background: MC.bg, color: MC.fg, boxShadow: `0 0 0 2px #FFFFFF, 0 0 0 4px ${MC.line}`, zIndex: 2 }
+            : busy ? { background: '#E6E9F0', color: '#0F1C3A', boxShadow: 'inset 0 0 0 1px #CDD3E0' }
+            : off ? { background: '#F4F4F5', color: '#A1A1AA', boxShadow: 'inset 0 0 0 1px #E4E4E7' }
+            : filtering && !isHit ? { background: '#FFFFFF', color: '#E2A47C', boxShadow: 'inset 0 0 0 1px #F5CDB0' }
+            : isHit ? { background: '#FFE2CC', color: '#B23C05', boxShadow: 'inset 0 0 0 2px #FF6F00' }
+            : { background: '#FFF6EF', color: '#C2410C', boxShadow: 'inset 0 0 0 1.5px #FF6F00' };
+          return (
+            <button
+              key={r.id} type="button" aria-pressed={isSel} aria-label={`${roomName(r)} ${t.text}`}
+              onClick={() => (vertical ? openDetail(r.id) : (setSel(r.id), setPage(pageOf(r.id)), setPh(0)))}
+              className={`su-tile su-room absolute cursor-pointer border-0 ${!busy && !off && !isSel ? 'su-av' : ''} ${hitCls(isHit)}`}
+              style={{ ...at(...POS[r.id]), ...look }}
+            >
+              <span className="su-rn leading-[1.1] font-extrabold">{r.mapName || r.id}</span>
+              <span className="su-ts font-bold opacity-85">{r.id === '129' && busy ? '닭한상' : t.text}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+  return (
+    <>
+      <style>{CSS}</style>
+      <section id="units" className="mx-auto flex max-w-[1280px] scroll-mt-[72px] flex-col gap-6 px-5 pt-16 pb-12 sm:px-10 sm:pt-[88px]">
+        <div className="flex flex-col gap-[14px]">
+          <p className="m-0 text-[13px] font-extrabold tracking-[2px] text-[#D24A0E]">STORE CURATION</p>
+          <h2 className="m-0 text-[30px] font-extrabold tracking-[-1px] sm:text-[36px]">입점추천</h2>
+          <span aria-hidden="true" className="h-1 w-16 bg-[#FF6F00]" />
+          <p className="mt-[6px] mb-0 text-[16px] text-[#3F3F46] sm:text-[17px]">
+            <strong className="text-[#1C1C1E]">원하시는 평수와 업종을 선택해 주세요.</strong> 해당하는 호실이 표시되고, 호실을 누르면 상세 조건을 보실 수 있습니다.
+          </p>
+        </div>
+
+        {/* 임대 / 분양 탭 */}
+        <div role="tablist" aria-label="거래 방식" className="grid w-full max-w-[560px] grid-cols-2 self-center border-b border-[#E4E4E7]">
+          {([['rent', '임대', '창업하실 분 · 보증금과 월세'], ['sale', '분양', '투자하실 분 · 분양가와 임차 현황']] as [Mode, string, string][]).map(([k, label, hint]) => {
+            const on = mode === k;
+            return (
+              <button
+                key={k} type="button" role="tab" aria-selected={on}
+                onClick={() => applyFilter({ mode: k })}
+                className="su-tab -mb-px flex cursor-pointer flex-col items-center justify-center gap-1 border-0 bg-transparent px-2 pt-[14px] pb-4"
+                style={{ borderBottom: `3px solid ${on ? (k === 'sale' ? '#2FA69A' : '#1F4E3D') : 'transparent'}`, color: on ? '#0F1C3A' : '#A1A1AA' }}
+              >
+                <span className="text-[20px] font-extrabold tracking-[-0.5px]">{label}</span>
+                <span className="text-[12px] font-medium whitespace-nowrap text-[#71717A] sm:text-[13px]">{hint.split(' · ')[0]}<span className="hidden sm:inline"> · {hint.split(' · ')[1]}</span></span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 평수 / 업종 칩 */}
+        <div className="flex flex-col gap-[10px] rounded-[6px] bg-[#F7F7F5] py-3 sm:gap-3 sm:px-6 sm:py-5">
+          {([['평수', SIZES, size, (v: string) => applyFilter({ size: v })], ['업종', USES, use, (v: string) => applyFilter({ use: v })]] as [string, [string, string][], string, (v: string) => void][]).map(([label, list, val, pick]) => (
+            <div key={label} className="su-chips flex items-center gap-2 overflow-x-auto px-4 sm:flex-wrap sm:overflow-visible sm:px-0">
+              <span className="w-[40px] flex-none text-[13px] font-bold text-[#3F3F46] sm:w-[52px] sm:text-[14px]">{label}</span>
+              {list.map(([k, t]) => {
+                const on = val === k;
+                return (
+                  <button
+                    key={k} type="button" aria-pressed={on} onClick={() => pick(k)}
+                    className={`h-9 flex-none cursor-pointer rounded-[4px] border px-3 text-[13px] whitespace-nowrap sm:h-auto sm:min-h-10 sm:px-4 sm:text-[14px] ${on ? 'border-[#1C1C1E] bg-[#1C1C1E] font-bold text-white' : 'border-[#D4D4D8] bg-white text-[#1C1C1E]'}`}
+                  >{t}</button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+
+        {/* 1층 배치도 */}
+        <div className="flex flex-col gap-[14px] rounded-[6px] border border-[#E4E4E7] bg-white px-4 pt-6 pb-5 sm:px-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <p className="m-0 text-[17px] font-extrabold">1층 배치도 <span className="hidden text-[13px] font-medium text-[#71717A] lg:inline">· 주황 호실을 누르면 아래에서 자세히 볼 수 있어요</span></p>
+            <p className="m-0 text-[12px] text-[#A1A1AA]">이해를 돕기 위한 간략도이며 실제 비율과 다를 수 있어요</p>
+          </div>
+          <p className="m-0 text-[12px] text-[#71717A] lg:hidden">병원이 위쪽이에요 · 주황 칸이 입점 가능한 호실이에요. 누르면 상세로 이동해요</p>
+          <div className="mx-auto w-full max-w-[420px] lg:hidden">{renderPlan(true)}</div>
+          <div className="hidden lg:block">{renderPlan(false)}</div>
+          <div aria-hidden="true" className="flex flex-wrap gap-x-5 gap-y-2 text-[12px] text-[#52525B]">
+            <span className="inline-flex items-center gap-[6px]"><span className="h-[14px] w-[14px] rounded-[2px] bg-[#FFF6EF] shadow-[inset_0_0_0_1.5px_#FF6F00]" />입점 가능 (누르면 상세)</span>
+            <span className="inline-flex items-center gap-[6px]"><span className="h-[14px] w-[14px] rounded-[2px] bg-[#E6E9F0] shadow-[inset_0_0_0_1px_#CDD3E0]" />영업 중 · 입점 확정</span>
+            <span className="inline-flex items-center gap-[6px]"><span className="h-[14px] w-[14px] rounded-[2px] bg-[#F4F4F5] shadow-[inset_0_0_0_1px_#E4E4E7]" />{sale ? '분양 불가 (협의 중 · 임대만 가능)' : '임대 불가 (분양만 가능)'}</span>
+            <span className="inline-flex items-center gap-[6px]"><span className="su-walk h-2 w-[14px]" />병원 통행로</span>
+          </div>
+        </div>
+
+        {/* 실제 거리 모습 */}
+        {STREET.some((st) => !noImg.includes(st.src)) && (
+          <div className="flex flex-col gap-[10px] rounded-[6px] border border-[#E4E4E7] bg-white px-4 pt-5 pb-4 sm:px-6">
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="m-0 text-[17px] font-extrabold">실제 거리 모습</p>
+              <span className="text-[11px] font-bold whitespace-nowrap text-[#9A3412] sm:text-[12px]">← 밀어서 보기 →</span>
+            </div>
+            <div className="su-street -mx-4 flex snap-x gap-[10px] overflow-x-auto px-4 pb-[6px] sm:-mx-6 sm:px-6">
+              {STREET.filter((st) => !noImg.includes(st.src)).map((st) => (
+                <figure key={st.src} className="relative m-0 h-[160px] flex-none snap-start overflow-hidden rounded-[6px] sm:h-[200px]" style={{ aspectRatio: st.ratio, background: st.dark ? '#3a3a3a' : '#D6D3D1' }}>
+                  <img src={st.src} alt={`${st.cap} 실제 모습`} loading="lazy" onError={() => setNoImg((n) => (n.includes(st.src) ? n : [...n, st.src]))}
+                    className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: st.pos || '50% 50%' }} />
+                  {st.marks.map(([left, text]) => (
+                    <span key={text} className="absolute top-2 rounded-[4px] bg-[rgba(15,28,58,0.88)] px-[7px] py-[3px] text-[10px] font-extrabold whitespace-nowrap text-white sm:text-[11px]" style={{ left }}>{text}</span>
+                  ))}
+                  {st.badge && <span className="absolute top-2 right-2 rounded-[4px] bg-[#7FD3CB] px-[7px] py-[3px] text-[10px] font-extrabold whitespace-nowrap text-[#0B3B37] sm:text-[11px]">{st.badge}</span>}
+                  <figcaption className="absolute bottom-0 left-0 rounded-tr-[6px] bg-white/90 px-[9px] py-[5px] text-[10.5px] font-bold text-[#3F3F46] sm:text-[12px]">{st.cap}</figcaption>
+                </figure>
+              ))}
+            </div>
+            <p className="m-0 text-[11px] text-[#A1A1AA]">사진 위 번호는 배치도의 호실 번호예요 · 인물·차량 번호는 비식별 처리했어요</p>
+          </div>
+        )}
+
+        {/* 결과 줄 */}
+        <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-[#1C1C1E] pb-3">
+          <p className="m-0 text-[15px]">
+            전체 <strong>{ROOMS.length}개</strong> 호실
+            {filtering && <span className="font-bold text-[#9A3412]">{hits ? ` · 조건에 맞는 호실 ${hits}곳` : ' · 선택하신 조건에 맞는 호실이 없습니다 · 전화 주시면 가능한 호실을 찾아 드립니다'}</span>}
+          </p>
+          <p className="m-0 text-[13px] text-[#71717A]">{sale ? '분양가는 부가세 포함 금액이에요 · 약국 외 호실은 시설비 지원 적용가' : '월세 부가세 별도 · 무권리 신축 · 금액은 업종과 계약 기간에 따라 조정 협의 가능'}</p>
+        </div>
+
+        {/* 호실 카드 */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+          {PAGES[page].map((id) => {
+            const r = findRoom(id);
+            const isHit = hit(r);
+            const ok = avail(r);
+            const dim = !ok || (filtering && !isHit);
+            const isSel = r.id === sel;
+            const t = tagOf(r);
+            const taken = !ok && !(r.rentTag === 'saleonly' || r.saleTag === 'rentonly' || r.saleTag === 'reserved');
+            const [img, pos] = CARD_IMG[r.id] || ['/photos/hero-1.jpg', '50% 50%'];
+            return (
+              <a
+                key={id} href="#detail" aria-current={isSel} aria-label={`${roomName(r)} 자세히 보기`}
+                onClick={(e) => { e.preventDefault(); openDetail(r.id); }}
+                className={`su-card flex flex-row gap-3 rounded-[6px] bg-white p-[10px] text-inherit no-underline sm:flex-col sm:gap-0 sm:px-3 sm:pt-3 sm:pb-4 ${hitCls(isHit)}`}
+                style={{
+                  border: isSel ? `2px solid ${MC.line}` : isHit ? '2px solid #FF6F00' : '1px solid #ECEBE8',
+                  boxShadow: isSel ? `0 16px 34px -18px ${MC.glow}` : isHit ? '0 10px 26px -18px rgba(255,111,0,0.6)' : '0 6px 20px -16px rgba(15,28,58,0.35)',
+                  opacity: dim && !isSel ? 0.5 : 1,
+                }}
+              >
+                <span className="relative block aspect-[4/3] w-[124px] flex-none self-start overflow-hidden rounded-[4px] bg-[#E7E5E4] sm:w-full sm:self-stretch">
+                  <img src={img} alt="" loading="lazy" className="su-cimg absolute inset-0 h-full w-full object-cover" style={{ objectPosition: pos, filter: taken ? 'grayscale(0.7) brightness(0.92)' : undefined }} />
+                  <span className="absolute top-[6px] left-[6px] inline-flex h-[22px] items-center gap-[5px] rounded-[4px] bg-white/95 px-[7px] text-[11px] font-bold text-[#1C1C1E] sm:top-3 sm:left-3 sm:h-[26px] sm:gap-[6px] sm:px-[10px] sm:text-[12px]">
+                    <span aria-hidden="true" className="h-[6px] w-[6px] rounded-full" style={{ background: taken ? '#0F1C3A' : ok ? '#FF6F00' : '#A1A1AA' }} />{t.text}
+                  </span>
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-none sm:gap-[6px] sm:px-1 sm:pt-4">
+                  <span className="flex flex-col gap-[2px] sm:flex-row sm:items-baseline sm:justify-between sm:gap-[10px]">
+                    <span className="text-[18px] font-extrabold tracking-[-0.5px] text-[#0F1C3A] sm:text-[20px]">{roomName(r).replace(/ \(.*\)/, '')}</span>
+                    <span className="text-[15px] font-extrabold whitespace-nowrap text-[#0F1C3A] sm:text-[16px]">{priceShort(r)}</span>
+                  </span>
+                  <span className="text-[12px] text-[#71717A] sm:text-[13px]">{r.useTitle}</span>
+                  <span className="text-[12px] text-[#52525B] sm:hidden">{r.area.split(' · ')[0]} · {pointShort(r)}</span>
+                </span>
+                <span className="mx-1 mt-[14px] hidden flex-wrap gap-x-4 gap-y-[6px] border-t border-[#ECEBE8] pt-3 text-[12px] text-[#52525B] sm:flex">
+                  <span className="inline-flex items-center gap-[5px]"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" /><path d="M4 9h16M9 4v16" /></svg>{r.area.split(' · ')[0]}</span>
+                  <span className="inline-flex items-center gap-[5px]"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18M5 21V8l7-4 7 4v13" /><path d="M10 21v-6h4v6" /></svg>{r.size === '30' ? '30평 이상' : `${r.size}평대`}</span>
+                  <span className="inline-flex items-center gap-[5px]"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></svg>{pointShort(r)}</span>
+                </span>
+              </a>
+            );
+          })}
+        </div>
+
+        {/* 페이지 */}
+        <nav aria-label="호실 목록 페이지" className="flex items-center justify-center gap-[6px] pt-2">
+          <button type="button" aria-label="이전 페이지" aria-disabled={page === 0} onClick={() => setPage(Math.max(0, page - 1))} className="inline-flex h-10 w-10 cursor-pointer items-center justify-center border-0 bg-transparent" style={{ color: page === 0 ? '#D4D4D8' : '#3F3F46' }}>
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          {PAGES.map((_, i) => {
+            const on = i === page;
+            const has = pagesHit[i];
+            return (
+              <button key={i} type="button" aria-current={on ? 'page' : undefined} aria-label={`${i + 1}페이지${has ? ', 조건에 맞는 호실 있음' : ''}`} onClick={() => setPage(i)}
+                className="relative h-10 min-w-10 cursor-pointer rounded-[20px] border-0 text-[16px]"
+                style={{ background: on ? '#1C1C1E' : 'transparent', color: on ? '#FFFFFF' : '#52525B', fontWeight: on ? 800 : 500 }}>
+                {i + 1}
+                {has && !on && <span aria-hidden="true" className="absolute top-[6px] right-[6px] h-[7px] w-[7px] rounded-full bg-[#FF6F00]" />}
+              </button>
+            );
+          })}
+          <button type="button" aria-label="다음 페이지" aria-disabled={page === PAGES.length - 1} onClick={() => setPage(Math.min(PAGES.length - 1, page + 1))} className="inline-flex h-10 w-10 cursor-pointer items-center justify-center border-0 bg-transparent" style={{ color: page === PAGES.length - 1 ? '#D4D4D8' : '#3F3F46' }}>
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+          </button>
+        </nav>
+      </section>
+
+      {/* ───────── 호실 상세 ───────── */}
+      <section id="detail" ref={detailRef} aria-live="polite" className="mx-auto max-w-[1280px] scroll-mt-[96px] px-5 pt-2 pb-16 sm:px-10">
+        <article
+          key={flash}
+          className={`grid grid-cols-1 gap-x-10 gap-y-7 rounded-[6px] border border-[#E4E4E7] bg-white px-5 py-6 shadow-[0_10px_30px_-18px_rgba(0,0,0,0.25)] sm:px-9 sm:py-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] ${flash ? 'su-flash' : ''}`}
+        >
+          {/* 사진 */}
+          <div className="flex min-w-0 flex-col gap-[10px]">
+            <div role="group" aria-roledescription="사진 슬라이드" aria-label={`${roomName(cur)} 사진`} className="su-ph relative aspect-[16/11] overflow-hidden rounded-[6px]">
+              {shot.src ? (
+                <img src={shot.src} alt={`${cur.id}호 ${shot.cap}`} className="absolute inset-0 h-full w-full object-cover" />
+              ) : (
+                <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center text-[#71717A]">
+                  <svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                  <span className="text-[16px] font-bold text-[#3F3F46]">{shot.cap}</span><span className="text-[13px]">사진 준비 중</span>
+                </span>
+              )}
+              <span className="absolute bottom-[14px] left-[14px] rounded-[6px] bg-[rgba(28,28,30,0.78)] px-3 py-[6px] text-[13px] font-bold text-white">{shot.cap}</span>
+              <span className="absolute top-[14px] right-[14px] rounded-[6px] bg-white/90 px-[10px] py-1 text-[12px] font-bold text-[#3F3F46]">{pi + 1} / {slots.length}</span>
+              {([['이전 사진', -1, 'left-3', 'M15 18l-6-6 6-6'], ['다음 사진', 1, 'right-3', 'M9 18l6-6-6-6']] as [string, number, string, string][]).map(([lb, dir, side, d]) => (
+                <button key={lb} type="button" aria-label={lb} onClick={() => setPh((pi + dir + slots.length) % slots.length)}
+                  className={`absolute top-1/2 ${side} inline-flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-white/90 text-[#1C1C1E] shadow-[0_2px_8px_rgba(0,0,0,0.15)]`}>
+                  <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={d} /></svg>
+                </button>
+              ))}
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {slots.map((t, k) => (
+                <button key={k} type="button" aria-pressed={k === pi} aria-label={t.cap} onClick={() => setPh(k)}
+                  className={`relative aspect-[4/3] cursor-pointer overflow-hidden rounded-[6px] p-0 ${t.src ? 'bg-[#D6D3D1]' : 'su-ph'}`}
+                  style={{ border: k === pi ? '2px solid #1C1C1E' : '2px solid transparent', opacity: k === pi ? 1 : 0.8 }}>
+                  {t.src && <img src={t.src} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />}
+                  <span className="absolute right-0 bottom-0 left-0 overflow-hidden bg-white/90 px-[6px] py-1 text-center text-[11px] font-bold text-ellipsis whitespace-nowrap text-[#3F3F46]">{t.cap}</span>
+                </button>
+              ))}
+            </div>
+            <p className="m-0 text-[12px] text-[#A1A1AA]">투시도가 들어간 사진은 임시예요. 실제 호실 사진으로 바꿀 예정이에요.</p>
+          </div>
+
+          {/* 정보 */}
+          <div className="flex min-w-0 flex-col gap-[14px]">
+            <div className="flex items-center gap-3">
+              <h3 className="m-0 text-[26px] font-extrabold tracking-[-0.8px] sm:text-[30px]">{roomName(cur)}</h3>
+              <span className={`inline-block rounded-[4px] px-[10px] py-1 text-center text-[12px] font-bold ${ct.cls}`}>{ct.text}</span>
+            </div>
+            <dl className="m-0 grid grid-cols-[80px_minmax(0,1fr)] gap-x-[14px] gap-y-3 text-[15px] leading-[1.55] sm:grid-cols-[92px_minmax(0,1fr)]">
+              <dt className="text-[#71717A]">면적</dt><dd className="m-0 font-bold">{cur.area}</dd>
+              <dt className="text-[#71717A]">임대 조건</dt><dd className="m-0">{cur.rent}</dd>
+              <dt className="text-[#71717A]">분양 조건</dt><dd className="m-0">{cur.sale}</dd>
+              <dt className="text-[#71717A]">임차 현황</dt><dd className="m-0">{cur.tenant}</dd>
+              <dt className="text-[#71717A]">추천 업종</dt><dd className="m-0">{cur.useText}</dd>
+            </dl>
+            <button type="button" onClick={ask} className="su-ask mt-1 inline-flex h-14 w-full cursor-pointer items-center justify-center gap-2 rounded-[6px] border-0 text-[16px] font-extrabold text-white">
+              {roomName(cur)} 상담 신청하기
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            </button>
+            <div className="mt-1 flex min-w-0 flex-col gap-[10px] rounded-[6px] bg-[#F7F7F5] px-5 py-5 sm:px-[22px]">
+              <p className="m-0 text-[16px] font-extrabold">왜 이 자리에 이 업종인가</p>
+              <ul className="m-0 flex list-none flex-col gap-[10px] p-0">
+                {cur.why.map((w) => (
+                  <li key={w} className="flex gap-[10px] text-[15px] leading-[1.55] text-[#27272A]">
+                    <span aria-hidden="true" className="mt-[9px] h-[6px] w-[6px] flex-none rounded-full bg-[#C2410C]" />
+                    <span>{w}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </article>
+      </section>
+    </>
+  );
+}
+
+const CSS = `
+.su-plan{background-color:#FBFBFA;background-image:linear-gradient(rgba(15,28,58,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(15,28,58,.045) 1px,transparent 1px);background-size:22px 22px}
+.su-walk{background:repeating-linear-gradient(45deg,rgba(127,211,203,.55) 0 3px,rgba(127,211,203,.15) 3px 7px)}
+.su-bldg{box-sizing:border-box;background:#fff;border:1.5px solid #9AA3B5;border-radius:3px;box-shadow:0 4px 14px -10px rgba(15,28,58,.35)}
+.su-rn{font-size:13px}.su-tn{font-size:11px}.su-ts{font-size:9.5px}
+.su-v .su-tile{padding:2px 3px;white-space:normal;align-items:center;justify-content:center;text-align:center}
+.su-v .su-rn{font-size:12px;letter-spacing:-.3px;white-space:nowrap}.su-v .su-ts{display:none}
+.su-v .su-tn{font-size:9px;line-height:1.15;letter-spacing:-.3px;word-break:keep-all}
+.su-v .su-lb{font-size:8.5px !important}
+.su-street{scrollbar-width:thin}
+.su-chips{scrollbar-width:none}.su-chips::-webkit-scrollbar{display:none}
+.su-tile{box-sizing:border-box;padding:5px 5px;white-space:nowrap;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:2px;text-align:left;border-radius:2px;font-family:inherit;overflow:hidden}
+.su-room{transition:background .15s,color .15s}
+.su-av:hover{background:#FF6F00 !important;color:#fff !important;box-shadow:none !important}
+.su-room:focus-visible{outline:2px solid #0F1C3A;outline-offset:2px}
+.su-tab{transition:color .2s ease,border-color .2s ease}
+.su-tab:hover{color:#0F1C3A !important}
+.su-tab:focus-visible{outline:2px solid #0F1C3A;outline-offset:-2px}
+.su-card{transition:opacity .2s,box-shadow .25s,border-color .25s,transform .25s}
+.su-card:hover{transform:translateY(-3px);box-shadow:0 18px 36px -18px rgba(15,28,58,.4) !important}
+.su-cimg{transition:transform .5s ease}
+.su-card:hover .su-cimg{transform:scale(1.04)}
+.su-ph{background:repeating-linear-gradient(135deg,#EDEDEE 0 12px,#E5E5E7 12px 24px)}
+.su-ask{background:#0F1C3A;box-shadow:0 10px 22px -12px rgba(15,28,58,.6);transition:background .15s ease,transform .1s ease}
+.su-ask svg{transition:transform .2s ease}
+.su-ask:hover{background:#1F4E3D;transform:translateY(-1px)}
+.su-ask:hover svg{transform:translateX(4px)}
+.su-ask:active{background:#163A2D;transform:scale(.98)}
+.su-ask:focus-visible{outline:3px solid #7FD3CB;outline-offset:3px}
+@keyframes suRingA{0%{box-shadow:0 0 0 0 rgba(194,65,12,.55)}70%{box-shadow:0 0 0 14px rgba(194,65,12,0)}100%{box-shadow:0 0 0 0 rgba(194,65,12,0)}}
+@keyframes suRingB{0%{box-shadow:0 0 0 0 rgba(194,65,12,.55)}70%{box-shadow:0 0 0 14px rgba(194,65,12,0)}100%{box-shadow:0 0 0 0 rgba(194,65,12,0)}}
+.su-hit{animation:suRingA 1.1s ease-out 3}
+.su-hit-b{animation-name:suRingB}
+@keyframes suFlash{0%{box-shadow:0 0 0 0 rgba(31,78,61,.5)}100%{box-shadow:0 0 0 18px rgba(31,78,61,0)}}
+.su-flash{animation:suFlash .9s ease-out 2}
+@media (prefers-reduced-motion:reduce){.su-hit,.su-flash{animation:none}.su-card,.su-cimg,.su-ask,.su-ask svg{transition:none}.su-card:hover,.su-card:hover .su-cimg{transform:none}}
+`;

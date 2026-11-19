@@ -148,9 +148,16 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
   };
 
   const exportToExcel = () => {
-    const headers = ['이름', '연락처', '관심항목', '신청일시'];
-    const rows = leads.map(l => [l.name, l.phone, l.interest, format(new Date(l.createdAt), 'yyyy-MM-dd HH:mm')]);
-    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+    const escapeCsv = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""')}"`;
+    const headers = ['이름', '연락처', '관심항목', '희망 시간', '신청일시'];
+    const rows = leads.map(l => [
+      escapeCsv(l.name),
+      escapeCsv(l.phone),
+      escapeCsv(l.interest),
+      escapeCsv(l.preferredTime || '-'),
+      escapeCsv(format(new Date(l.createdAt), 'yyyy-MM-dd HH:mm'))
+    ]);
+    const csvContent = [headers.map(escapeCsv), ...rows].map(e => e.join(",")).join("\n");
     const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
@@ -335,6 +342,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                               <th className="p-4 text-xs font-bold uppercase tracking-widest">성함</th>
                               <th className="p-4 text-xs font-bold uppercase tracking-widest">휴대전화번호 (연락처)</th>
                               <th className="p-4 text-xs font-bold uppercase tracking-widest">상담관심품목</th>
+                              <th className="p-4 text-xs font-bold uppercase tracking-widest">희망 시간</th>
                               <th className="p-4 text-xs font-bold uppercase tracking-widest">안전접수일시</th>
                               <th className="p-4 text-xs font-bold uppercase tracking-widest text-center">동작</th>
                             </tr>
@@ -342,7 +350,7 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                           <tbody className="divide-y divide-gray-50">
                             {leads.length === 0 ? (
                               <tr>
-                                <td colSpan={6} className="text-center py-16 text-gray-400 font-medium text-sm">
+                                <td colSpan={7} className="text-center py-16 text-gray-400 font-medium text-sm">
                                   실시간 상담 신청 유입 내역이 존재하지 않습니다.
                                 </td>
                               </tr>
@@ -362,6 +370,9 @@ export default function AdminDashboard({ isOpen, onClose }: { isOpen: boolean; o
                                     )}>
                                       {lead.interest}
                                     </span>
+                                  </td>
+                                  <td className="p-4 text-xs text-gray-700 font-medium max-w-[220px]">
+                                    {lead.preferredTime || '-'}
                                   </td>
                                   <td className="p-4 text-xs text-gray-400 font-medium">
                                     {format(new Date(lead.createdAt), 'yyyy-MM-dd HH:mm:ss')}
