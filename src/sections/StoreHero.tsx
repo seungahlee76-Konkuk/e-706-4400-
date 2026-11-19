@@ -233,6 +233,16 @@ export default function StoreHero() {
           ))}
         </div>
       </div>
+
+      {/* 휴대폰·태블릿 전용: 매장·음식 사진 가로 띠 (PC에서는 오른쪽 사진 기둥이 대신 보임) */}
+      <div className="sh-mstrip" aria-label="입점 매장 사진">
+        {COLS.flatMap((c) => c.tiles).filter((t) => t.src).map((t, i) => (
+          <figure key={(t.src || '') + i} className="sh-mtile">
+            <img src={t.src} alt={t.cap || ''} loading="lazy" style={{ objectPosition: t.pos }} />
+            {t.cap && <figcaption>{t.cap}</figcaption>}
+          </figure>
+        ))}
+      </div>
     </section>
   );
 }
@@ -345,4 +355,24 @@ const CSS = `
   .sh-bg img,.sh-col,.sh-rise,.sh-track,.sh-red-wrap,.sh-mosaic,.sh-dot{animation:none !important}
   .sh-bg img:first-child{opacity:1}
 }
+
+/* 휴대폰·태블릿: 흐린 투시도 대신 미색 바탕 + 사진 띠 */
+.sh-mstrip{display:none}
+@media (max-width:1023px){
+  .sh-hero{background:#F6F4EF !important}
+  .sh-bg{display:none}
+  .sh-text{padding-bottom:28px}
+  .sh-title,.sh-text p{text-shadow:none}
+  .sh-mstrip{position:relative;z-index:1;display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:20px;padding:0 20px 40px;scrollbar-width:none}
+  .sh-mstrip::-webkit-scrollbar{display:none}
+  .sh-mtile{position:relative;flex:none;width:150px;height:200px;margin:0;border-radius:12px;overflow:hidden;scroll-snap-align:start;background:#E7E5E4}
+  .sh-mtile img{width:100%;height:100%;object-fit:cover;display:block}
+  .sh-mtile figcaption{position:absolute;left:8px;right:8px;bottom:8px;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.9);font-size:11px;font-weight:700;color:#1C1C1E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+@media (min-width:640px) and (max-width:1023px){.sh-mstrip{padding:0 40px 48px;scroll-padding-left:40px}.sh-mtile{width:180px;height:240px}}
+
+/* 큰 화면(1600px 이상): 히어로 전체를 화면 크기에 맞춰 비율대로 키움 */
+@media (min-width:1600px){.sh-hero{zoom:1.12;height:max(760px,calc((100svh - 72px) / 1.12))}}
+@media (min-width:1920px){.sh-hero{zoom:1.3;height:max(760px,calc((100svh - 72px) / 1.3))}}
+@media (min-width:2300px){.sh-hero{zoom:1.6;height:max(760px,calc((100svh - 72px) / 1.6))}}
 `;

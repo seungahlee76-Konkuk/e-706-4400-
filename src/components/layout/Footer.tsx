@@ -1,4 +1,5 @@
 import { PROJECT_INFO } from '../../constants';
+import { Link } from '../../lib/router';
 
 export default function Footer({ onAdminOpen }: { onAdminOpen: () => void }) {
   return (
@@ -6,13 +7,12 @@ export default function Footer({ onAdminOpen }: { onAdminOpen: () => void }) {
       <div className="max-w-7xl mx-auto text-left">
         {/* 1. 맨 위 얇은 링크 줄 */}
         <div className="pb-4 mb-7 border-b border-gray-200/80 flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px]">
-          <a
-            href="#"
-            onClick={(e) => e.preventDefault()}
+          <Link
+            to="/privacy"
             className="font-bold text-accent hover:opacity-80 transition-opacity"
           >
             개인정보처리방침
-          </a>
+          </Link>
           <span className="h-3 w-px bg-gray-300" aria-hidden="true" />
           <a
             href="https://blog.naver.com/placebusiness"
@@ -44,7 +44,13 @@ export default function Footer({ onAdminOpen }: { onAdminOpen: () => void }) {
               <span className="font-bold text-gray-700">홍보관 :</span> {PROJECT_INFO.showroomAddress}
             </p>
             <p>
-              <span className="font-bold text-gray-700">분양·임대 문의 :</span> {PROJECT_INFO.representativeNumber}
+              <span className="font-bold text-gray-700">분양·임대 문의 :</span>{' '}
+              <a
+                href="tel:031-293-1073"
+                className="hover:text-accent hover:underline transition-colors"
+              >
+                {PROJECT_INFO.representativeNumber}
+              </a>
               <span className="mx-2 text-gray-300">|</span>
               <span className="font-bold text-gray-700">전화 상담 :</span> 연중무휴 10:00–18:00
               <span className="mx-2 text-gray-300">|</span>

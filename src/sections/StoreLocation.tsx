@@ -463,4 +463,12 @@ const CSS = `
   .loc-next{margin-top:64px !important}
 }
 @media (prefers-reduced-motion:reduce){.loc-next>span,.loc-cards button{transition:none}.loc-cards button:hover{transform:none}}
+
+/* 한 화면 꽉 채우기: 섹션 높이를 화면 높이(헤더 제외)에 맞추고 내용은 세로 가운데 → 푸터는 항상 화면 아래 */
+.loc:has(.loc-idx),.pov{min-height:calc(100svh - 72px);display:flex;align-items:center}
+.loc-idx,.pov-in{width:100%}
+/* 큰 화면(1600px 이상): 히어로와 같은 비율로 키움 */
+@media (min-width:1600px){.loc-idx,.pov-in{zoom:1.12}}
+@media (min-width:1920px){.loc-idx,.pov-in{zoom:1.3}}
+@media (min-width:2300px){.loc-idx,.pov-in{zoom:1.45}}
 `;

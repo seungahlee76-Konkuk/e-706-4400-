@@ -13,6 +13,7 @@ import StoreUnits from './sections/StoreUnits';
 import StoreOverview from './sections/StoreOverview';
 import StoreLocation from './sections/StoreLocation';
 import Officetel from './sections/Officetel';
+import PrivacyPolicy from './sections/PrivacyPolicy';
 import ContactForm from './sections/ContactForm';
 import QuickMenu from './components/ui/QuickMenu';
 import SideSwitch from './components/ui/SideSwitch';
@@ -40,6 +41,10 @@ const ROUTE_META: Record<string, { title: string; canonical: string }> = {
   '/officetel': {
     title: '84타입 3룸 오피스텔 | e편한세상 시티 고색',
     canonical: 'https://elife-gosaek.com/officetel',
+  },
+  '/privacy': {
+    title: '개인정보처리방침 | e편한세상 시티 고색',
+    canonical: 'https://elife-gosaek.com/privacy',
   },
 };
 
@@ -182,6 +187,14 @@ export default function App() {
       );
     }
 
+    if (path === '/privacy') {
+      return (
+        <div className="pt-[65px] md:pt-[72px]">
+          <PrivacyPolicy />
+        </div>
+      );
+    }
+
     // Default "/store" (and fallback for unknown routes)
     return (
       <div className="pt-[65px] md:pt-[72px]">
@@ -197,6 +210,7 @@ export default function App() {
   };
 
   const isHome = isChooserView || path === '/';
+  const isPrivacy = !isHome && path === '/privacy';
 
   return (
     <div className="min-h-screen bg-[#F5F5F0] font-sans text-gray-900 overflow-x-clip pb-0">
@@ -211,7 +225,7 @@ export default function App() {
           setIsAdminOpen(true);
         }
       }} />
-      {!isHome && (
+      {!isHome && !isPrivacy && (
         path === '/officetel' ? (
           <SideSwitch to="/store" label="상가" side="left" onNavigate={navigate} />
         ) : (
@@ -219,7 +233,7 @@ export default function App() {
         )
       )}
       {isHome && <QuickMenu />}
-      <StickyBottomForm />
+      {!isPrivacy && <StickyBottomForm />}
 
       <AdminDashboard isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
     </div>

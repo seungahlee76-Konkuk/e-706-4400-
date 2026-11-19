@@ -155,7 +155,7 @@ export default function Navbar() {
           )}
           <div className={cn("h-7 w-px transition-colors", showSolidNav ? "bg-gray-200" : "bg-white/25")} />
           <a
-            href={`tel:${PROJECT_INFO.representativeNumber.replace(/[^0-9]/g, '')}`}
+            href="tel:031-293-1073"
             className="flex flex-col leading-tight group whitespace-nowrap"
           >
             <span className={cn("text-[11px] font-bold tracking-tight transition-colors", showSolidNav ? "text-gray-500" : "text-white/75")}>
@@ -236,7 +236,7 @@ export default function Navbar() {
                 );
               })}
               <a
-                href={`tel:${PROJECT_INFO.representativeNumber.replace(/[^0-9]/g, '')}`}
+                href="tel:031-293-1073"
                 className="bg-primary text-white py-4 rounded-lg flex items-center justify-center gap-2 font-bold shadow-md active:scale-[0.98] transition-transform duration-100"
               >
                 상담 전화하기

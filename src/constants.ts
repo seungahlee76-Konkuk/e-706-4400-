@@ -5,7 +5,7 @@ export const DEFAULT_PROJECT_INFO = {
   location: '고색',
   businessHours: '연중무휴 10:00 - 18:00',
   representativeNumber: '031)293-1073',
-  showroomAddress: '경기도 수원시 고색동 서부로1670번길 11-9',
+  showroomAddress: '경기도 수원시 권선구 서부로 1670번길 11-9',
   developer: '보원',
   builder: 'DL이앤씨',
   agency: '루에나파트너스 (대표 김지선)',

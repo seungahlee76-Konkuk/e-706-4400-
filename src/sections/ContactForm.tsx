@@ -271,7 +271,11 @@ export default function ContactForm() {
                 <div className="space-y-8">
                   <div>
                     <label className="text-[10px] text-gray-500 font-black tracking-widest uppercase mb-1.5 block">대표번호</label>
-                    <p className="text-lg sm:text-xl font-extrabold text-[#111111] tracking-tight">{PROJECT_INFO.representativeNumber}</p>
+                    <p className="text-lg sm:text-xl font-extrabold text-[#111111] tracking-tight">
+                      <a href="tel:031-293-1073" className="hover:text-accent hover:underline transition-colors">
+                        {PROJECT_INFO.representativeNumber}
+                      </a>
+                    </p>
                   </div>
                   <div>
                     <label className="text-[10px] text-gray-500 font-black tracking-widest uppercase mb-1.5 block">운영시간</label>

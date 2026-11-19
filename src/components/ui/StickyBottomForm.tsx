@@ -202,7 +202,7 @@ export default function StickyBottomForm() {
               <span className="font-bold">분양·임대 상담 예약</span>
             </div>
             <div className="h-8 w-px bg-slate-200" />
-            <a href={`tel:${PROJECT_INFO.representativeNumber.replace(/[^0-9]/g, '')}`} className="flex items-center gap-2 group">
+            <a href="tel:031-293-1073" className="flex items-center gap-2 group">
               <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
                 <Phone className="w-4 h-4" />
               </div>

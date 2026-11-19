@@ -30,7 +30,7 @@ export default function QuickMenu() {
     <div className="fixed right-6 top-1/3 z-50 hidden lg:flex flex-col gap-3">
       {/* Phone Inquiry */}
       <motion.a
-        href={`tel:${PROJECT_INFO.representativeNumber.replace(/[^0-9]/g, '')}`}
+        href="tel:031-293-1073"
         initial={{ x: 50, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         whileHover={{ scale: 1.05 }}
@@ -49,7 +49,7 @@ export default function QuickMenu() {
       >
         <div className="writing-vertical-lr text-[9px] font-bold tracking-[0.2em] uppercase mb-2">RESERVATION</div>
         <div className="w-px h-8 bg-white/20 my-2"></div>
-        <div className="text-[11px] font-black -rotate-90 origin-center whitespace-nowrap mt-5 text-accent tracking-tighter">{PROJECT_INFO.representativeNumber}</div>
+        <a href="tel:031-293-1073" className="text-[11px] font-black -rotate-90 origin-center whitespace-nowrap mt-5 text-accent tracking-tighter hover:underline">{PROJECT_INFO.representativeNumber}</a>
       </motion.div>
 
       {/* Scroll to Top */}
