@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 
 /* ───────── 입점추천 (#units) + 호실 상세 (#detail) ─────────
    호실 정보를 바꿀 때는 아래 ROOMS 데이터만 고치면 됩니다. */
@@ -61,7 +61,7 @@ const CARD_IMG: Record<string, [string, string]> = {
 // 상세 사진 칸 (호실별 실사진이 생기면 ROOM_PHOTOS['118'] = [...] 형태로 추가)
 type Slot = { cap: string; src?: string };
 const ROOM_PHOTOS: Record<string, Slot[]> = {
-  '117': [{ cap: '밖에서 본 전면', src: '/photos/rooms/117-1.jpg' }, { cap: '인테리어 콘셉트 예시 · AI 생성', src: '/photos/rooms/117-concept.jpg' }, { cap: '실제 내부 · 사진 준비 중' }],
+  '117': [{ cap: '밖에서 본 전면', src: '/photos/rooms/117-1.jpg' }, { cap: '인테리어 콘셉트 예시 · AI 생성', src: '/photos/rooms/117-concept.jpg' }],
   '118': [{ cap: '밖에서 본 전면', src: '/photos/rooms/118-1-1.jpg' }, { cap: '내부 · 안쪽에서 본 입구', src: '/photos/rooms/118-2-1.jpg' }, { cap: '내부 · 창 쪽', src: '/photos/rooms/118-2-2.jpg' }, { cap: '옆에서 본 전면', src: '/photos/rooms/118-1-2.jpg' }],
   '126': [{ cap: '밖에서 본 전면', src: '/photos/rooms/126-1.jpg' }, { cap: '내부', src: '/photos/rooms/126-2.jpg' }],
   '127': [{ cap: '밖에서 본 전면', src: '/photos/rooms/127-1.jpg' }, { cap: '내부 · 안쪽에서 본 입구', src: '/photos/rooms/127-2-2.jpg' }, { cap: '내부 · 안쪽 벽', src: '/photos/rooms/127-2-1.jpg' }, { cap: '내부 · 천장 설비', src: '/photos/rooms/127-2-3.jpg' }],
@@ -160,6 +160,16 @@ export default function StoreUnits() {
     scrollToId('detail');
   };
 
+  // 입점 캘린더의 "집중 모집" 카드에서 보내는 신호를 받아 해당 호실 상세를 엽니다.
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const id = (e as CustomEvent<{ room?: string }>).detail?.room;
+      if (id) openDetail(id);
+    };
+    window.addEventListener('store-open-room', onOpen);
+    return () => window.removeEventListener('store-open-room', onOpen);
+  }, []);
+
   const ask = () => {
     // 6단계 상담 폼이 이 이벤트를 받아 관심 호실을 미리 선택합니다.
     window.dispatchEvent(new CustomEvent('store-ask', { detail: { room: cur.id } }));
@@ -229,7 +239,10 @@ export default function StoreUnits() {
         <span aria-hidden="true" className={`absolute box-border flex rounded-[3px] border-[1.5px] border-dashed border-[#C4C9D4] bg-white/60 text-[#8A93A6] ${vertical ? 'flex-col items-center justify-center gap-1 text-center text-[10px] leading-[1.4]' : 'items-center pl-4 text-[12px]'}`} style={at(362, 16, 734, 72)}>
           {vertical ? (<><strong className="text-[12px] text-[#3F4A63]">101동</strong>덕산간호학원<br />개원 예정<br />(105·106·<br />115·116호)</>) : (<><strong className="mr-2 text-[#3F4A63]">101동</strong> 덕산간호학원 개원 예정 (105·106·115·116호)</>)}
         </span>
-        <span aria-hidden="true" className="absolute box-border flex items-center justify-center rounded-full border-[1.5px] border-dashed border-[#9CC7AE] bg-[rgba(220,236,226,0.35)] text-[11px] font-bold text-[#3F6B4A]" style={at(430, 160, 165, 165)}>중앙 정원</span>
+        <span aria-hidden="true" className="absolute box-border flex items-center justify-center overflow-hidden rounded-full border-[1.5px] border-dashed border-[#9CC7AE]" style={at(430, 160, 165, 165)}>
+          <img src="/photos/hero-5.jpg" alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover object-[46%_65%]" />
+          <span className="relative z-[1] rounded-full bg-white/85 px-2.5 py-0.5 text-[11px] font-bold text-[#3F6B4A] shadow-sm">중앙 정원</span>
+        </span>
         <span aria-hidden="true" className={`su-lb absolute flex items-center justify-center text-[10px] text-[#A1A1AA] ${vertical ? '' : '[writing-mode:vertical-rl]'}`} style={vertical ? at(244, 186, 46, 92) : at(244, 186, 46, 142)}>130·131호</span>
         {vertical ? (
           <>

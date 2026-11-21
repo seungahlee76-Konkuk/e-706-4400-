@@ -36,8 +36,8 @@ const PANELS: PanelConfig[] = [
     ),
     line2: (
       <>
-        의료·주거 수요가 만나는 <span className="text-accent font-bold">스트리트 상가</span> · 고색역{' '}
-        <span className="text-accent font-bold">도보 200m</span>
+        의료·주거 수요가 만나는 <span className="text-accent font-bold">스트리트 상가</span> · 단지 내 오피스텔{' '}
+        <span className="text-accent font-bold">430세대</span>
       </>
     ),
     cta: '상가 보기 →',
@@ -60,7 +60,7 @@ const PANELS: PanelConfig[] = [
     ),
     line2: (
       <>
-        주거형 3룸 구조 · 고색역 <span className="text-mint font-bold">도보 200m</span>
+        주거형 3룸 구조 · 수원덕산병원 <span className="text-mint font-bold">바로 옆</span>
       </>
     ),
     cta: '오피스텔 보기 →',

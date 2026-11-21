@@ -217,7 +217,7 @@ function Article2() {
       <Facts rows={[
         ['정류장', <>권선구청.한봄고.덕산병원 <small>(2097)</small></>],
         ['서울 직행', <>{nw('7780 사당')} · {nw('3003 강남')} · {nw('1009 잠실')}</>],
-        ['지하철', <>수인분당선 고색역 <small>(약 1.3km)</small></>],
+        ['지하철', <>수인분당선 고색역 <small>(약 1.4km)</small></>],
         ['광역 환승', <>수원역 <small>(고색역에서 1정거장)</small></>],
         ['GTX-C', '수원역 정차 · 2026년 9월 실착공'],
       ]} />
@@ -230,9 +230,9 @@ function Article2() {
       </ul>
       <p className="loc-src">노선 정보는 2026년 11월 기준이며, 운행 노선과 정류장은 바뀔 수 있습니다.</p>
       <H n={2} k={2}>고색역 · 수원역</H>
-      <p>고색역은 상가에서 약 1.3km 떨어진 수인분당선 역입니다. 다음 역이 <strong>수원역</strong>으로, 1호선·KTX로 바로 갈아탈 수 있습니다.</p>
+      <p>고색역은 상가에서 약 1.4km 떨어진 수인분당선 역입니다. 다음 역이 <strong>수원역</strong>으로, 1호선·KTX로 바로 갈아탈 수 있습니다.</p>
       <div className="loc-line">
-        <span className="st o">상가</span><i>약 1.3km</i><span className="st">고색역</span><i>수인분당선 1정거장</i>
+        <span className="st o">상가</span><i>약 1.4km</i><span className="st">고색역</span><i>수인분당선 1정거장</i>
         <span className="st n">수원역<small>1호선 · KTX · GTX-C 예정</small></span>
       </div>
       <H n={2} k={3}>GTX-C</H>

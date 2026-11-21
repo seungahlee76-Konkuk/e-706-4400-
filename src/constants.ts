@@ -137,13 +137,13 @@ export const DEFAULT_CARDNEWS_DATA = [
     id: 'traffic',
     title: '교통',
     subTitle: 'TRAFFIC INFRASTRUCTURE',
-    mainTitle: '고색역 초역세권 입지',
+    mainTitle: '수원역까지 한 정거장',
     headline: '수인분당선 직통 주파 및 광역 신설 교통망의 초강력 집결형 노선',
     coverImage: 'https://i.ibb.co/ZzcZLsTS/5.png',
     slides: [
       {
-        title: '수인분당선 고색역 직접 도보 역세권',
-        desc: '강남, 분당, 인천을 관통하는 수인분당선 고색역이 고작 도보 200m에 인접해 있어, 수도권 전역에서 역세권 중심지로의 유입이 탁월합니다.',
+        title: '수인분당선 고색역',
+        desc: '수인분당선 고색역(약 1.4km)에서 한 정거장이면 1호선·KTX가 서는 수원역입니다.',
         image: 'https://i.ibb.co/XxgM5xHz/6.png'
       },
       {
