@@ -1,4 +1,5 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+@import url("https://fonts.googleapis.com/css2?family=Jost:ital,wght@1,300;1,400&display=swap");
 @import "tailwindcss";
 
 @font-face { font-family: 'Paperlogy'; src: url('/fonts/Paperlogy-7Bold.woff2') format('woff2'); font-weight: 600 700; font-display: swap; }

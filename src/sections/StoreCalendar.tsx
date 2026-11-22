@@ -1,5 +1,8 @@
+import { useState } from 'react';
+
 /* ───────── 입점 캘린더 (/store #calendar) ─────────
-   내용을 바꿀 때는 아래 MONTH, NEWS, OPEN 데이터만 고치면 됩니다. */
+   내용을 바꿀 때는 아래 MONTH, NEWS, OPEN 데이터만 고치면 됩니다.
+   휴대폰에서는 짧게 보이도록: 집중 모집 카드는 눌러서 펼치고, 입점 소식 / 모집 중인 자리는 탭으로 하나씩 봅니다. */
 
 const MONTH = { year: 2026, month: 11 };
 
@@ -8,7 +11,7 @@ type TagKey = 'focus' | 'open' | 'nego' | 'done' | 'work' | 'soon' | 'income' | 
 // 상태 태그: 문구와 색 (확정 팔레트)
 const TAG: Record<TagKey, { text: string; className: string }> = {
   focus:    { text: '집중 모집',   className: 'bg-[#FF671D] text-white' },
-  open:     { text: '모집 중',     className: 'bg-[#FFF1E8] text-[#9A3412]' },
+  open:     { text: '입점 가능',   className: 'bg-[#FFF1E8] text-[#9A3412]' },
   nego:     { text: '협의 중',     className: 'bg-white text-[#3F3F46] border border-dashed border-[#71717A] !py-[3px] !px-[9px]' },
   done:     { text: '입점 확정',   className: 'bg-[#DDE1EC] text-[#0F1C3A]' },
   work:     { text: '인테리어 시작', className: 'bg-[#D9F3EF] text-[#0F6F68]' },
@@ -63,44 +66,66 @@ function openRoom(id: string) {
 }
 
 function FocusCards() {
+  const [open, setOpen] = useState<string | null>(null); // 휴대폰: 펼친 카드
   return (
     <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {FOCUS.map((f) => (
-          <article key={f.id} className="grid grid-cols-1 overflow-hidden rounded-[12px] border border-[#ECEBE8] bg-white sm:grid-cols-[200px_minmax(0,1fr)]" style={{ boxShadow: '0 14px 34px -22px rgba(15,28,58,.35)' }}>
-            <div className="relative h-[180px] sm:h-auto">
-              <img src={f.img} alt={`${f.id}호 외관`} loading="lazy" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: f.pos, filter: 'saturate(.9) sepia(.07)' }} />
-              <span className="absolute top-3 left-3 rounded-[6px] bg-[#FF671D] px-[10px] py-1 text-[12px] font-extrabold text-white">집중 모집 · {f.id}호</span>
-            </div>
-            <div className="flex flex-col gap-2 px-5 py-5 sm:px-6">
-              <h3 className="m-0 text-[18px] leading-[1.4] font-extrabold tracking-[-0.5px] text-[#0F1C3A] [word-break:keep-all] sm:text-[19px]">{f.title}</h3>
-              {f.lines.map((l) => <p key={l} className="m-0 text-[14px] leading-[1.7] text-[#3F3F46] [word-break:keep-all]">{l}</p>)}
-              <p className="m-0 mt-1 text-[13px] font-bold text-[#52525B]">{f.meta}</p>
-              <p className="m-0 text-[13px] font-bold text-[#D24A0E]">임대조건 협의 가능</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <button type="button" onClick={() => openRoom(f.id)} className="cursor-pointer rounded-[8px] border-0 bg-[#0F1C3A] px-4 py-[10px] text-[14px] font-bold text-white">호실 자세히 보기</button>
-                <a href="tel:031-293-1073" className="rounded-[8px] border border-[#D6D3D1] px-4 py-[9px] text-[14px] font-bold text-[#0F1C3A] no-underline">031)293-1073</a>
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
+        {FOCUS.map((f) => {
+          const on = open === f.id;
+          return (
+            <article key={f.id} className="overflow-hidden rounded-[12px] border border-[#ECEBE8] bg-white sm:grid sm:grid-cols-[200px_minmax(0,1fr)]" style={{ boxShadow: '0 14px 34px -22px rgba(15,28,58,.35)' }}>
+              {/* PC: 큰 사진 */}
+              <div className="relative hidden sm:block">
+                <img src={f.img} alt={`${f.id}호 외관`} loading="lazy" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: f.pos, filter: 'saturate(.9) sepia(.07)' }} />
+                <span className="absolute top-3 left-3 rounded-[6px] bg-[#FF671D] px-[10px] py-1 text-[12px] font-extrabold text-white">집중 모집 · {f.id}호</span>
               </div>
-            </div>
-          </article>
-        ))}
+
+              {/* 휴대폰: 작은 사진 + 제목 줄 (누르면 펼침) */}
+              <button type="button" aria-expanded={on} onClick={() => setOpen(on ? null : f.id)}
+                className="flex w-full cursor-pointer items-center gap-3 border-0 bg-transparent p-3 text-left sm:hidden">
+                <span className="relative block h-[84px] w-[84px] flex-none overflow-hidden rounded-[8px]">
+                  <img src={f.img} alt={`${f.id}호 외관`} loading="lazy" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: f.pos, filter: 'saturate(.9) sepia(.07)' }} />
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col gap-1">
+                  <span className="text-[12px] font-extrabold text-[#D24A0E]">집중 모집 · {f.id}호</span>
+                  <span className="text-[16px] leading-[1.35] font-extrabold tracking-[-0.4px] text-[#0F1C3A] [word-break:keep-all]">{f.title}</span>
+                </span>
+                <span aria-hidden="true" className="flex h-7 w-7 flex-none items-center justify-center rounded-full text-[14px] transition-transform"
+                  style={{ background: on ? '#FF671D' : '#F4F4F5', color: on ? '#fff' : '#71717A', transform: on ? 'rotate(90deg)' : 'none' }}>›</span>
+              </button>
+
+              {/* 내용: 휴대폰은 펼쳤을 때만, PC는 항상 */}
+              <div className={`${on ? 'flex' : 'hidden'} flex-col gap-2 px-4 pb-4 sm:flex sm:px-6 sm:py-5`}>
+                <h3 className="m-0 hidden text-[19px] leading-[1.4] font-extrabold tracking-[-0.5px] text-[#0F1C3A] [word-break:keep-all] sm:block">{f.title}</h3>
+                {f.lines.map((l) => <p key={l} className="m-0 text-[14px] leading-[1.7] text-[#3F3F46] [word-break:keep-all]">{l}</p>)}
+                <p className="m-0 mt-1 text-[13px] font-bold text-[#52525B]">{f.meta}</p>
+                <p className="m-0 text-[13px] font-bold text-[#D24A0E]">임대조건 협의 가능</p>
+                <div className="mt-2 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                  <button type="button" onClick={() => openRoom(f.id)} className="cursor-pointer rounded-[8px] border-0 bg-[#0F1C3A] px-4 py-[11px] text-[14px] font-bold text-white">호실 자세히 보기</button>
+                  <a href="tel:031-293-1073" className="rounded-[8px] border border-[#D6D3D1] px-4 py-[10px] text-center text-[14px] font-bold text-[#0F1C3A] no-underline">031)293-1073</a>
+                </div>
+              </div>
+            </article>
+          );
+        })}
       </div>
       <p className="m-0 text-[12px] text-[#A1A1AA]">{FOCUS_NOTE}</p>
     </div>
   );
 }
 
-function CalCard({ title, titleColor, topColor, rows }: { title: string; titleColor: string; topColor: string; rows: Row[] }) {
+function CalCard({ title, titleColor, topColor, rows, show }: { title: string; titleColor: string; topColor: string; rows: Row[]; show: boolean }) {
   return (
     <article
-      className="flex w-full max-w-[560px] flex-[1_1_440px] flex-col gap-[18px] rounded-[6px] border border-[#ECEBE8] bg-white px-5 pt-7 pb-5 text-[#1C1C1E] sm:px-8 sm:pt-8 sm:pb-6"
+      className={`${show ? 'flex' : 'hidden'} w-full max-w-[560px] flex-[1_1_440px] flex-col gap-[10px] rounded-[6px] border border-[#ECEBE8] bg-white px-5 pt-4 pb-3 text-[#1C1C1E] sm:flex sm:gap-[18px] sm:px-8 sm:pt-8 sm:pb-6`}
       style={{ borderTop: `4px solid ${topColor}` }}
     >
-      <div className="flex flex-col items-center gap-[2px] border-b border-[#E4E4E7] pb-4">
-        <p className="m-0 text-[20px] font-bold sm:text-[22px]" style={{ color: titleColor }}>{title}</p>
+      <div className="hidden flex-col items-center gap-[2px] border-b border-[#E4E4E7] pb-4 sm:flex">
+        <p className="m-0 text-[22px] font-bold" style={{ color: titleColor }}>{title}</p>
         <p className="mt-[6px] mb-0 text-[40px] font-extrabold leading-none">{MONTH.month}</p>
         <p className="m-0 text-[13px] text-[#71717A]">{MONTH.year}</p>
       </div>
+      <p className="m-0 text-[13px] font-bold text-[#71717A] sm:hidden">{MONTH.year}년 {MONTH.month}월 기준</p>
       <ul className="m-0 flex list-none flex-col p-0">
         {rows.map((r, i) => {
           const t = TAG[r.tag];
@@ -124,6 +149,7 @@ function CalCard({ title, titleColor, topColor, rows }: { title: string; titleCo
 }
 
 export default function StoreCalendar() {
+  const [tab, setTab] = useState<'news' | 'open'>('news'); // 휴대폰 탭
   return (
     <section id="calendar" className="scroll-mt-[72px] bg-[#F7F6F4] text-[#1C1C1E]">
       <div className="mx-auto flex max-w-[1280px] flex-col gap-11 px-5 pt-16 pb-20 sm:px-10 sm:pt-[88px] sm:pb-24">
@@ -133,9 +159,19 @@ export default function StoreCalendar() {
           <span aria-hidden="true" className="h-1 w-16 bg-[#FF6F00]" />
         </div>
         <FocusCards />
-        <div className="flex w-full flex-wrap justify-center gap-6">
-          <CalCard title="입점 소식" titleColor="#1F4E3D" topColor="#1F4E3D" rows={NEWS} />
-          <CalCard title="모집 중인 자리" titleColor="#D24A0E" topColor="#FF6F00" rows={OPEN} />
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6">
+          {/* 휴대폰 탭: 하나씩 보기 */}
+          <div role="tablist" aria-label="입점 캘린더 보기" className="grid grid-cols-2 rounded-[10px] bg-[#ECEAE6] p-1 sm:hidden">
+            {([['news', '입점 소식', NEWS.length], ['open', '모집 중인 자리', OPEN.length]] as ['news' | 'open', string, number][]).map(([k, label, n]) => (
+              <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
+                className="h-12 cursor-pointer rounded-[8px] border-0 text-[16px] font-extrabold tracking-[-0.3px]"
+                style={{ background: tab === k ? '#FFFFFF' : 'transparent', color: tab === k ? (k === 'news' ? '#1F4E3D' : '#D24A0E') : '#71717A', boxShadow: tab === k ? '0 2px 8px -4px rgba(15,28,58,.35)' : 'none' }}>
+                {label} <span className="text-[13px] font-bold opacity-70">{n}</span>
+              </button>
+            ))}
+          </div>
+          <CalCard title="입점 소식" titleColor="#1F4E3D" topColor="#1F4E3D" rows={NEWS} show={tab === 'news'} />
+          <CalCard title="모집 중인 자리" titleColor="#D24A0E" topColor="#FF6F00" rows={OPEN} show={tab === 'open'} />
         </div>
       </div>
     </section>

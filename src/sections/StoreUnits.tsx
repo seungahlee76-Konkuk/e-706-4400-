@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
    호실 정보를 바꿀 때는 아래 ROOMS 데이터만 고치면 됩니다. */
 
 type Mode = 'rent' | 'sale';
-type TagKey = 'open' | 'nego' | 'done' | 'work' | 'soon' | 'income' | 'reserved' | 'saleonly' | 'rentonly';
+type TagKey = 'open' | 'saleopen' | 'consult' | 'nego' | 'done' | 'work' | 'soon' | 'income' | 'reserved' | 'saleonly' | 'rentonly';
 type Room = {
   id: string;
   name?: string;            // 표시 이름 (없으면 '118호')
@@ -26,7 +26,7 @@ const ROOMS: Room[] = [
     why: ['병원 통행로에 바로 붙어 있어, 정문에서 나온 처방전 동선 위에 있어요.', '118호와 함께 병원 쪽 첫 줄을 이루는 자리예요.'] },
   { id: '120', mapName: '약국', name: '120호', size: '30', uses: ['pharmacy'], rentOK: false, rentTag: 'saleonly', useTitle: '약국 (분양 전용)', useText: '약국', area: '전용 56.73평 · 계약 117.26평', rent: '임대 불가 · 분양만 가능', sale: '분양가 87억 8,000만 원', tenant: '공실 · 분양으로만 진행', point: '병원 통행로 바로 앞',
     why: ['병원 통행로를 따라 이어지는 약국 자리예요.', '119호와 나란히 있어 병원 쪽 동선을 함께 받아요.'] },
-  { id: '122', mapName: '약국', name: '122호', size: '30', uses: ['pharmacy'], useTitle: '약국 (임대·분양 모두 가능)', useText: '약국', area: '전용 44.25평 · 계약 91.47평', rent: '보증금·월세 협의 · 전화 주시면 바로 알려 드려요', sale: '분양가 69억 원', tenant: '현재 분양홍보관으로 사용 중 · 약국 임차인 모집', point: '정문 바로 앞 · 홍보관 자리',
+  { id: '122', mapName: '약국', name: '122호', size: '30', uses: ['pharmacy'], rentTag: 'consult', useTitle: '약국 (임대·분양 모두 가능)', useText: '약국', area: '전용 44.25평 · 계약 91.47평', rent: '보증금·월세 협의 · 전화 주시면 바로 알려 드려요', sale: '분양가 69억 원', tenant: '현재 분양홍보관으로 사용 중 · 약국 임차인 모집', point: '정문 바로 앞 · 홍보관 자리',
     why: ['병원 정문에서 가장 가까운 호실 가운데 하나예요.', '약국 중 유일하게 임차로 들어올 수 있는 자리예요.', '지금은 분양홍보관으로 쓰고 있어, 입점 시기는 협의로 정해요.'] },
   { id: '126', size: '20', uses: ['food', 'office'], useTitle: '음식점 · 사무실', useText: '음식점, 사무실', area: '전용 23.44평 · 계약 48.45평', rent: '보증금 5,000만 · 월 320만 (부가세 별도) · 조정 협의 가능', sale: '분양가 8억 3,780만 원', tenant: '임차인 모집 중', point: '외부 노출 · 주차장 인접 · 후면 확장형',
     why: ['밖에서 바로 보이고 주차장 입구와 가까워 차로 오는 손님도 들르기 쉬워요.', '뒤쪽으로 공간이 넓어지는 구조라 주방이나 창고, 상담실을 두기 좋아요.', '옆 127호에 베이커리 입점을 협의 중이라 오가는 손님이 함께 늘어날 자리예요.'] },
@@ -78,7 +78,9 @@ const DEFAULT_SLOTS: Slot[] = [
 ];
 
 const TAG: Record<TagKey, { text: string; cls: string }> = {
-  open:     { text: '모집 중',     cls: 'bg-[#FFF1E8] text-[#9A3412]' },
+  open:     { text: '입점 가능',   cls: 'bg-[#FFF1E8] text-[#9A3412]' },
+  saleopen: { text: '분양 가능',   cls: 'bg-[#FFF1E8] text-[#9A3412]' },
+  consult:  { text: '입점 협의',   cls: 'bg-[#FFF1E8] text-[#9A3412]' },
   nego:     { text: '협의 중',     cls: 'bg-white text-[#3F3F46] border border-dashed border-[#71717A]' },
   done:     { text: '입점 확정',   cls: 'bg-[#DDE1EC] text-[#0F1C3A]' },
   work:     { text: '인테리어 시작', cls: 'bg-[#D9F3EF] text-[#0F6F68]' },
@@ -92,17 +94,39 @@ const TAG: Record<TagKey, { text: string; cls: string }> = {
 const SIZES: [string, string][] = [['all', '전체'], ['10', '10평대'], ['20', '20평대'], ['30', '30평 이상']];
 const USES: [string, string][] = [['all', '전체'], ['pharmacy', '약국'], ['food', '음식점·카페'], ['bar', '주점'], ['office', '사무실'], ['edu', '교육·운동'], ['service', '미용·서비스'], ['pet', '반려동물']];
 
-// 배치도 좌표 (1100 × 520 기준)
+// 배치도 좌표 (1100 × 520 기준) [x, y, 너비, 높이]
+// 칸 크기는 분양 테이블의 전용면적(㎡)에 비례합니다 (같은 줄은 같은 깊이, 면적 1㎡ = 약 51.5칸²).
 const POS: Record<string, [number, number, number, number]> = {
-  '118': [134, 20, 100, 90], '119': [134, 118, 100, 56], '120': [134, 180, 100, 50], '132': [244, 118, 46, 62], '122': [134, 400, 100, 70],
-  '117': [300, 20, 50, 62], '126': [456, 400, 70, 70], '127': [528, 400, 70, 70], '128': [600, 400, 50, 70], '129': [652, 400, 50, 70],
-  '137': [1000, 400, 50, 70], '139': [1052, 330, 46, 60],
+  '118': [132, 20, 104, 59.5], '119': [132, 81.5, 104, 96.3], '120': [132, 179.8, 104, 92.9], '122': [132, 402.2, 104, 72.4],
+  '132': [244, 118, 46, 49.4], '117': [300, 20, 43.9, 62],
+  '126': [441.8, 402, 66.5, 60], '127': [510.3, 402, 72.3, 60], '128': [584.6, 402, 46.8, 60], '129': [633.4, 402, 52.4, 60],
+  '137': [996.5, 402, 53.5, 60], '139': [1052, 341.1, 46, 58.9],
 };
 const TENANTS: [string, string, number, number, number, number][] = [
-  ['약국', '121호 · 영업 중', 134, 250, 100, 80],
-  ['메가커피', '123호', 300, 400, 50, 70], ['우지커피', '124호', 352, 400, 50, 70], ['본죽', '125호', 404, 400, 50, 70],
-  ['부동산', '133호', 792, 400, 50, 70], ['장호덕 손만두', '134·135호', 844, 400, 102, 70], ['136호', '분양 완료', 948, 400, 50, 70], ['CU', '138호', 1052, 400, 46, 70],
+  ['약국', '121호 · 영업 중', 132, 274.6, 104, 125.6],
+  ['메가커피', '123호', 300, 402, 37.1, 60], ['우지커피', '124호', 339.1, 402, 39.9, 60], ['본죽', '125호', 380.9, 402, 58.9, 60],
+  ['', '133호', 847.5, 402, 31.5, 60], ['장호덕 손만두', '134·135호', 881, 402, 61.1, 60], ['', '136호 · 분양 완료', 944, 402, 50.5, 60], ['CU', '138호', 1052, 402, 46, 60],
 ];
+// "어떤 자리를 찾으세요?" 고르기 목록 (임대 탭)
+// - title: 버튼에 보이는 말 / info·note: 펼쳤을 때 요약 / why: 이유 두 줄
+// - crop: 작은 확대 지도에 보여 줄 범위 [x, y, 너비, 높이] (배치도 1100 × 520 기준)
+// 호실이 계약되면 이 목록에서도 빼 주세요. 금액·면적은 위 ROOMS 와 같게 맞춰 주세요.
+type Spot = { ids: string[]; title: string; info: string; note: string; why: string[]; crop: [number, number, number, number] };
+const SPOTS: Spot[] = [
+  { ids: ['126', '127', '128'], title: '메인 먹거리 라인', info: '126·127·128호 · 전용 16~25평 · 월 270~350만', note: '보증금 5,000만 · 부가세 별도',
+    why: ['메가커피·본죽·닭한상 손님이 함께 지나가는 상가 줄이에요', '밖에서 바로 보이고 주차장 입구와 가까워요'], crop: [372, 330, 330, 180] },
+  { ids: ['118'], title: '약국 라인 옆 음식점 자리', info: '118호 · 전용 36평 · 월 350만', note: '보증금 5,000만 · 부가세 별도 · 가장 큰 자리',
+    why: ['병원 정문에서 약국으로 이어지는 길 위에 있어요', '홀 좌석을 넉넉히 둘 수 있는 큰 면적이에요'], crop: [0, -40, 380, 320] },
+  { ids: ['122'], title: '정문 앞 코너 약국', info: '122호 · 전용 44평 · 약국 자리', note: '현재 분양홍보관 자리 · 입점 시기 협의',
+    why: ['병원 정문에서 가장 가까운 호실 가운데 하나예요', '약국 중 유일하게 임차로 들어올 수 있는 자리예요'], crop: [0, 270, 430, 250] },
+  { ids: ['117'], title: '병원 길 앞 1:1 레슨 자리', info: '117호 · 전용 16평 · 월 170만', note: '보증금 3,000만 · 부가세 별도 · 1:1 필라테스 등 예약제 업종 추천',
+    why: ['손님이 일부러 찾아오는 예약제 업종에 맞는 자리예요', '외래 하루 800명이 지나는 병원 앞 길에서 간판이 바로 보여요'], crop: [0, -40, 400, 320] },
+  { ids: ['132'], title: '중앙 정원 앞 소형칸', info: '132호 · 전용 13평 · 월 140만', note: '보증금 3,000만 · 부가세 별도',
+    why: ['단지 중앙 정원에 붙어 있어 입주민이 오가는 길목이에요', '1인 미용실·교습소처럼 예약제로 운영하는 업종에 맞아요'], crop: [170, 70, 360, 240] },
+  { ids: ['137', '139'], title: 'CU 옆자리', info: '137·139호 · 전용 16~19평 · 월 250만', note: '보증금 5,000만 · 부가세 별도',
+    why: ['CU 옆이라 저녁에도 사람이 오가요', '호프·이자카야 같은 저녁 업종에 맞아요'], crop: [800, 300, 300, 190] },
+];
+
 const pct = (x: number, y: number, w: number, h: number): CSSProperties => ({
   left: `${(x / 11).toFixed(2)}%`, top: `${(y / 5.2).toFixed(2)}%`, width: `${(w / 11).toFixed(2)}%`, height: `${(h / 5.2).toFixed(2)}%`,
 });
@@ -126,6 +150,9 @@ export default function StoreUnits() {
   const [size, setSize] = useState('all');
   const [use, setUse] = useState('all');
   const [sel, setSel] = useState('118');
+  const [spot, setSpot] = useState(0);          // PC: 위에서 고른 자리
+  const [openSpot, setOpenSpot] = useState(-1); // 휴대폰: 펼친 자리 (-1 = 모두 접힘)
+  const [showAll, setShowAll] = useState(false); // 휴대폰: 전체 배치도 펼치기
   const [page, setPage] = useState(0);
   const [ph, setPh] = useState(0);
   const [tick, setTick] = useState(0);   // 필터가 바뀔 때마다 강조 애니메이션 다시 재생
@@ -138,7 +165,7 @@ export default function StoreUnits() {
   const avail = (r: Room) => okIn(r, mode);
   const hit = (r: Room) => filtering && avail(r) && (size === 'all' || r.size === size) && (use === 'all' || r.uses.includes(use));
   const hits = ROOMS.filter(hit).length;
-  const tagOf = (r: Room) => TAG[sale ? (r.saleTag || 'open') : (r.rentTag || 'open')];
+  const tagOf = (r: Room) => TAG[sale ? (r.saleTag || 'saleopen') : (r.rentTag || 'open')];
   const cur = findRoom(sel) || ROOMS[0];
   const ct = tagOf(cur);
 
@@ -199,7 +226,9 @@ export default function StoreUnits() {
 
 
   // 배치도: vertical=true 이면 휴대폰용 세로 배치도 (병원이 위쪽)
-  const renderPlan = (vertical: boolean) => {
+  // 색은 두 가지만: 주황 = 입점 가능 / 회색 = 그 밖의 칸. 가게 이름은 위치를 찾는 기준(랜드마크)으로만 보여 줍니다.
+  // hl: 고른 자리 호실들(진한 주황) / mini: 작은 확대 지도용 (말풍선 없음)
+  const renderPlan = (vertical: boolean, hl?: string[], mini?: boolean) => {
     const W = vertical ? 520 : 1100, H = vertical ? 1100 : 520;
     const T = (x: number, y: number, w: number, h: number): [number, number, number, number] => (vertical ? [520 - y - h, x, h, w] : [x, y, w, h]);
     const at = (x: number, y: number, w: number, h: number): CSSProperties => {
@@ -207,75 +236,61 @@ export default function StoreUnits() {
       return { left: `${(a / W) * 100}%`, top: `${(b / H) * 100}%`, width: `${(c / W) * 100}%`, height: `${(d / H) * 100}%` };
     };
     const pt = (x: number, y: number): CSSProperties => ({ left: `${(x / W) * 100}%`, top: `${(y / H) * 100}%` });
+
+    // 말풍선: 고른 자리가 있으면 "여기예요", 없으면 "지금 보는 자리" (휴대폰·작은 지도는 없음)
+    const pin = (() => {
+      if (vertical || mini) return null;
+      const ids = hl ? (hl.length > 2 ? hl : [hl[0]]) : [sel];
+      const ps = ids.map((id) => POS[id]).filter(Boolean);
+      if (!ps.length) return null;
+      const x0 = Math.min(...ps.map((p) => p[0])), x1 = Math.max(...ps.map((p) => p[0] + p[2]));
+      const y0 = Math.min(...ps.map((p) => p[1])), y1 = Math.max(...ps.map((p) => p[1] + p[3]));
+      const text = hl ? '여기예요' : '지금 보는 자리';
+      return y0 < 40
+        ? <span aria-hidden="true" className="su-pin su-pin-b absolute" style={pt((x0 + x1) / 2, y1 + 8)}>▲ {text}</span>
+        : <span aria-hidden="true" className="su-pin absolute" style={pt((x0 + x1) / 2, y0 - 8)}>{text} ▼</span>;
+    })();
+
     return (
-      <div role="group" aria-label="1층 상가 배치도" className={`su-plan relative w-full overflow-hidden rounded-[6px] border border-[#ECEBE8] ${vertical ? 'su-v aspect-[520/1100]' : 'aspect-[1100/520]'}`}>
-        {vertical ? (
-          <div aria-hidden="true" className="absolute flex items-center justify-center gap-2 border-b border-[#D4D8E0] bg-[#EEF0F4]" style={at(0, 0, 92, 520)}>
-            <span className="text-[13px] font-extrabold text-[#3F4A63]">수원덕산병원</span><span className="text-[11px] text-[#8A93A6]">439병상</span>
-          </div>
-        ) : (
-          <div aria-hidden="true" className="absolute flex flex-col items-center justify-center gap-1 border-r border-[#D4D8E0] bg-[#EEF0F4] text-center" style={at(0, 0, 92, 520)}>
-            <span className="text-[12px] leading-[1.3] font-extrabold text-[#3F4A63]">수원<br />덕산병원</span><span className="text-[10px] text-[#8A93A6]">439병상</span>
-          </div>
-        )}
-        <span aria-hidden="true" className="absolute box-border flex items-center justify-center rounded-[3px] border-[1.5px] border-[#0F1C3A] bg-white text-[11px] font-extrabold whitespace-nowrap text-[#0F1C3A] sm:text-[12px]"
-          style={vertical ? { left: `${(18 / W) * 100}%`, top: `${(30 / H) * 100}%`, width: `${(76 / W) * 100}%`, height: `${(30 / H) * 100}%` } : at(14, 432, 64, 36)}>{vertical ? '정문 ▾' : '정문 ▸'}</span>
+      <div role="group" aria-label="1층 상가 배치도" className={`su-plan relative w-full overflow-hidden rounded-[6px] border border-[#ECEBE8] ${vertical ? 'su-v aspect-[520/820]' : 'aspect-[1100/520]'}`}>
+        {/* 병원 */}
+        <div aria-hidden="true" className="su-hosp absolute" style={at(0, 0, 92, 520)}>
+          <img src="/photos/stores/hospital-1.jpg" alt="" loading="lazy" />
+          <span className="su-hosp-t"><strong>수원덕산병원</strong><span>439병상 종합병원</span></span>
+        </div>
+        <span aria-hidden="true" className="su-gate absolute"
+          style={vertical ? { left: `${(14 / W) * 100}%`, top: `${(26 / H) * 100}%`, width: `${(116 / W) * 100}%`, height: `${(40 / H) * 100}%` } : at(8, 420, 90, 38)}>{vertical ? '병원 정문 ▼' : '병원 정문 ▶'}</span>
+
+        {/* 병원 앞 길 */}
         <span aria-hidden="true" className="su-walk absolute" style={at(102, 16, 22, 488)} />
         <span aria-hidden="true" className="su-walk absolute" style={at(102, 486, 460, 20)} />
-        {vertical ? (
-          <>
-            <span aria-hidden="true" className="absolute flex items-center justify-center text-[10px] font-extrabold tracking-[2px] text-[#0F6F68]" style={at(102, 150, 22, 220)}>병원 통행로</span>
-            <span aria-hidden="true" className="absolute flex items-center justify-center text-[9px] font-extrabold tracking-[1px] text-[#0F6F68] [writing-mode:vertical-rl]" style={at(240, 486, 140, 20)}>병원 통행로 ↓</span>
-          </>
-        ) : (
-          <>
-            <span aria-hidden="true" className="absolute flex items-center justify-center text-[11px] font-extrabold tracking-[3px] text-[#0F6F68] [writing-mode:vertical-rl]" style={at(102, 200, 22, 140)}>병원 통행로</span>
-            <span aria-hidden="true" className="absolute text-[10px] font-extrabold tracking-[1px] text-[#0F6F68]" style={pt(240, 487)}>병원 통행로 →</span>
-          </>
-        )}
-        {([[130, 16, 108, 458], [240, 114, 54, 218], [296, 16, 58, 70], [296, 396, 410, 78], [788, 396, 312, 78], [1048, 326, 52, 68]] as [number, number, number, number][]).map((b, i) => (
+        <span aria-hidden="true" className={`su-walklb absolute ${vertical ? '' : '[writing-mode:vertical-rl]'}`} style={vertical ? at(102, 120, 22, 260) : at(102, 170, 22, 200)}>병원 앞 길</span>
+
+        {/* 건물 윤곽 */}
+        {([[128, 16, 112, 462], [240, 114, 54, 245], [296, 16, 52, 70], [296, 398, 393, 68], [843, 398, 257, 68], [1048, 337, 52, 63]] as [number, number, number, number][]).map((b, i) => (
           <span key={i} aria-hidden="true" className="su-bldg absolute" style={at(...b)} />
         ))}
-        <span aria-hidden="true" className={`absolute box-border flex rounded-[3px] border-[1.5px] border-dashed border-[#C4C9D4] bg-white/60 text-[#8A93A6] ${vertical ? 'flex-col items-center justify-center gap-1 text-center text-[10px] leading-[1.4]' : 'items-center pl-4 text-[12px]'}`} style={at(362, 16, 734, 72)}>
-          {vertical ? (<><strong className="text-[12px] text-[#3F4A63]">101동</strong>덕산간호학원<br />개원 예정<br />(105·106·<br />115·116호)</>) : (<><strong className="mr-2 text-[#3F4A63]">101동</strong> 덕산간호학원 개원 예정 (105·106·115·116호)</>)}
-        </span>
-        <span aria-hidden="true" className="absolute box-border flex items-center justify-center overflow-hidden rounded-full border-[1.5px] border-dashed border-[#9CC7AE]" style={at(430, 160, 165, 165)}>
-          <img src="/photos/hero-5.jpg" alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover object-[46%_65%]" />
-          <span className="relative z-[1] rounded-full bg-white/85 px-2.5 py-0.5 text-[11px] font-bold text-[#3F6B4A] shadow-sm">중앙 정원</span>
-        </span>
-        <span aria-hidden="true" className={`su-lb absolute flex items-center justify-center text-[10px] text-[#A1A1AA] ${vertical ? '' : '[writing-mode:vertical-rl]'}`} style={vertical ? at(244, 186, 46, 92) : at(244, 186, 46, 142)}>130·131호</span>
-        {vertical ? (
-          <>
-            <span aria-hidden="true" className="absolute text-[11px] font-extrabold tracking-[1.5px] text-[#3F4A63]" style={pt(132, 280)}>102동</span>
-            <span aria-hidden="true" className="absolute text-[11px] font-extrabold tracking-[1.5px] text-[#3F4A63]" style={pt(132, 772)}>103동</span>
-          </>
-        ) : (
-          <>
-            <span aria-hidden="true" className="absolute text-[11px] font-extrabold tracking-[1.5px] text-[#3F4A63]" style={pt(298, 376)}>102동</span>
-            <span aria-hidden="true" className="absolute text-[11px] font-extrabold tracking-[1.5px] text-[#3F4A63]" style={pt(790, 376)}>103동</span>
-          </>
-        )}
-        <span aria-hidden="true" className="absolute box-border flex items-center justify-center rounded-[3px] border-[1.5px] border-dashed border-[#A1A1AA] text-center text-[10px] leading-[1.3] text-[#71717A]" style={at(712, 396, 70, 78)}>주차장<br />출입구</span>
-        {vertical ? (
-          <>
-            <span aria-hidden="true" className="absolute box-border flex items-center justify-center border-l-[1.5px] border-[#B9C2D0] text-[9px] tracking-[1px] text-[#8A93A6] [writing-mode:vertical-rl]" style={at(712, 490, 388, 18)}>차량 진출입</span>
-            <span aria-hidden="true" className="absolute text-[10px] font-bold whitespace-nowrap text-[#8A93A6]" style={pt(306, 1040)}>수원역 방면 ↘</span>
-            <span aria-hidden="true" className="absolute box-border flex items-center justify-center gap-px rounded-full border-[1.5px] border-[#3F4A63] text-[10px] font-extrabold text-[#3F4A63]" style={at(1060, 110, 30, 30)}><span className="text-[8px]">▶</span>N</span>
-          </>
-        ) : (
-          <>
-            <span aria-hidden="true" className="absolute flex justify-center border-t-[1.5px] border-[#B9C2D0] pt-[2px] text-[10px] tracking-[1px] text-[#8A93A6]" style={at(712, 488, 388, 18)}>차량 진출입</span>
-            <span aria-hidden="true" className="absolute text-[11px] font-bold text-[#8A93A6]" style={{ right: '1.5%', top: '38%' }}>수원역 방면 ↗</span>
-            <span aria-hidden="true" className="absolute box-border flex flex-col items-center justify-center rounded-full border-[1.5px] border-[#3F4A63] text-[10px] leading-none font-extrabold text-[#3F4A63]" style={at(1060, 110, 30, 30)}><span className="text-[8px]">▲</span>N</span>
-          </>
-        )}
 
+        {/* 중앙 정원 · 주차장 입구 */}
+        <span aria-hidden="true" className="su-park absolute" style={vertical ? { ...at(450, 180, 130, 130), height: 'auto', aspectRatio: '1 / 1' } : at(440, 170, 150, 150)}>
+          <img src="/photos/hero-5.jpg" alt="" loading="lazy" />
+          <span>중앙 정원</span>
+        </span>
+        <span aria-hidden="true" className="su-car absolute" style={at(696, 400, 72, 64)}>주차장<br />입구</span>
+
+        {/* 이름 없이 회색으로만 두는 칸 (130호, 131호, 101동) */}
+        {([[244, 169.4, 46, 104.3], [244, 275.6, 46, 77.8], [362, 16, 734, 72]] as [number, number, number, number][]).map((b, i) => (
+          <span key={i} aria-hidden="true" className="su-tile su-blank absolute" style={at(...b)} />
+        ))}
+
+        {/* 영업 중인 가게 (이름이 빈 칸은 회색만) */}
         {TENANTS.map(([name, sub, x, y, w, h]) => (
-          <span key={sub} aria-label={`${sub} ${name}`} className="su-tile absolute" style={{ ...at(x, y, w, h), ...(sub === '분양 완료' ? { background: '#F4F4F5', color: '#A1A1AA', boxShadow: 'inset 0 0 0 1px #E4E4E7' } : { background: '#E6E9F0', color: '#0F1C3A', boxShadow: 'inset 0 0 0 1px #CDD3E0' }) }}>
-            <span className="su-tn leading-[1.2] font-extrabold">{name}</span><span className="su-ts opacity-70">{sub}</span>
+          <span key={sub} aria-label={name ? `${sub} ${name}` : sub} className={`su-tile absolute ${name ? 'su-busy' : 'su-blank'} ${!vertical && w < 42 ? 'su-vt' : ''}`} style={at(x, y, w, h)}>
+            {name && <span className="su-tn">{name}</span>}
           </span>
         ))}
 
+        {/* 호실 */}
         {ROOMS.map((r) => {
           const isHit = hit(r);
           const ok = avail(r);
@@ -283,26 +298,81 @@ export default function StoreUnits() {
           const t = tagOf(r);
           const off = !ok && (r.rentTag === 'saleonly' || r.saleTag === 'rentonly' || r.saleTag === 'reserved');
           const busy = !ok && !off;
-          const look: CSSProperties = isSel ? { background: MC.bg, color: MC.fg, boxShadow: `0 0 0 2px #FFFFFF, 0 0 0 4px ${MC.line}`, zIndex: 2 }
-            : busy ? { background: '#E6E9F0', color: '#0F1C3A', boxShadow: 'inset 0 0 0 1px #CDD3E0' }
-            : off ? { background: '#F4F4F5', color: '#A1A1AA', boxShadow: 'inset 0 0 0 1px #E4E4E7' }
-            : filtering && !isHit ? { background: '#FFFFFF', color: '#E2A47C', boxShadow: 'inset 0 0 0 1px #F5CDB0' }
-            : isHit ? { background: '#FFE2CC', color: '#B23C05', boxShadow: 'inset 0 0 0 2px #FF6F00' }
-            : { background: '#FFF6EF', color: '#C2410C', boxShadow: 'inset 0 0 0 1.5px #FF6F00' };
+          const look = busy ? 'su-busy' : off ? 'su-blank' : hl
+            ? (hl.includes(r.id) ? 'su-free su-av su-pick' : 'su-free su-av')
+            : `su-free su-av${filtering && !isHit ? ' su-dim' : ''}${isHit ? ' su-hl' : ''}`;
+          const label = busy ? (r.id === '129' ? '닭한상' : roomName(r)) : off ? (r.mapName || '') : r.id === '122' ? (vertical ? '약국' : '약국 자리') : `${r.id}호`;
           return (
             <button
               key={r.id} type="button" aria-pressed={isSel} aria-label={`${roomName(r)} ${t.text}`}
-              onClick={() => (vertical ? openDetail(r.id) : (setSel(r.id), setPage(pageOf(r.id)), setPh(0)))}
-              className={`su-tile su-room absolute cursor-pointer border-0 ${!busy && !off && !isSel ? 'su-av' : ''} ${hitCls(isHit)}`}
-              style={{ ...at(...POS[r.id]), ...look }}
+              onClick={() => {
+                if (vertical || mini) { openDetail(r.id); return; }
+                setSel(r.id); setPage(pageOf(r.id)); setPh(0);
+                const k = SPOTS.findIndex((p) => p.ids.includes(r.id));
+                if (k >= 0) setSpot(k);
+              }}
+              className={`su-tile su-room absolute cursor-pointer border-0 ${look} ${isSel && !hl && !vertical ? 'su-sel' : ''} ${hl ? '' : hitCls(isHit)}`}
+              style={at(...POS[r.id])}
             >
-              <span className="su-rn leading-[1.1] font-extrabold">{r.mapName || r.id}</span>
-              <span className="su-ts font-bold opacity-85">{r.id === '129' && busy ? '닭한상' : t.text}</span>
+              {label && <span className={busy || off ? 'su-tn' : 'su-rn'}>{label}</span>}
             </button>
           );
         })}
+
+        {pin}
       </div>
     );
+  };
+
+  // 작은 확대 지도: 고른 자리 주변만 잘라서 보여 줌
+  const renderMini = (p: Spot) => {
+    const [cx, cy, cw, ch] = p.crop;
+    const ps = (p.ids.length > 2 ? p.ids : [p.ids[0]]).map((id) => POS[id]);
+    const x0 = Math.min(...ps.map((q) => q[0])), x1 = Math.max(...ps.map((q) => q[0] + q[2])), y0 = Math.min(...ps.map((q) => q[1]));
+    return (
+      <div className="su-mini relative overflow-hidden rounded-[8px]" style={{ aspectRatio: `${cw} / ${ch}` }}>
+        <div className="absolute" style={{ width: `${(1100 / cw) * 100}%`, left: `${(-cx / cw) * 100}%`, top: `${(-cy / ch) * 100}%` }}>
+          {renderPlan(false, p.ids, true)}
+        </div>
+        <span aria-hidden="true" className="su-pin absolute" style={{ left: `${(((x0 + x1) / 2 - cx) / cw) * 100}%`, top: `max(30px, ${((y0 - cy) / ch) * 100 - 2}%)` }}>여기예요</span>
+        {cx > 92 && <span aria-hidden="true" className="su-hint absolute">← 병원 쪽</span>}
+      </div>
+    );
+  };
+
+  // 색 안내 (칸 안에는 상태 글씨를 쓰지 않고 색으로만 구분)
+  const renderLegend = (picked: boolean) => (
+    <div aria-hidden="true" className="flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-[#52525B]">
+      {picked && <span className="inline-flex items-center gap-[6px]"><span className="su-lg" style={{ background: '#FF671D' }} />고른 자리</span>}
+      <span className="inline-flex items-center gap-[6px]"><span className="su-lg" style={{ background: '#FFE9DA', boxShadow: 'inset 0 0 0 1.5px #FF671D' }} />{sale ? '분양 가능' : '입점 가능'}</span>
+      <span className="inline-flex items-center gap-[6px]"><span className="su-lg" style={{ background: '#E7E8EC', boxShadow: 'inset 0 0 0 1px #D6D9E0' }} />{sale ? '분양 안 되는 칸' : '임대 안 되는 칸 (영업 중 등)'}</span>
+    </div>
+  );
+
+  // 고른 자리 요약 + 이유 + 버튼
+  const renderSpotInfo = (p: Spot) => (
+    <div className="flex flex-col">
+      <p className="m-0 mt-3 text-[16px] font-bold text-[#1C1C1E] lg:text-[18px]">{p.info}</p>
+      <p className="m-0 mt-[2px] text-[13px] text-[#71717A]">{p.note}</p>
+      <ul className="m-0 mt-[10px] flex list-none flex-col gap-1 p-0">
+        {p.why.map((w) => <li key={w} className="su-why">{w}</li>)}
+      </ul>
+      <div className="mt-[14px] grid grid-cols-2 gap-2 lg:max-w-[420px]">
+        <button type="button" onClick={() => openDetail(p.ids[0])} className="su-act su-act-1">자세히 보기</button>
+        <a href="tel:031-293-1073" className="su-act su-act-2">전화 문의</a>
+      </div>
+    </div>
+  );
+
+  const toggleSpot = (i: number) => {
+    const n = openSpot === i ? -1 : i;
+    setOpenSpot(n);
+    if (n >= 0) window.setTimeout(() => document.getElementById(`spot-${n}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+  };
+  const pickSpot = (i: number) => {
+    setSpot(i);
+    const id = SPOTS[i].ids[0];
+    setSel(id); setPage(pageOf(id)); setPh(0);
   };
   return (
     <>
@@ -368,19 +438,65 @@ export default function StoreUnits() {
 
         {/* 1층 배치도 */}
         <div className="flex flex-col gap-[14px] rounded-[6px] border border-[#E4E4E7] bg-white px-4 pt-6 pb-5 sm:px-6">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <p className="m-0 text-[17px] font-extrabold">1층 배치도 <span className="hidden text-[13px] font-medium text-[#71717A] lg:inline">· 주황 호실을 누르면 아래에서 자세히 볼 수 있어요</span></p>
-            <p className="m-0 text-[12px] text-[#A1A1AA]">이해를 돕기 위한 간략도이며 실제 비율과 다를 수 있어요</p>
-          </div>
-          <p className="m-0 text-[12px] text-[#71717A] lg:hidden">병원이 위쪽이에요 · 주황 칸이 입점 가능한 호실이에요. 누르면 상세로 이동해요</p>
-          <div className="mx-auto w-full max-w-[420px] lg:hidden">{renderPlan(true)}</div>
-          <div className="hidden lg:block">{renderPlan(false)}</div>
-          <div aria-hidden="true" className="flex flex-wrap gap-x-5 gap-y-2 text-[12px] text-[#52525B]">
-            <span className="inline-flex items-center gap-[6px]"><span className="h-[14px] w-[14px] rounded-[2px] bg-[#FFF6EF] shadow-[inset_0_0_0_1.5px_#FF6F00]" />입점 가능 (누르면 상세)</span>
-            <span className="inline-flex items-center gap-[6px]"><span className="h-[14px] w-[14px] rounded-[2px] bg-[#E6E9F0] shadow-[inset_0_0_0_1px_#CDD3E0]" />영업 중 · 입점 확정</span>
-            <span className="inline-flex items-center gap-[6px]"><span className="h-[14px] w-[14px] rounded-[2px] bg-[#F4F4F5] shadow-[inset_0_0_0_1px_#E4E4E7]" />{sale ? '분양 불가 (협의 중 · 임대만 가능)' : '임대 불가 (분양만 가능)'}</span>
-            <span className="inline-flex items-center gap-[6px]"><span className="su-walk h-2 w-[14px]" />병원 통행로</span>
-          </div>
+          {!sale ? (
+            <>
+              {/* 임대: "어떤 자리를 찾으세요?" 고르기 */}
+              <div className="flex flex-col gap-1">
+                <p className="m-0 text-[21px] font-extrabold tracking-[-0.6px] sm:text-[22px]">어떤 자리를 찾으세요?</p>
+                <p className="m-0 text-[15px] text-[#52525B]">누르시면 배치도에서 위치를 보여 드려요</p>
+              </div>
+
+              {/* 휴대폰: 누르면 그 자리에서 펼쳐짐 */}
+              <div className="flex flex-col gap-[10px] lg:hidden">
+                {SPOTS.map((p, i) => {
+                  const on = openSpot === i;
+                  return (
+                    <div key={p.ids[0]} id={`spot-${i}`} className={`su-opt scroll-mt-[84px] ${on ? 'su-on' : ''}`}>
+                      <button type="button" aria-expanded={on} onClick={() => toggleSpot(i)} className="su-opt-btn">
+                        <span className="su-opt-t">{p.title}</span>
+                        <span className="su-opt-n">{p.ids.join('·')}호</span>
+                        <span aria-hidden="true" className="su-opt-c">›</span>
+                      </button>
+                      {on && <div className="px-4 pb-4">{renderMini(p)}{renderSpotInfo(p)}</div>}
+                    </div>
+                  );
+                })}
+                <button type="button" aria-expanded={showAll} onClick={() => setShowAll((v) => !v)} className="su-all">
+                  {showAll ? '전체 배치도 접기' : '전체 배치도 보기'}
+                </button>
+                {showAll && <div className="mx-auto flex w-full max-w-[420px] flex-col gap-2">{renderPlan(true)}{renderLegend(false)}</div>}
+              </div>
+
+              {/* PC: 위에서 고르고, 아래 배치도에서 위치 확인 */}
+              <div className="hidden flex-col gap-4 lg:flex">
+                <div className="grid grid-cols-3 gap-[10px]">
+                  {SPOTS.map((p, i) => (
+                    <button key={p.ids[0]} type="button" aria-pressed={spot === i} onClick={() => pickSpot(i)} className={`su-opt su-opt-pc ${spot === i ? 'su-on' : ''}`}>
+                      <span className="su-opt-t">{p.title}</span>
+                      <span className="su-opt-n">{p.ids.join('·')}호</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="flex flex-col gap-2">
+                  {renderPlan(false, SPOTS[spot].ids)}
+                  {renderLegend(true)}
+                </div>
+                {renderSpotInfo(SPOTS[spot])}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* 분양: 전체 배치도 */}
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <p className="m-0 text-[17px] font-extrabold">1층 배치도</p>
+                <p className="m-0 text-[14px] text-[#3F3F46]"><b className="text-[#D24A0E]">주황색</b> 칸이 지금 분양 가능한 자리예요</p>
+              </div>
+              <div className="mx-auto w-full max-w-[420px] lg:hidden">{renderPlan(true)}</div>
+              <div className="hidden lg:block">{renderPlan(false)}</div>
+              {renderLegend(false)}
+            </>
+          )}
+          <p className="m-0 text-[11px] text-[#A1A1AA]">이해를 돕기 위한 간략도이며 실제 비율과 다를 수 있어요</p>
         </div>
 
         {/* 결과 줄 */}
@@ -543,18 +659,63 @@ export default function StoreUnits() {
 }
 
 const CSS = `
-.su-plan{background-color:#FBFBFA;background-image:linear-gradient(rgba(15,28,58,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(15,28,58,.045) 1px,transparent 1px);background-size:22px 22px}
-.su-walk{background:repeating-linear-gradient(45deg,rgba(127,211,203,.55) 0 3px,rgba(127,211,203,.15) 3px 7px)}
-.su-bldg{box-sizing:border-box;background:#fff;border:1.5px solid #9AA3B5;border-radius:3px;box-shadow:0 4px 14px -10px rgba(15,28,58,.35)}
-.su-rn{font-size:13px}.su-tn{font-size:11px}.su-ts{font-size:9.5px}
-.su-v .su-tile{padding:2px 3px;white-space:normal;align-items:center;justify-content:center;text-align:center}
-.su-v .su-rn{font-size:12px;letter-spacing:-.3px;white-space:nowrap}.su-v .su-ts{display:none}
-.su-v .su-tn{font-size:9px;line-height:1.15;letter-spacing:-.3px;word-break:keep-all}
-.su-v .su-lb{font-size:8.5px !important}
+.su-plan{background:#FAF9F6;container-type:inline-size}
+.su-hosp{display:flex;align-items:center;justify-content:center;overflow:hidden;background:#E9ECF2}
+.su-hosp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.28}
+.su-hosp-t{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;line-height:1.25}
+.su-hosp-t strong{font-size:min(16px,1.25cqw);font-weight:800;letter-spacing:-.4px;color:#0F1C3A}
+.su-hosp-t span{font-size:min(11.5px,.95cqw);font-weight:600;color:#3F4A63}
+.su-gate{z-index:3;display:flex;align-items:center;justify-content:center;border-radius:999px;background:#0F1C3A;color:#fff;font-size:12.5px;font-weight:800;white-space:nowrap;box-shadow:0 4px 10px -4px rgba(15,28,58,.5)}
+.su-walk{background:#DCEFEB}
+.su-walklb{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;letter-spacing:1px;color:#0F6F68;white-space:nowrap}
+.su-bldg{box-sizing:border-box;background:#F1F2F5;border:1.5px solid #D6D9E0;border-radius:4px}
+.su-park{display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:50%}
+.su-park img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:46% 65%}
+.su-park span{position:relative;border-radius:999px;background:rgba(255,255,255,.88);padding:3px 10px;font-size:12px;font-weight:700;color:#3F6B4A}
+.su-car{box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.3;border:1.5px dashed #B4B8C2;border-radius:4px;color:#71717A;font-size:11px;font-weight:600}
+.su-tile{box-sizing:border-box;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;line-height:1.15;white-space:nowrap;border-radius:4px;font-family:inherit;overflow:hidden}
+.su-free{background:#FFE9DA;color:#B23C05;box-shadow:inset 0 0 0 2px #FF671D}
+.su-free.su-hl{background:#FFD9BF}
+.su-free.su-dim{background:#FFFFFF;color:#E2A47C;box-shadow:inset 0 0 0 1px #F5CDB0}
+.su-busy{background:#E7E8EC;color:#52525B;box-shadow:inset 0 0 0 1px #D6D9E0}
+.su-blank{background:#ECEDF0;color:#52525B;box-shadow:inset 0 0 0 1px #DEE0E6}
+.su-sel{z-index:2;box-shadow:0 0 0 3px #FFFFFF,0 0 0 6px #0F1C3A}
+.su-free.su-sel{box-shadow:inset 0 0 0 2px #FF671D,0 0 0 3px #FFFFFF,0 0 0 6px #0F1C3A}
+.su-rn{font-size:min(16px,1.45cqw);font-weight:800;letter-spacing:-.4px}
+.su-tn{font-size:min(12.5px,1.15cqw);font-weight:700;letter-spacing:-.3px;white-space:normal;word-break:keep-all}
+.su-vt .su-tn{writing-mode:vertical-rl;letter-spacing:0}
+.su-ts{font-size:min(11px,1cqw);font-weight:700;color:#C2410C}
+.su-pin{z-index:4;transform:translate(-50%,-100%);border-radius:999px;background:#0F1C3A;color:#fff;padding:4px 9px;font-size:11px;font-weight:800;white-space:nowrap;pointer-events:none}
+.su-pin-b{transform:translate(-50%,0)}
+.su-v .su-rn{font-size:12px;letter-spacing:-.5px}.su-v .su-tn{font-size:9.5px}.su-v .su-ts{display:none}
+.su-v .su-hosp-t strong{font-size:14px}.su-v .su-hosp-t span{font-size:10.5px}.su-v .su-gate{font-size:11px}.su-v .su-walklb{font-size:11px}.su-v .su-car{font-size:10px}.su-v .su-park span{font-size:11px;padding:2px 8px}
+.su-lg{display:inline-block;width:14px;height:14px;border-radius:3px}
+.su-free.su-pick{z-index:2;background:#FF671D;color:#fff;box-shadow:0 0 0 3px #fff,0 0 0 5px #FF671D}
+.su-pick .su-ts{color:#fff}
+.su-opt{box-sizing:border-box;border:1.5px solid #E4E4E7;border-radius:10px;background:#fff;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.su-opt.su-on{border-color:#FF671D;box-shadow:0 10px 24px -16px rgba(255,103,29,.7)}
+.su-opt-btn,.su-opt-pc{display:flex;align-items:center;gap:12px;width:100%;min-height:62px;padding:12px 16px;background:none;font-family:inherit;text-align:left;cursor:pointer}
+.su-opt-btn{border:0}
+.su-opt-pc{min-height:58px;background:#fff}
+.su-opt-pc:hover{border-color:#FF671D}
+.su-opt-t{flex:1;min-width:0;font-size:18px;font-weight:800;letter-spacing:-.5px;color:#1C1C1E;word-break:keep-all}
+.su-opt-n{font-size:13px;font-weight:700;color:#A1A1AA;white-space:nowrap}
+.su-opt-c{flex:none;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#F4F4F5;color:#71717A;font-size:14px;transition:transform .2s}
+.su-on .su-opt-t{color:#B23C05}.su-on .su-opt-n{color:#C2410C}.su-on .su-opt-c{background:#FF671D;color:#fff;transform:rotate(90deg)}
+.su-opt-btn:focus-visible,.su-opt-pc:focus-visible,.su-all:focus-visible,.su-act:focus-visible{outline:2px solid #0F1C3A;outline-offset:2px}
+.su-all{align-self:center;margin-top:4px;padding:8px 12px;border:0;background:none;font-family:inherit;font-size:15px;font-weight:700;color:#3F3F46;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.su-mini{border:1px solid #ECEBE8;background:#FAF9F6}
+.su-mini .su-plan{border:0;border-radius:0}
+.su-hint{left:6px;bottom:6px;z-index:5;border-radius:4px;background:rgba(15,28,58,.78);padding:3px 8px;font-size:11px;font-weight:700;color:#fff}
+.su-why{position:relative;padding-left:14px;font-size:15px;line-height:1.5;color:#27272A;word-break:keep-all}
+.su-why:before{content:"";position:absolute;left:2px;top:9px;width:6px;height:6px;border-radius:50%;background:#C2410C}
+.su-act{box-sizing:border-box;display:flex;align-items:center;justify-content:center;height:52px;border-radius:8px;font-family:inherit;font-size:16px;font-weight:800;text-decoration:none;cursor:pointer}
+.su-act-1{border:1.5px solid #0F1C3A;background:#fff;color:#0F1C3A}
+.su-act-2{border:0;background:#FF671D;color:#fff}
 .su-chips{scrollbar-width:none}.su-chips::-webkit-scrollbar{display:none}
-.su-tile{box-sizing:border-box;padding:5px 5px;white-space:nowrap;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:2px;text-align:left;border-radius:2px;font-family:inherit;overflow:hidden}
 .su-room{transition:background .15s,color .15s}
-.su-av:hover{background:#FF6F00 !important;color:#fff !important;box-shadow:none !important}
+.su-av:hover{background:#FF671D !important;color:#fff !important}
+.su-av:hover .su-ts{color:#fff}
 .su-room:focus-visible{outline:2px solid #0F1C3A;outline-offset:2px}
 .su-tab{transition:color .2s ease,border-color .2s ease}
 .su-tab:hover{color:#0F1C3A !important}

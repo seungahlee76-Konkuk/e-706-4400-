@@ -204,7 +204,7 @@ export default function StoreHero() {
                 <span className="sh-num">031)293-1073</span>
               </a>
               <a href="#units" className="sh-cta">
-                <span className="text-[#D24A0E]">입점 가능한 호실 보기</span>
+                <span className="text-[#D24A0E]">바로 입점 가능한 8개 호실 보기</span>
                 <span className="sh-ic" aria-hidden="true">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
                 </span>
@@ -249,7 +249,6 @@ export default function StoreHero() {
 
 /* ───────── 스타일 ───────── */
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@1,300;1,400&display=swap');
 /* 입점 소식: 앱 푸시 알림 모양 */
 .sh-push{position:relative;align-self:flex-start;display:flex;align-items:flex-start;gap:12px;width:min(372px,100%);padding:12px 16px 13px 12px;border-radius:22px;background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(255,255,255,.7);box-shadow:0 9px 0 -5px rgba(255,255,255,.55),0 1px 1px rgba(15,28,58,.04),0 14px 34px -12px rgba(15,28,58,.28);color:#1C1C1E;text-decoration:none;transition:transform .25s ease,box-shadow .25s ease}
 .sh-push:hover{transform:translateY(-2px) scale(1.01);box-shadow:0 9px 0 -5px rgba(255,255,255,.55),0 1px 1px rgba(15,28,58,.04),0 20px 40px -14px rgba(15,28,58,.34)}
