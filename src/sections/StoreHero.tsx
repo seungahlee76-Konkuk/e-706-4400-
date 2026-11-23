@@ -1,377 +1,316 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-/* ───────── 데이터 ───────── */
-// 인트로: 액자 안에서 순서대로 바뀌는 사진 (마지막 컷이 화면 전체로 열림)
-const INTRO = [
-  { src: '/photos/street-09.jpg', pos: '50% 60%' }, // 수원덕산병원 앞
-  { src: '/photos/street-06.jpg', pos: '50% 50%' }, // 우지커피 앞
-  { src: '/photos/street-03.jpg', pos: '40% 52%' }, // 본죽&비빔밥
-  { src: '/photos/street-10.jpg', pos: '45% 45%' }, // 장호덕 칼국수·손만두
-  { src: '/photos/street-08.jpg', pos: '45% 50%' }, // 닭한상 간판
-  { src: '/photos/street-07.jpg', pos: '70% 55%' }, // 장호덕 손만두 앞
-  { src: '/photos/street-12.jpg', pos: '45% 50%' }, // 분양홍보관
-  { src: '/photos/street-11.jpg', pos: '40% 40%' }, // 101동 현수막 (메인, 마지막)
+/* ───────── 상가 히어로 (/store 맨 위) ─────────
+   위: 제목(가운데) / 가운데: 실제 매장 정면 사진을 이어 붙인 거리 위로 연출 인물이 걸어가며 가게 앞에서 멈춤
+   아래: 가게 이름 버튼(누르면 음식·매장 사진) / 전화번호 + "바로 입점 가능한 8개 호실 보기"
+   - 화면이 간호사를 따라 자동으로 오른쪽으로 움직입니다. ‹ › 버튼으로 직접 넘겨 볼 수 있고, 8초 뒤 다시 따라갑니다.
+   - 화면에 보일 때만 움직이고, 벗어나면 멈춥니다. "움직임 줄이기" 설정이면 멈춘 장면만 보여 줍니다.
+   - 그림·사진 파일은 사용자가 GitHub public/walk/ 에 직접 올립니다.
+   - 거리 사진을 바꾸면 STREET 의 너비·높이와 PLAN·SHOPS 의 x(가게 위치)만 고치면 됩니다. */
+
+const BASE = '/walk/';
+
+// 거리 사진 (가로로 긴 한 장) · 바닥 높이 · 사람 키 (모두 사진 픽셀 기준)
+const STREET = { src: `${BASE}street.jpg`, w: 5887, h: 640, ground: 606, person: 215 };
+
+// 사람 그림 묶음 정보 (영상에서 잰 걸음 속도·멈춤 구간 포함, 고치지 마세요)
+type Sheet = { n: number; cols: number; rows: number };
+type Sprite = { walk: Sheet; act: Sheet; w: number; h: number; walkHs: number; actDx: number[]; enterWalk: number; exitWalk: number };
+const SPRITES: Record<'nurse' | 'md', Sprite> = {"nurse":{"walk":{"n":31,"cols":12,"rows":3},"act":{"n":42,"cols":12,"rows":4},"w":129,"h":240,"walkHs":0.4828,"actDx":[0.0448,0.0323,0.0323,0.0341,0.0394,0.043,0.0439,0.0403,0.0036,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0036,0.0278,0.0358,0.0305,0.0323,0.0349,0.0412,0.0448,0.0448,0.0448,0.0448],"enterWalk":8,"exitWalk":28},"md":{"walk":{"n":39,"cols":12,"rows":4},"act":{"n":45,"cols":12,"rows":4},"w":169,"h":240,"walkHs":-0.3114,"actDx":[-0.0285,-0.0292,-0.015,-0.0055,-0.0159,-0.0214,-0.0253,-0.0272,-0.0279,-0.0273,-0.0259,-0.0249,-0.0256,-0.0256,-0.0245,-0.0241,-0.0246,-0.0252,-0.0256,-0.022,-0.0015,-0.0019,-0.0113,-0.0174,-0.0123,-0.0037,-0.0035,-0.0077,-0.0127,-0.0127,-0.0248,-0.0248,-0.0249,-0.025,-0.0234,-0.0217,-0.0206,-0.0098,-0.0059,-0.0165,-0.0237,-0.024,-0.0264,-0.0272],"enterWalk":4,"exitWalk":7}};
+
+// 누가 어디서 출발해서 어느 가게 앞에서 멈추고 무슨 말을 하는지 (x = 거리 사진 가로 위치)
+type Plan = { who: 'nurse' | 'md'; dir: 1 | -1; x0: number; far: boolean; stops: { x: number; say: string }[]; pass: { from: number; to: number; say: string }[] };
+// 맨 위(간호사)를 화면이 따라갑니다. 어머니와 딸은 같은 그림으로 두 번 나옵니다 (본죽 앞 / 장호덕 앞).
+const PLAN: Plan[] = [
+  { who: 'nurse', dir: 1, x0: -160, far: false, stops: [{ x: 720, say: '☕ 아아 한 잔' }], pass: [{ from: 2150, to: 2500, say: '🥐 여기 빵집 생기면 좋겠다' }, { from: 2990, to: 3340, say: '🍗 닭한상 12월 말 오픈이래' }] },
+  { who: 'md', dir: -1, x0: 2100, far: true, stops: [{ x: 1250, say: '🥣 죽은 역시 본죽이지' }], pass: [] },
+  // 거리 사진 오른쪽 바깥에서 출발해, 간호사가 장호덕 근처에 올 때 맞춰 장호덕 앞에서 멈춤
+  { who: 'md', dir: -1, x0: 8300, far: true, stops: [{ x: 5000, say: '🥟 여기 새우김치 만두 맛있더라' }], pass: [] },
+];
+const LOOP_END = 5950; // 간호사가 여기까지 가면 처음부터 다시
+
+// 누르면 사진이 나오는 가게 (비어 있으면 이름표를 보여 주지 않음)
+// x: 거리 사진 속 가게 위치. -1 이면 아직 거리 사진에 없는 가게 → 장면 위 이름표 없이 아래 버튼으로만 사진 보기
+type Shop = { id: string; name: string; x: number; line: string; photos?: string[]; vacant?: boolean };
+const SHOPS: Shop[] = [
+  { id: '123', name: '메가커피', x: 285, line: '123호 · 카페 · 영업 중', photos: ['/photos/stores/shop-123-in-1.jpg'] },
+  { id: '124', name: '우지커피', x: 793, line: '124호 · 카페 · 영업 중', photos: ['/photos/stores/food-124-1.jpg', '/photos/stores/shop-124-1.jpg'] },
+  { id: '125', name: '본죽&비빔밥', x: 1282, line: '125호 · 죽·비빔밥 · 영업 중', photos: ['/photos/stores/food-125-1.jpg', '/photos/stores/shop-125-in-1.jpg'] },
+  { id: '126', name: '126호', x: 1792, line: '', vacant: true },
+  { id: '127', name: '127호', x: 2290, line: '', vacant: true },
+  { id: '128', name: '128호', x: 2720, line: '', vacant: true },
+  { id: 'parking', name: '주차장', x: 3880, line: '총 608대 주차 가능 (근린생활시설 포함) · 102·103동 사이 출입구', photos: ['/photos/street-07.jpg'] },
+  { id: '134', name: '장호덕 손만두', x: 5296, line: '134·135호 · 손만두·칼국수 · 영업 중', photos: ['/photos/stores/food-134-1.jpg', '/photos/stores/food-134-2.jpg'] },
 ];
 
-// 히어로 뒷배경: 투시도 로테이션 (hero-2는 오피스텔이라 제외)
-const BG = ['/photos/hero-1.jpg', '/photos/hero-3.jpg', '/photos/hero-5.jpg', '/photos/hero-4.jpg'];
-
-// 오른쪽 사진 기둥: 실사진 + 파스텔 칸
-type Tile = { src?: string; pos?: string; cap?: string; color?: string };
-const COLS: { up: boolean; top: number; tiles: Tile[] }[] = [
-  { up: false, top: -30, tiles: [
-    { src: '/photos/stores/shop-125-1.jpg', cap: '본죽&비빔밥 · 125호' },
-    { src: '/photos/stores/food-125-1.jpg', cap: '본죽 돌솥비빔밥' },
-    { src: '/photos/stores/hospital-1.jpg', cap: '수원덕산병원 · 지역응급의료센터' },
-    { src: '/photos/stores/food-134-2.jpg', cap: '장호덕 오징어볶음' },
-  ] },
-  { up: true, top: -10, tiles: [
-    { src: '/photos/stores/shop-124-1.jpg', cap: '우지커피 · 124호' },
-    { src: '/photos/stores/food-124-1.jpg', cap: '우지커피 프루티 슈페너' },
-    { src: '/photos/stores/shop-123-in-1.jpg', cap: '메가커피 · 123호' },
-    { src: '/photos/street-08.jpg', pos: '22% 50%', cap: '닭한상 · 12월 오픈' },
-  ] },
-  { up: false, top: -110, tiles: [
-    { src: '/photos/stores/shop-134-1.jpg', cap: '장호덕 칼국수·손만두 · 134·135호' },
-    { src: '/photos/stores/food-134-1.jpg', cap: '장호덕 새우 손만두' },
-    { src: '/photos/stores/shop-125-in-1.jpg', cap: '본죽&비빔밥 매장 안' },
-    { src: '/photos/stores/shop-121-1.jpg', cap: '약국 · 121호' },
-  ] },
-];
-
-/* ───────── 타이밍 (초) ───────── */
-const STEP = 0.32;            // 인트로 한 컷당 시간
-const T0 = 0.15;              // 첫 컷 시작
-const LAST = T0 + (INTRO.length - 1) * STEP; // 마지막 컷 시작 (≈2.39)
-const GROW = LAST + 0.71;     // 액자가 화면 전체로 열리기 시작 (≈3.10)
-const OUT = GROW + 0.8;       // 인트로 사라지기 시작 (≈3.90)
-const INTRO_MS = Math.round((OUT + 0.45) * 1000);
-const HERO_DELAY_WITH_INTRO = OUT; // 인트로가 끝난 뒤 히어로 글이 올라옴
-const FILL_RANGE = 300;       // 스크롤 이만큼(px) 내리면 빨간 선이 끝까지 채워짐
-
-const SESSION_KEY = 'storeIntroSeen';
-
-function shouldPlayIntro() {
-  // 인트로는 쓰지 않습니다. 다시 켜려면 sessionStorage 확인 후 true를 돌려주던 예전 내용으로 되돌리면 됩니다.
-  return false;
-}
+const RATE = 1.25; // 재생 속도 (걸음과 이동을 함께 빠르게)
 
 export default function StoreHero() {
-  const [intro, setIntro] = useState<boolean>(() => (typeof window === 'undefined' ? false : shouldPlayIntro()));
-  const [heroDelay, setHeroDelay] = useState<number>(() => (intro ? HERO_DELAY_WITH_INTRO : 0.1));
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const worldRef = useRef<HTMLDivElement>(null);
+  const prevRef = useRef<HTMLButtonElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
+  const wkRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const navRef = useRef<(d: 1 | -1) => void>(() => {});
+  const pausedRef = useRef(false);
+  const [open, setOpen] = useState<Shop | null>(null);
 
-  // 인트로 자동 종료
+  useEffect(() => { pausedRef.current = !!open; }, [open]);
+
   useEffect(() => {
-    if (!intro) return;
-    const t = window.setTimeout(() => setIntro(false), INTRO_MS);
-    return () => window.clearTimeout(t);
-  }, [intro]);
+    const scene = sceneRef.current, world = worldRef.current;
+    const els = wkRefs.current;
+    if (!scene || !world || PLAN.some((_, i) => !els[i])) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const skipIntro = () => {
-    setIntro(false);
-    setHeroDelay(0);
-  };
+    type W = { id: 'nurse' | 'md'; c: Sprite; p: Plan; el: HTMLDivElement; bub: HTMLElement; x: number; mode: 'walk' | 'act'; f: number; acc: number; si: number; armed: boolean; pre: number; stopF: number; dw: number; dh: number; src: string; hideAt: number };
+    const W: W[] = PLAN.map((p, idx) => {
+      const id = p.who, c = SPRITES[id], el = els[idx] as HTMLDivElement;
+      const th = 0.45 * Math.abs(c.walkHs) / 12; // 멈춤 영상은 1초에 12장
+      const slow = c.actDx.map((d) => Math.abs(d) < th);
+      let stopF = slow.findIndex((v, i) => v && slow[i + 1] && slow[i + 2]);
+      if (stopF < 0) stopF = Math.floor(c.actDx.length / 2);
+      let pre = 0; for (let i = 0; i < stopF; i++) pre += Math.abs(c.actDx[i]);
+      return { id, c, p, el, bub: el.querySelector('.sw-bub') as HTMLElement, x: p.x0, mode: 'walk', f: 0, acc: 0, si: 0, armed: false, pre, stopF, dw: 0, dh: 0, src: '', hideAt: 0 };
+    });
 
-  // 왼쪽 세로선: 빨간 구간이 스크롤에 따라 아래로 채워짐
-  const bodyRef = useRef<HTMLDivElement>(null);
-  const leadRef = useRef<HTMLParagraphElement>(null);
-  const [redPx, setRedPx] = useState(0);
-
-  useLayoutEffect(() => {
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      const body = bodyRef.current;
-      const lead = leadRef.current;
-      if (!body || !lead) return;
-      const total = body.offsetHeight;
-      const base = lead.offsetTop + lead.offsetHeight; // Enjoy your E-Life ~ 설명 두 줄까지
-      const p = Math.min(1, Math.max(0, window.scrollY / FILL_RANGE));
-      setRedPx(base + (total - base) * p);
+    let k = 1;
+    const layout = () => {
+      k = scene.clientHeight / STREET.h;
+      world.style.width = `${STREET.w * k}px`;
+      for (const o of W) {
+        const sc = o.p.far ? 0.94 : 1;
+        o.dh = STREET.person * k * 1.04 * sc; o.dw = o.dh * o.c.w / o.c.h;
+        Object.assign(o.el.style, { width: `${o.dw}px`, height: `${o.dh}px`, top: `${(STREET.ground - (o.p.far ? 10 : 0)) * k - o.dh}px`, zIndex: o.p.far ? '1' : '2' });
+        o.src = '';
+      }
     };
-    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
-    update();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      if (raf) cancelAnimationFrame(raf);
+    const say = (o: W, text: string, now: number) => { o.bub.textContent = text; o.bub.classList.add('on'); o.hideAt = now + 2400; };
+    const draw = (o: W) => {
+      const s = o.mode === 'walk' ? o.c.walk : o.c.act, src = `${BASE}${o.id}-${o.mode}.webp`;
+      if (o.src !== src) { o.el.style.backgroundImage = `url(${src})`; o.el.style.backgroundSize = `${o.dw * s.cols}px ${o.dh * s.rows}px`; o.src = src; }
+      o.el.style.backgroundPosition = `${-(o.f % s.cols) * o.dw}px ${-Math.floor(o.f / s.cols) * o.dh}px`;
+      o.el.style.left = `${o.x * k - o.dw / 2}px`;
     };
+
+    // 화면 위치: 평소에는 간호사를 따라가고, ‹ › 를 누르면 그 위치에 8초 머문 뒤 다시 따라감
+    let cam = 0, manual = -1, manualUntil = 0, snap = true, visible = false;
+    const maxCam = () => Math.max(0, STREET.w * k - scene.clientWidth);
+    const clamp = (v: number) => Math.min(maxCam(), Math.max(0, v));
+    const setCam = (v: number) => {
+      cam = v; world.style.transform = `translateX(${-cam}px)`;
+      if (prevRef.current) prevRef.current.disabled = cam <= 2;
+      if (nextRef.current) nextRef.current.disabled = cam >= maxCam() - 2;
+    };
+    const follow = (x: number) => clamp(x * k - scene.clientWidth * 0.4);
+    const camera = (x: number, now: number) => {
+      if (manual >= 0 && now >= manualUntil) manual = -1;
+      const want = manual >= 0 ? manual : follow(x);
+      setCam(snap || Math.abs(want - cam) < 0.5 ? want : cam + (want - cam) * 0.12);
+      snap = false;
+    };
+    navRef.current = (d) => {
+      manual = clamp((manual >= 0 ? manual : cam) + d * scene.clientWidth * 0.8);
+      manualUntil = performance.now() + 8000;
+      if (reduce || !visible) setCam(manual);
+    };
+    layout();
+    setCam(0); // ‹ › 버튼 보이기/숨기기 처음 상태 (버튼 사용 가능 여부는 여기서만 바꿈)
+
+    // 움직임 줄이기: 각자 멈추는 가게 앞에 서 있는 장면만
+    if (reduce) {
+      for (const o of W) { o.x = o.p.stops[0]?.x ?? o.p.x0; o.mode = 'walk'; o.f = 0; draw(o); o.bub.textContent = o.p.stops[0]?.say ?? ''; o.bub.classList.add('on'); }
+      setCam(follow(W[0].x));
+      const onR = () => { layout(); for (const o of W) draw(o); setCam(clamp(cam)); };
+      window.addEventListener('resize', onR);
+      return () => window.removeEventListener('resize', onR);
+    }
+
+    for (const o of W) for (const t of ['walk', 'act']) { const im = new Image(); im.src = `${BASE}${o.id}-${t}.webp`; }
+    let raf = 0, last = 0;
+    const reset = () => { for (const o of W) { Object.assign(o, { x: o.p.x0, mode: 'walk', f: 0, acc: 0, si: 0, armed: false, hideAt: 0 }); o.bub.classList.remove('on'); } snap = true; };
+    const step = (now: number) => {
+      const dt = last ? Math.min(0.05, (now - last) / 1000) : 0; last = now;
+      if (!pausedRef.current) {
+        for (const o of W) {
+          const c = o.c, dir = o.p.dir;
+          o.acc += dt * (o.mode === 'walk' ? 24 : 12) * RATE;
+          while (o.acc >= 1) {
+            o.acc -= 1;
+            if (o.mode === 'walk') {
+              o.x += dir * Math.abs(c.walkHs) / 24 * STREET.person;
+              o.f = (o.f + 1) % c.walk.n;
+              const st = o.p.stops[o.si];
+              if (st && !o.armed && dir * (st.x - o.x) <= o.pre * STREET.person + 40) o.armed = true;
+              if (o.armed && o.f === c.enterWalk) { o.mode = 'act'; o.f = 0; o.armed = false; }
+            } else {
+              o.x += dir * Math.abs(c.actDx[o.f] || 0) * STREET.person;
+              o.f++;
+              if (o.f === o.stopF) say(o, o.p.stops[o.si].say, now);
+              if (o.f >= c.act.n - 1) { o.mode = 'walk'; o.f = c.exitWalk; o.si++; }
+            }
+          }
+          if (o.mode === 'walk') { const ps = o.p.pass.find((q) => o.x >= q.from && o.x <= q.to); if (ps && !o.bub.classList.contains('on')) say(o, ps.say, now); }
+          if (o.hideAt && now > o.hideAt) { o.bub.classList.remove('on'); o.hideAt = 0; }
+          draw(o);
+        }
+        if (W[0].x > LOOP_END) reset();
+      }
+      camera(W[0].x, now);
+      if (visible) raf = requestAnimationFrame(step);
+    };
+    const io = new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (visible) { last = 0; cancelAnimationFrame(raf); raf = requestAnimationFrame(step); } else cancelAnimationFrame(raf);
+    }, { threshold: 0.2 });
+    io.observe(scene);
+    const onR = () => { layout(); for (const o of W) draw(o); snap = true; };
+    window.addEventListener('resize', onR);
+    return () => { io.disconnect(); cancelAnimationFrame(raf); window.removeEventListener('resize', onR); };
   }, []);
 
-  const d = (s: number) => `${(heroDelay + s).toFixed(2)}s`;
+  const pick = (s: Shop) => {
+    if (s.vacant) {
+      // 입점추천(StoreUnits)이 이 이벤트를 받아 해당 호실 상세를 엽니다.
+      window.dispatchEvent(new CustomEvent('store-open-room', { detail: { room: s.id } }));
+      return;
+    }
+    setOpen(s);
+    // PC: 사진 카드가 거리 장면 안에 뜨므로 장면이 화면에 다 보이게
+    if (window.innerWidth >= 768) sceneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
 
   return (
-    <section
-      id="store-hero"
-      className="sh-hero relative overflow-clip bg-white"
-    >
+    <section id="store-hero" className="sw">
       <style>{CSS}</style>
-
-      {/* ── 인트로 ── */}
-      {intro && (
-        <div className="sh-intro" aria-hidden="true" onClick={skipIntro}>
-          <span className="sh-itop">e편한세상 CITY · GOSAEK</span>
-          <div className="sh-ifr">
-            <span className="sh-blw">
-              <span className="sh-bl sh-b-top" />
-              <span className="sh-bl sh-b-left" />
-              <span className="sh-bl sh-b-right" />
-              <span className="sh-bl sh-b-bot" />
-            </span>
-            <div className="sh-iin">
-              {INTRO.map((ph, i) => (
-                <img
-                  key={ph.src}
-                  src={ph.src}
-                  alt=""
-                  style={{
-                    objectPosition: ph.pos,
-                    animation: i < INTRO.length - 1
-                      ? `shFlash ${STEP}s linear ${(T0 + i * STEP).toFixed(2)}s`
-                      : `shLast 1.3s ease ${LAST.toFixed(2)}s forwards`,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="sh-icap">
-            <b>e편한세상 시티 고색 <i>MEDICAL STREET</i></b>
-            <span className="sh-inum">
-              {INTRO.map((_, i) => (
-                <span
-                  key={i}
-                  style={{
-                    animation: i < INTRO.length - 1
-                      ? `shFlash ${STEP}s linear ${(T0 + i * STEP).toFixed(2)}s`
-                      : `shLast 1.3s ease ${LAST.toFixed(2)}s forwards`,
-                  }}
-                >
-                  {String(i + 1).padStart(2, '0')} / {String(INTRO.length).padStart(2, '0')}
-                </span>
-              ))}
-            </span>
-          </div>
-          <span className="sh-iskip">클릭하면 건너뛰기</span>
-        </div>
-      )}
-
-      {/* ── 뒷배경: 투시도 로테이션 ── */}
-      <div className="sh-bg" aria-hidden="true">
-        {BG.map((src, i) => (
-          <img key={src} src={src} alt="" style={{ animationDelay: `${(-1.4 + i * 7).toFixed(1)}s` }} />
-        ))}
-        <span className="sh-veil" />
+      <div className="sw-in sw-head">
+        <p className="sw-el">Enjoy your <b>E</b>-Life</p>
+        <h1 className="sw-h1"><b>e편한세상</b> 시티 고색</h1>
+        <p className="sw-lead"><strong>439병상 종합병원 바로 앞,</strong><br />의료·주거 수요가 만나는 스트리트 상가</p>
       </div>
 
-      <div className="mx-auto flex h-full max-w-[1280px] items-start px-5 sm:px-10">
-        {/* ── 왼쪽 글 ── */}
-        <div className="sh-text relative z-[1] flex max-w-[560px] flex-col">
-          <a href="#calendar" className="sh-push sh-drop" style={{ animationDelay: d(0.35) }} aria-label="입점 소식: 닭한상 129호, 12월 말 오픈">
-            <span className="sh-push-ic" aria-hidden="true">
-              <img src="/photos/street-08.jpg" alt="" />
-            </span>
-            <span className="sh-push-bd">
-              <span className="sh-push-hd"><b>고색 상가 · 입점 소식</b><i>11월</i></span>
-              <strong>닭한상, 12월 말 오픈해요</strong>
-              <span>129호 삼계탕·닭볶음탕 · <span className="whitespace-nowrap">인테리어 공사 중</span></span>
-            </span>
-          </a>
-
-          {/* Enjoy your E-Life ~ 입점 가능한 호실 보기 (왼쪽 세로선이 붙는 묶음) */}
-          <div ref={bodyRef} className="sh-body relative mt-[38px]">
-            <span className="sh-track" aria-hidden="true" style={{ animationDelay: d(0.3) }} />
-            <span className="sh-red-wrap" aria-hidden="true" style={{ animationDelay: d(1.1) }}>
-              <span className="sh-red" style={{ height: `${redPx}px` }} />
-            </span>
-
-            <p className="sh-rise sh-el m-0" style={{ animationDelay: d(0.07) }}>
-              Enjoy your <b>E</b>-Life
-            </p>
-            <h1 className="sh-title sh-rise mt-[10px] mb-0 text-[#0F1C3A]" style={{ animationDelay: d(0.14) }}>
-              <span className="block whitespace-nowrap font-extrabold"><b className="font-extrabold text-[#FF671D]">e편한세상</b> 시티 고색</span>
-            </h1>
-            <p ref={leadRef} className="sh-rise sh-lead mt-[26px] mb-0" style={{ animationDelay: d(0.21) }}>
-              <strong>439병상 종합병원 바로 앞,</strong>
-              <br />
-              <span>의료·주거 수요가 만나는 스트리트 상가</span>
-            </p>
-
-            <div className="sh-rise mt-[30px] flex flex-col items-start gap-4" style={{ animationDelay: d(0.28) }}>
-              <a href="tel:031-293-1073" className="sh-tel" aria-label="분양·임대 문의 전화 031)293-1073">
-                <span className="flex flex-col text-[11px] font-bold leading-[1.25] text-[#3F3F46]"><span>분양·임대</span><span>문의</span></span>
-                <span className="sh-num">031)293-1073</span>
-              </a>
-              <a href="#units" className="sh-cta">
-                <span className="text-[#D24A0E]">바로 입점 가능한 8개 호실 보기</span>
-                <span className="sh-ic" aria-hidden="true">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-                </span>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* ── 오른쪽 사진 기둥 (PC만) ── */}
-        <div className="sh-mosaic" aria-hidden="true" style={{ animationDelay: d(0) }}>
-          {COLS.map((c, ci) => (
-            <div key={ci} className={c.up ? 'sh-col sh-up' : 'sh-col'} style={{ left: 64 + ci * 224, top: c.top }}>
-              {[...c.tiles, ...c.tiles].map((t, ti) => (
-                <div
-                  key={ti}
-                  className="sh-tile"
-                  style={t.color
-                    ? { background: t.color, boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.04)' }
-                    : { background: '#D6D3D1', boxShadow: '0 18px 34px -20px rgba(0,0,0,0.45)' }}
-                >
-                  {t.src && <img src={t.src} alt="" loading="lazy" style={{ objectPosition: t.pos }} />}
-                  {t.cap && <span className="sh-cap">{t.cap}</span>}
-                </div>
-              ))}
-            </div>
+      <div ref={sceneRef} className="sw-scene" role="img" aria-label="102동 1층 상가 거리 실제 사진 위로 병원 직원과 진료 온 가족이 걸어가는 장면">
+        <div ref={worldRef} className="sw-world">
+          <img className="sw-street" src={STREET.src} alt="" fetchPriority="high" />
+          {SHOPS.filter((s) => s.x >= 0).map((s) => (
+            <button key={s.id} type="button" className={`sw-tag ${s.vacant ? 'sw-tag-v' : ''}`} style={{ left: `${(s.x / STREET.w) * 100}%` }} onClick={() => pick(s)}>
+              {s.vacant ? `${s.id}호 입점 가능` : s.name}
+            </button>
+          ))}
+          {PLAN.map((p, i) => (
+            <div key={i} ref={(el) => { wkRefs.current[i] = el; }} className="sw-wk"><span className="sw-bub" /></div>
           ))}
         </div>
-      </div>
+        <button ref={prevRef} type="button" className="sw-nav sw-prev" aria-label="거리 왼쪽으로 보기" onClick={() => navRef.current(-1)}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M15 5l-7 7 7 7" /></svg>
+        </button>
+        <button ref={nextRef} type="button" className="sw-nav sw-next" aria-label="거리 오른쪽으로 보기" onClick={() => navRef.current(1)}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
+        </button>
+        <span className="sw-ai">거리: 실제 사진 · 인물: 연출 이미지</span>
 
-      {/* 휴대폰·태블릿 전용: 매장·음식 사진 가로 띠 (PC에서는 오른쪽 사진 기둥이 대신 보임) */}
-      <div className="sh-mstrip" aria-label="입점 매장 사진">
-        {COLS.flatMap((c) => c.tiles).filter((t) => t.src).map((t, i) => (
-          <figure key={(t.src || '') + i} className="sh-mtile">
-            <img src={t.src} alt={t.cap || ''} loading="lazy" style={{ objectPosition: t.pos }} />
-            {t.cap && <figcaption>{t.cap}</figcaption>}
-          </figure>
-        ))}
+        {open && (
+          <div className="sw-card" role="dialog" aria-label={`${open.name} 사진`}>
+            <button type="button" className="sw-x" aria-label="닫기" onClick={() => setOpen(null)}>×</button>
+            <div className="sw-ph">
+              {(open.photos || []).slice(0, 2).map((p) => <img key={p} src={p} alt={`${open.name} 사진`} />)}
+            </div>
+            <p className="sw-cn">{open.name}</p>
+            <p className="sw-cl">{open.line}</p>
+          </div>
+        )}
+      </div>
+      {open && <button type="button" className="sw-dim" aria-label="닫기" onClick={() => setOpen(null)} />}
+
+      <div className="sw-in">
+        <div className="sw-chip-row" aria-label="가게 이름을 누르면 사진을 볼 수 있어요">
+          {SHOPS.map((s) => (
+            <button key={s.id} type="button" className={`sw-chip ${s.vacant ? 'sw-chip-v' : ''}`} onClick={() => pick(s)}>
+              {s.vacant ? `${s.id}호 입점 가능` : s.name}
+            </button>
+          ))}
+        </div>
+        <div className="sw-act">
+          <a href="tel:031-293-1073" className="sw-tel" aria-label="분양·임대 문의 전화 031)293-1073">
+            <span className="sw-tel-l">분양·임대<br />문의</span>
+            <span className="sw-num">031)293-1073</span>
+          </a>
+          <a href="#units" className="sw-cta">
+            <span>바로 입점 가능한 8개 호실 보기</span>
+            <span className="sw-ic" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            </span>
+          </a>
+        </div>
       </div>
     </section>
   );
 }
 
-/* ───────── 스타일 ───────── */
 const CSS = `
-/* 입점 소식: 앱 푸시 알림 모양 */
-.sh-push{position:relative;align-self:flex-start;display:flex;align-items:flex-start;gap:12px;width:min(372px,100%);padding:12px 16px 13px 12px;border-radius:22px;background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(255,255,255,.7);box-shadow:0 9px 0 -5px rgba(255,255,255,.55),0 1px 1px rgba(15,28,58,.04),0 14px 34px -12px rgba(15,28,58,.28);color:#1C1C1E;text-decoration:none;transition:transform .25s ease,box-shadow .25s ease}
-.sh-push:hover{transform:translateY(-2px) scale(1.01);box-shadow:0 9px 0 -5px rgba(255,255,255,.55),0 1px 1px rgba(15,28,58,.04),0 20px 40px -14px rgba(15,28,58,.34)}
-.sh-push-ic{flex:none;width:40px;height:40px;border-radius:10px;overflow:hidden;background:#2E2E30;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
-.sh-push-ic img{width:100%;height:100%;object-fit:cover;object-position:24% 50%;transform:scale(1.6)}
-.sh-push-bd{display:flex;flex-direction:column;min-width:0;flex:1}
-.sh-push-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:3px}
-.sh-push-hd b{font-size:12px;font-weight:600;letter-spacing:-.1px;color:#71717A}
-.sh-push-hd i{font-style:normal;font-size:12px;color:#A1A1AA}
-.sh-push strong{font-size:15px;font-weight:700;letter-spacing:-.3px;line-height:1.35;color:#1C1C1E}
-.sh-push-bd>span:last-child{word-break:keep-all;font-size:14px;line-height:1.4;letter-spacing:-.2px;color:#3F3F46}
-.sh-push:focus-visible{outline:3px solid #FF671D;outline-offset:4px}
-.sh-drop{opacity:0;transform:translateY(-26px) scale(.96);animation:shDrop .75s cubic-bezier(.2,1.25,.35,1) forwards}
-@keyframes shDrop{60%{opacity:1}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.sh-drop{animation:none;opacity:1;transform:none}}
-.sh-el{font-family:'Jost',sans-serif;font-style:italic;font-weight:300;font-size:clamp(22px,2.6vw,30px);line-height:1.1;letter-spacing:.3px;color:#3F3F46}
-.sh-el b{font-weight:400;color:#FF671D}
-.sh-lead{font-size:clamp(18px,1.8vw,22px);line-height:1.4;letter-spacing:-.6px;color:#1C1C1E}
-.sh-lead strong{font-weight:800;color:#0F1C3A}
-.sh-lead span{font-weight:400}
-.sh-hero{height:auto;min-height:640px}
-@media (min-width:1024px){.sh-hero{height:max(760px,calc(100svh - 72px))}}
-
-/* 인트로 */
-.sh-intro{position:fixed;inset:0;z-index:100;background:#F3F3F1;cursor:pointer;animation:shOut .45s ease ${OUT.toFixed(2)}s forwards}
-.sh-ifr{position:absolute;left:50%;top:50%;width:min(580px,86vw);height:min(366px,54vw);transform:translate(-50%,-50%);overflow:hidden;box-sizing:border-box;padding:6px;animation:shGrow .9s cubic-bezier(.76,0,.24,1) ${GROW.toFixed(2)}s forwards}
-.sh-iin{position:relative;width:100%;height:100%;overflow:hidden}
-.sh-iin img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}
-.sh-blw{position:absolute;inset:0;pointer-events:none;z-index:2;animation:shFade .2s ease ${(GROW - 0.05).toFixed(2)}s forwards}
-.sh-bl{position:absolute;background:#E3141B;animation-fill-mode:both;animation-timing-function:cubic-bezier(.45,0,.55,1)}
-.sh-b-top{left:0;top:0;width:100%;height:1.5px;transform-origin:left;animation-name:shX;animation-duration:1.1s;animation-delay:.15s}
-.sh-b-left{left:0;top:0;width:1.5px;height:100%;transform-origin:top;animation-name:shY;animation-duration:1.1s;animation-delay:.15s}
-.sh-b-right{right:0;top:0;width:1.5px;height:100%;transform-origin:top;animation-name:shY;animation-duration:1.14s;animation-delay:1.25s}
-.sh-b-bot{left:0;bottom:0;width:100%;height:1.5px;transform-origin:left;animation-name:shX;animation-duration:1.14s;animation-delay:1.25s}
-.sh-itop{position:absolute;left:50%;top:calc(50% - min(183px,27vw) - 30px);transform:translateX(-50%);font-size:11px;font-weight:700;letter-spacing:3px;color:rgba(227,20,27,.55);white-space:nowrap;animation:shFade .25s ease ${(GROW - 0.12).toFixed(2)}s forwards}
-.sh-icap{position:absolute;left:50%;top:calc(50% + min(183px,27vw) + 14px);width:min(580px,86vw);transform:translateX(-50%);display:flex;justify-content:space-between;align-items:baseline;animation:shFade .25s ease ${(GROW - 0.12).toFixed(2)}s forwards}
-.sh-icap b{font-size:12px;font-weight:800;letter-spacing:-.2px;color:#E3141B}
-.sh-icap i{font-style:normal;font-size:10px;font-weight:700;letter-spacing:2.5px;color:#E3141B;opacity:.55;margin-left:8px}
-.sh-inum{position:relative;display:inline-block;width:56px;height:14px;font-size:11px;font-weight:800;letter-spacing:1px;color:#E3141B;text-align:right}
-.sh-inum span{position:absolute;right:0;top:0;opacity:0;white-space:nowrap}
-.sh-iskip{position:absolute;right:28px;bottom:24px;font-size:12px;font-weight:600;color:rgba(227,20,27,.5);animation:shFade .25s ease ${(GROW - 0.12).toFixed(2)}s forwards}
-@keyframes shFlash{from{opacity:1}to{opacity:1}}
-@keyframes shLast{from{opacity:1;transform:scale(1.15)}to{opacity:1;transform:scale(1)}}
-@keyframes shGrow{to{width:100%;height:100%;padding:0}}
-@keyframes shOut{to{opacity:0;visibility:hidden}}
-@keyframes shFade{to{opacity:0}}
-@keyframes shX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-@keyframes shY{from{transform:scaleY(0)}to{transform:scaleY(1)}}
-
-/* 뒷배경 로테이션 */
-.sh-bg{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.sh-bg img{position:absolute;left:-4%;top:-4%;width:108%;height:108%;object-fit:cover;opacity:0;will-change:transform,opacity;animation:shKb 28s ease-in-out infinite}
-.sh-veil{position:absolute;inset:0;background:radial-gradient(ellipse 640px 560px at 24% 46%,rgba(255,255,255,.80) 0%,rgba(255,255,255,.58) 45%,rgba(255,255,255,0) 78%),linear-gradient(90deg,rgba(255,255,255,.50) 0%,rgba(255,255,255,.32) 45%,rgba(255,255,255,.08) 72%,rgba(255,255,255,0) 100%),linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,0) 18%,rgba(255,255,255,0) 80%,#fff 100%)}
-.sh-bg img{filter:saturate(1.08) contrast(1.04)}
-.sh-title,.sh-text p{text-shadow:0 1px 14px rgba(255,255,255,.9)}
-@media (max-width:1023px){.sh-veil{background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(255,255,255,.78) 60%,#fff)}}
-@keyframes shKb{0%{opacity:0;transform:scale(1.02)}5%{opacity:1}25%{opacity:1}30%{opacity:0;transform:scale(1.09) translate(-1%,-.5%)}100%{opacity:0;transform:scale(1.02)}}
-
-/* 왼쪽 글 */
-.sh-text{padding-top:clamp(56px,11vh,112px);padding-bottom:64px}
-.sh-rise{animation:shRise .8s cubic-bezier(.2,.7,.2,1) both}
-@keyframes shRise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
-.sh-title{font-family:'Pretendard Variable',Pretendard,sans-serif !important;font-size:clamp(38px,9.5vw,58px);line-height:1.1;letter-spacing:-.04em}
-.sh-live{align-self:flex-start;display:inline-flex;align-items:center;gap:14px;padding:10px 20px 10px 10px;border-radius:6px;background:rgba(255,255,255,.92);border:1px solid #E7E5E4;box-shadow:0 12px 30px -16px rgba(15,28,58,.35);color:#1C1C1E;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease}
-.sh-live:hover{transform:translateY(-2px);box-shadow:0 16px 34px -16px rgba(15,28,58,.45)}
-.sh-live:hover strong{text-decoration:underline}
-.sh-logo{flex:none;width:46px;height:46px;border-radius:50%;overflow:hidden;background:#3a3a3a;border:1px solid #E4E4E7}
-.sh-logo img{width:100%;height:100%;object-fit:cover;object-position:24% 50%;transform:scale(1.6)}
-.sh-live-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:1.2px;color:#1F4E3D}
-.sh-dot{width:6px;height:6px;border-radius:50%;background:#1F4E3D;animation:shPulse 1.8s ease-out infinite}
-@keyframes shPulse{0%{box-shadow:0 0 0 0 rgba(31,78,61,.45)}70%{box-shadow:0 0 0 7px rgba(31,78,61,0)}100%{box-shadow:0 0 0 0 rgba(31,78,61,0)}}
-.sh-tel{display:inline-flex;align-items:center;gap:12px;color:#1C1C1E;text-decoration:none;text-align:center}
-.sh-num{font-size:26px;font-weight:700;letter-spacing:-.5px;line-height:1;transition:color .2s ease}
-.sh-tel:hover .sh-num{color:#D24A0E}
-.sh-cta{display:inline-flex;align-items:center;gap:12px;text-decoration:none;font-size:17px;font-weight:800}
-.sh-ic{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#1C1C1E;color:#fff;transition:transform .25s ease}
-.sh-cta:hover .sh-ic{transform:rotate(-45deg)}
-.sh-tel:focus-visible,.sh-cta:focus-visible,.sh-live:focus-visible{outline:3px solid #FF6F00;outline-offset:4px;border-radius:6px}
-
-/* 왼쪽 세로선: 회색 트랙 + 빨간 구간 */
-.sh-body{--sh-x:-30px}
-@media (max-width:639px){.sh-body{--sh-x:-14px}}
-.sh-track{position:absolute;left:calc(var(--sh-x) + 1px);top:-3px;bottom:0;width:1px;background:#D6D6DB;transform-origin:top;animation:shY .9s cubic-bezier(.45,0,.55,1) both}
-.sh-red-wrap{position:absolute;left:var(--sh-x);top:-3px;bottom:0;width:3px;transform-origin:top;animation:shY .5s cubic-bezier(.45,0,.55,1) both}
-.sh-red{display:block;width:3px;background:#E3141B;transition:height .08s linear}
-/* 왼쪽 세로선은 쓰지 않음 (다시 쓰려면 이 줄만 지우면 됩니다) */
-.sh-track,.sh-red-wrap{display:none}
-
-/* 오른쪽 사진 기둥 */
-.sh-mosaic{display:none}
-@media (min-width:1024px){.sh-mosaic{display:block;position:absolute;top:0;bottom:0;right:0;width:min(52vw,820px);overflow:hidden;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 9%,#000 91%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 9%,#000 91%,transparent 100%);animation:shRise 1s ease both}}
-.sh-col{position:absolute;display:flex;flex-direction:column;gap:14px;will-change:transform;animation:shDown 34s linear infinite}
-.sh-col.sh-up{animation-name:shUp}
-.sh-mosaic:hover .sh-col{animation-play-state:paused}
-@keyframes shDown{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,-50%,0)}}
-@keyframes shUp{from{transform:translate3d(0,-50%,0)}to{transform:translate3d(0,0,0)}}
-.sh-tile{position:relative;flex:none;width:210px;height:280px;border-radius:6px;overflow:hidden}
-.sh-tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.sh-cap{position:absolute;left:12px;bottom:12px;padding:4px 9px;border-radius:6px;background:rgba(255,255,255,.88);font-size:11px;font-weight:700;color:#1C1C1E}
-
-@media (prefers-reduced-motion:reduce){
-  .sh-intro{display:none}
-  .sh-bg img,.sh-col,.sh-rise,.sh-track,.sh-red-wrap,.sh-mosaic,.sh-dot{animation:none !important}
-  .sh-bg img:first-child{opacity:1}
+.sw{background:#F6F4EF;padding:clamp(24px,5vh,52px) 0 clamp(28px,4vh,44px)}
+.sw-in{max-width:1280px;margin:0 auto;padding:0 40px}
+.sw-head{text-align:center}
+.sw-el{margin:0;font-family:'Jost',sans-serif;font-style:italic;font-weight:300;font-size:clamp(20px,2.2vw,28px);line-height:1.1;color:#3F3F46}
+.sw-el b{font-weight:400;color:#FF671D}
+.sw-h1{margin:8px 0 0;font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:clamp(34px,4vw,56px);font-weight:800;letter-spacing:-.04em;line-height:1.1;color:#0F1C3A;white-space:nowrap}
+.sw-h1 b{font-weight:800;color:#FF671D}
+.sw-lead{margin:16px 0 0;font-size:clamp(16px,1.6vw,20px);line-height:1.45;letter-spacing:-.5px;color:#1C1C1E;word-break:keep-all}
+.sw-lead strong{font-weight:800;color:#0F1C3A}
+.sw-scene{position:relative;margin-top:clamp(20px,3.5vh,36px);height:clamp(300px,42vh,440px);overflow:hidden;background:#EDEAE4;scroll-margin-top:96px;scroll-margin-bottom:24px}
+.sw-world{position:absolute;left:0;top:0;height:100%;will-change:transform}
+.sw-street{display:block;height:100%;width:auto;max-width:none;filter:saturate(.95) contrast(1.02)}
+.sw-wk{position:absolute;left:0;top:0;background-repeat:no-repeat;will-change:left,background-position}
+.sw-wk::after{content:"";position:absolute;left:12%;right:12%;bottom:-1.5%;height:5%;border-radius:50%;background:radial-gradient(ellipse at center,rgba(15,28,58,.28),rgba(15,28,58,0) 70%);z-index:-1}
+.sw-bub{position:absolute;left:50%;bottom:100%;transform:translate(-50%,6px);margin-bottom:6px;background:rgba(255,255,255,.96);border-radius:14px;padding:7px 12px;font-size:13px;font-weight:800;color:#0F1C3A;white-space:nowrap;box-shadow:0 8px 20px -10px rgba(15,28,58,.45);opacity:0;transition:opacity .35s,transform .35s;pointer-events:none}
+.sw-bub.on{opacity:1;transform:translate(-50%,0)}
+.sw-ai{position:absolute;right:16px;bottom:10px;z-index:4;font-size:11px;font-weight:700;color:#71717A;background:rgba(255,255,255,.85);padding:4px 8px;border-radius:6px}
+.sw-tag{position:absolute;top:5%;z-index:3;transform:translateX(-50%);border:0;border-radius:999px;background:rgba(15,28,58,.86);color:#fff;font-family:inherit;font-size:13px;font-weight:800;padding:7px 12px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 16px -8px rgba(15,28,58,.6)}
+.sw-tag::after{content:" ›";opacity:.7}
+.sw-tag-v{background:#FF671D}
+.sw-nav{position:absolute;top:50%;z-index:5;width:48px;height:48px;margin-top:-24px;border:0;border-radius:50%;background:rgba(255,255,255,.94);color:#0F1C3A;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px -8px rgba(15,28,58,.5);transition:opacity .25s,transform .2s}
+.sw-nav:hover{transform:scale(1.06)}
+.sw-nav:disabled{opacity:0;pointer-events:none}
+.sw-prev{left:16px}
+.sw-next{right:16px}
+.sw-tag:focus-visible,.sw-chip:focus-visible,.sw-x:focus-visible,.sw-nav:focus-visible,.sw-tel:focus-visible,.sw-cta:focus-visible{outline:3px solid #FF671D;outline-offset:3px}
+.sw-chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.sw-chip{flex:none;border:1.5px solid #D6D3D1;border-radius:999px;background:#fff;font-family:inherit;font-size:15px;font-weight:700;color:#0F1C3A;padding:9px 16px;cursor:pointer;white-space:nowrap}
+.sw-chip:hover{border-color:#0F1C3A}
+.sw-chip-v{border-color:#FF671D;color:#B23C05;background:#FFF1E8}
+.sw-act{display:flex;justify-content:flex-end;align-items:center;gap:36px;margin-top:18px}
+.sw-tel{display:inline-flex;align-items:center;gap:12px;color:#1C1C1E;text-decoration:none}
+.sw-tel-l{font-size:11px;font-weight:700;line-height:1.25;color:#3F3F46}
+.sw-num{font-size:28px;font-weight:700;letter-spacing:-.5px;line-height:1;transition:color .2s ease}
+.sw-tel:hover .sw-num{color:#D24A0E}
+.sw-cta{display:inline-flex;align-items:center;gap:12px;color:#D24A0E;font-size:17px;font-weight:800;text-decoration:none}
+.sw-ic{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#1C1C1E;color:#fff;transition:transform .25s ease}
+.sw-cta:hover .sw-ic{transform:rotate(-45deg)}
+.sw-card{position:absolute;left:16px;top:16px;z-index:6;width:320px;background:#fff;border-radius:12px;padding:12px;box-shadow:0 20px 40px -16px rgba(15,28,58,.45)}
+.sw-ph{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sw-ph img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px;filter:saturate(.9) contrast(1.03) sepia(.07)}
+.sw-ph img:only-child{grid-column:1 / -1;aspect-ratio:4/3}
+.sw-cn{margin:10px 2px 0;font-size:17px;font-weight:800;color:#0F1C3A}
+.sw-cl{margin:2px 2px 2px;font-size:13px;color:#52525B}
+.sw-x{position:absolute;right:8px;top:8px;z-index:1;width:32px;height:32px;border:0;border-radius:50%;background:rgba(255,255,255,.92);font-size:20px;line-height:1;cursor:pointer;color:#0F1C3A;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.sw-dim{display:none}
+@media (max-width:767px){
+  .sw{padding:24px 0 32px}
+  .sw-in{padding:0 20px}
+  .sw-h1{font-size:clamp(30px,9vw,40px)}
+  .sw-scene{height:270px;margin-top:20px}
+  .sw-bub{font-size:12px;padding:6px 10px}
+  .sw-tag{font-size:12px;padding:6px 10px}
+  .sw-nav{width:40px;height:40px;margin-top:-20px}
+  .sw-prev{left:10px}
+  .sw-next{right:10px}
+  /* 휴대폰: 가게 버튼은 한 줄로 옆으로 밀어서 보기 */
+  .sw-chip-row{flex-wrap:nowrap;overflow-x:auto;margin:14px -20px 0;padding:0 20px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .sw-chip-row::-webkit-scrollbar{display:none}
+  .sw-chip{font-size:14px;padding:8px 14px}
+  .sw-act{flex-direction:column;align-items:flex-start;gap:14px;margin-top:16px}
+  .sw-card{position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;z-index:61;border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+  .sw-dim{display:block;position:fixed;inset:0;z-index:60;border:0;background:rgba(15,28,58,.45)}
 }
-
-/* 휴대폰·태블릿: 흐린 투시도 대신 미색 바탕 + 사진 띠 */
-.sh-mstrip{display:none}
-@media (max-width:1023px){
-  .sh-hero{background:#F6F4EF !important}
-  .sh-bg{display:none}
-  .sh-text{padding-bottom:28px}
-  .sh-title,.sh-text p{text-shadow:none}
-  .sh-mstrip{position:relative;z-index:1;display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:20px;padding:0 20px 40px;scrollbar-width:none}
-  .sh-mstrip::-webkit-scrollbar{display:none}
-  .sh-mtile{position:relative;flex:none;width:150px;height:200px;margin:0;border-radius:12px;overflow:hidden;scroll-snap-align:start;background:#E7E5E4}
-  .sh-mtile img{width:100%;height:100%;object-fit:cover;display:block}
-  .sh-mtile figcaption{position:absolute;left:8px;right:8px;bottom:8px;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.9);font-size:11px;font-weight:700;color:#1C1C1E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-}
-@media (min-width:640px) and (max-width:1023px){.sh-mstrip{padding:0 40px 48px;scroll-padding-left:40px}.sh-mtile{width:180px;height:240px}}
-
-/* 큰 화면(1600px 이상): 히어로 전체를 화면 크기에 맞춰 비율대로 키움 */
-@media (min-width:1600px){.sh-hero{zoom:1.12;height:max(760px,calc((100svh - 72px) / 1.12))}}
-@media (min-width:1920px){.sh-hero{zoom:1.3;height:max(760px,calc((100svh - 72px) / 1.3))}}
-@media (min-width:2300px){.sh-hero{zoom:1.6;height:max(760px,calc((100svh - 72px) / 1.6))}}
+@media (prefers-reduced-motion:reduce){.sw-nav,.sw-ic{transition:none}}
 `;

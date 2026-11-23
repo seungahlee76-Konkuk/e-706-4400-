@@ -13,7 +13,7 @@ export default function Navbar() {
   const [activeSection, setActiveSection] = useState('');
 
   const isHome = isChooserView || path === '/';
-  const isOfficetel = !isHome && path === '/officetel';
+  const isOfficetel = !isHome && path.startsWith('/officetel');
   const isStoreHome = !isHome && path === '/store';
 
   const logoTo = isOfficetel ? '/officetel' : isHome ? '/' : '/store';
@@ -23,7 +23,11 @@ export default function Navbar() {
   const navItems = isHome
     ? []
     : isOfficetel
-      ? [{ name: '상품안내', to: '/officetel#officetel', matchPath: '/officetel', hashId: '#officetel' }]
+      ? [
+          { name: '세대 안내', to: '/officetel/units', matchPath: '/officetel/units', hashId: '#units' },
+          { name: '누가 사나요', to: '/officetel/people', matchPath: '/officetel/people', hashId: '#people' },
+          { name: '사업개요', to: '/officetel/overview', matchPath: '/officetel/overview', hashId: '#overview' },
+        ]
       : [
           { name: '사업개요', to: '/store/overview', matchPath: '/store/overview', hashId: '#overview' },
           { name: '입지분석', to: '/store/location', matchPath: '/store/location', hashId: '#location' },
@@ -89,41 +93,9 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop Menu (Officetel keeps center placement) */}
-        {isOfficetel && (
-          <div className="hidden md:flex items-center gap-6 lg:gap-10">
-            {navItems.map((item) => {
-              const isActive = isStoreHome
-                ? activeSection === item.hashId
-                : path === item.matchPath;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.to}
-                  className={cn(
-                    'font-title text-sm font-semibold tracking-wide transition-colors hover:text-accent relative py-1 whitespace-nowrap',
-                    isActive 
-                      ? 'text-accent' 
-                      : (showSolidNav ? 'text-gray-800' : 'text-white')
-                  )}
-                >
-                  {item.name}
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeIndicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Desktop Right Utility: Store Menu + Phone + Consultation Link */}
+        {/* Desktop Right Utility: Menu (상가·오피스텔 같은 자리) + Phone + Consultation Link */}
         <div className="hidden md:flex items-center gap-5 shrink-0">
-          {!isOfficetel && navItems.length > 0 && (
+          {navItems.length > 0 && (
             <div className="flex items-center gap-8">
               {navItems.map((item) => {
                 const isActive = isStoreHome

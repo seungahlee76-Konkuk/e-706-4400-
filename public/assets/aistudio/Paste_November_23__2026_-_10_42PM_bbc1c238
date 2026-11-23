@@ -1,0 +1,1799 @@
+[AI Studio 요청문] 오피스텔 "세대 안내" · "누가 사나요" · "사업개요" 페이지 추가
+(2026-11-23 · GitHub 최신 코드 기준으로 작성 · 히어로 포함)
+
+■ 먼저 할 일 (사용자가 직접)
+- officetel-photos.zip 을 풀면 officetel 폴더가 나옵니다. 이 폴더를 GitHub 저장소 public/photos/ 안에 폴더째 올려 주세요 (→ public/photos/officetel/...).
+  (조감도(일러스트 aerial-illu.jpg 포함)·배치도, units/ 견본주택 사진·평면도·커뮤니티, people/ 인물 그림 p1~p6·핀용 a1~a6 등)
+- AI Studio에서는 public 폴더 파일을 추가·수정·삭제하지 않습니다.
+
+■ 바꿀 것 (아래 7개 파일을 "통째로" 넣어 주세요)
+1. 새 파일 src/sections/OfficetelUnits.tsx  → /officetel/units "세대 안내"
+   - "아파트예요?" → "아파트처럼 사는 오피스텔" + 84㎡ · 방 3 · 욕실 2 · 거실·주방, 기본 제공(시스템에어컨 4대 · 김치냉장고)
+   - 공간 둘러보기(84A 견본주택 사진 8장, 작은 사진 누르면 큰 사진 바뀜), 타입별 평면도(84A~D 탭), 지하 1층 커뮤니티(배치도 + 시설 CG 5장: 피트니스·스크린골프룸·라운지 카페·실내놀이터·개인오피스 라운지)
+2. 새 파일 src/sections/OfficetelPeople.tsx → /officetel/people "누가 사나요" (상가 입지분석과 같은 틀, 카드 6장 → 글)
+3. 새 파일 src/sections/OfficetelOverview.tsx → /officetel/overview "사업개요" (상가 사업개요와 같은 틀 + 타입별 배치)
+4. src/App.tsx 통째로 교체: 위 3개 페이지 연결 + /officetel 에서 기존 "주거용 오피스텔 상품안내" 섹션(Officetel.tsx, 상품 카드·커뮤니티 사진란) 제거 → 히어로 바로 아래에 상담 폼이 이어짐 (Officetel.tsx 파일 자체는 지우지 않고 그대로 둠)(제목·canonical 포함), /officetel 아래 모든 페이지에서 "상가" 전환 버튼
+7. 새 파일 src/sections/OfficetelQuick.tsx → /officetel 히어로 바로 아래 "세대 안내 · 누가 사나요 · 사업개요" 3칸 바로가기 (App.tsx가 히어로 다음에 보여줌)
+6. 새 파일 src/sections/OfficetelHero.tsx → /officetel 맨 위 히어로 (일러스트 조감도 + 6명 핀, 핀을 누르면 "누가 사나요" 해당 글로 이동, 오른쪽 위에 "2029년 7월 탑동 이노베이션밸리 준공 목표" 안내)
+   (App.tsx가 /officetel 에서 이 히어로 → 기존 Officetel 순서로 보여줍니다. 사업개요 표에 "주변 개발" 줄 추가됨)
+5. src/components/layout/Navbar.tsx 통째로 교체
+   - 오피스텔 메뉴: "상품안내" → "세대 안내 · 누가 사나요 · 사업개요" (이 순서)
+   - 메뉴 위치를 상가와 같은 오른쪽 자리로 통일
+
+■ 건드리지 말 것
+- 상담 폼과 저장 필드(id, name, phone, interest, createdAt, preferredTime), Formspree, Firebase 규칙
+- 관리자 로그인·관리자 페이지, Google Analytics, naver-site-verification, 인증 파일, robots, viewport
+- public 폴더의 이미지·폰트·영상 (추가·수정·삭제 금지 → 사용자가 GitHub에 직접 올림)
+- 새 라이브러리 설치 금지
+- 위 7개 파일 말고 다른 파일은 고치지 마세요 (StoreHero, StoreOverview, StoreLocation, Officetel 등 그대로)
+- GitHub 동기화는 다른 요청문까지 모두 넣은 뒤 마지막에 한 번만
+
+■ 확인 방법
+- /officetel : 일러스트 조감도 위 6명 핀(마우스 올리면 한 줄 설명, 누르면 해당 글), 글이 위에 붙지 않고 안정적인지, 휴대폰에서 핀 6개 모두 보이는지
+- /officetel/units : 사진 누르면 바뀌는지, 평면도 탭 84A~D가 바뀌는지, 커뮤니티 번호 1~8이 그림 위에 맞게 있는지
+- /officetel/people : 카드 6장 → 카드 누르면 글, "← 누가 사나요 전체"로 돌아오는지
+- /officetel/overview : 조감도·표, 아래 배치도·타입 표
+- 휴대폰 메뉴(햄버거)에 세 메뉴가 순서대로 보이는지 / /store/overview, /store/location 은 그대로인지
+
+
+
+==================== [파일: src/sections/OfficetelUnits.tsx] 통째로 ====================
+
+import { useState } from 'react';
+
+/* ───────── 오피스텔 세대 안내 (/officetel/units) ─────────
+   "아파트예요?"에 대한 답 → 공간 사진 → 타입별 평면도 → 커뮤니티 순서.
+   내용을 바꿀 때는 아래 STATS, ROOMS, TYPES, COMMUNITY만 고치면 됩니다.
+   이미지 파일은 public/photos/officetel/units/ 에 사용자가 직접 올립니다. */
+
+const U = '/photos/officetel/units/';
+
+// 첫 화면: 한 줄 답 + 숫자 4개
+const STATS = [
+  { big: '84㎡', label: '아파트 국민평형과 같은 크기', note: '전용 약 25.6평' },
+  { big: '3', label: '방' },
+  { big: '2', label: '욕실' },
+  { big: '거실·주방', label: '아파트와 같은 구성', small: true },
+];
+const INCLUDED = '시스템에어컨 4대 · 김치냉장고';
+
+// 공간 사진 (84A 견본주택)
+const ROOMS = [
+  { name: '거실', src: 'mh-living.jpg' },
+  { name: '주방', src: 'mh-kitchen.jpg' },
+  { name: '식당', src: 'mh-dining.jpg' },
+  { name: '안방', src: 'mh-bed1.jpg' },
+  { name: '침실', src: 'mh-bed2.jpg' },
+  { name: '자녀방', src: 'mh-bed3.jpg' },
+  { name: '욕실 1', src: 'mh-bath1.jpg' },
+  { name: '욕실 2', src: 'mh-bath2.jpg' },
+];
+const ROOM_NOTE = `84A 견본주택 촬영 · 기본 제공은 ${INCLUDED}이며, 그 밖의 가구·가전은 연출입니다.`;
+
+// 타입별 평면도 (배치도와 같은 색)
+const TYPES = [
+  { t: '84A', color: '#E09346', n: 302, area: '84.63', shape: '맞통풍 3BAY 판상형', mh: true,
+    points: ['현관 1면 신발장', 'ㄱ자형 주방', '세탁기·건조기 나란히 놓는 구조', '침실2 붙박이장'] },
+  { t: '84B', color: '#00B4BC', n: 89, area: '84.51', shape: '개방감 좋은 4BAY 판상형',
+    points: ['현관 신발장 + 현관 팬트리', 'ㅡ자형 주방', '분리형 세탁실', '안방 화장대 + 드레스룸', '침실3 붙박이장'] },
+  { t: '84C', color: '#8676B0', n: 26, area: '84.16', shape: '코너 탑상형',
+    points: ['현관 1면 신발장', 'ㄱ자형 주방', '분리형 세탁실', '안방 화장대 + 드레스룸', '침실3 붙박이장'] },
+  { t: '84D', color: '#EF5DA2', n: 13, area: '84.52', shape: '4BAY 판상형 · 주거약자형 세대',
+    points: ['현관 1면 신발장', 'ㅡ자형 주방', '분리형 세탁실', '침실3 붙박이장'] },
+];
+const COMMON = '주방 상판·벽 엔지니어드 스톤 · 빌트인 김치냉장고 · 시스템에어컨';
+
+// 커뮤니티 (지하 1층) — x, y 는 그림 위 번호 위치(%)
+const COMMUNITY = [
+  { name: '피트니스', x: 18.6, y: 31.8 },
+  { name: '스크린골프룸', x: 37.3, y: 20.6 },
+  { name: '라운지 카페', x: 28.3, y: 58.8 },
+  { name: '실내놀이터', x: 67.3, y: 49.9 },
+  { name: '개인용 오피스', x: 78.6, y: 58.1 },
+  { name: '개인오피스 라운지', x: 73.2, y: 65.7 },
+  { name: '멀티룸 · 주민회의실', x: 79.2, y: 74.2 },
+  { name: '창고', x: 88.2, y: 65.7 },
+];
+
+// 커뮤니티 CG 이미지 (n = 위 번호와 같음)
+const COMM_PICS = [
+  { n: 1, name: '피트니스', src: 'comm-fitness.jpg' },
+  { n: 2, name: '스크린골프룸', src: 'comm-golf.jpg' },
+  { n: 3, name: '라운지 카페', src: 'comm-lounge.jpg' },
+  { n: 4, name: '실내놀이터', src: 'comm-kids.jpg' },
+  { n: 6, name: '개인오피스 라운지', src: 'comm-office.jpg' },
+];
+
+export default function OfficetelUnits() {
+  const [room, setRoom] = useState(1);
+  const [type, setType] = useState(0);
+  const T = TYPES[type];
+
+  return (
+    <section id="units" className="unt scroll-mt-[72px]">
+      <style>{CSS}</style>
+      <div className="unt-in">
+        {/* ── 1. 답부터 ── */}
+        <p className="unt-eb">UNIT GUIDE</p>
+        <h2 className="unt-tt">세대 안내</h2>
+        <span className="unt-ln" aria-hidden="true" />
+
+        <div className="unt-top">
+          <figure className="unt-ph">
+            <div><img src={U + ROOMS[0].src} alt="84A 견본주택 거실" /></div>
+            <figcaption>84A 견본주택 거실 · 가구와 소품은 연출</figcaption>
+          </figure>
+          <div className="unt-ans">
+            <p className="unt-q">아파트예요?</p>
+            <h3 className="unt-a"><b>아파트처럼</b> 사는<br />오피스텔</h3>
+            <ul className="unt-stats">
+              {STATS.map((s) => (
+                <li key={s.label}>
+                  <b className={s.small ? 'sm' : ''}>{s.big}</b>
+                  <span>{s.label}</span>
+                  {s.note && <small>{s.note}</small>}
+                </li>
+              ))}
+            </ul>
+            <p className="unt-inc"><em>기본 제공</em>{INCLUDED}</p>
+          </div>
+        </div>
+
+        {/* ── 2. 공간 둘러보기 ── */}
+        <div className="unt-hd">
+          <p className="unt-eb">ROOMS</p>
+          <h3 className="unt-st">공간 둘러보기</h3>
+        </div>
+        <div className="unt-gal">
+          <figure className="unt-big">
+            <img key={room} src={U + ROOMS[room].src} alt={`84A 견본주택 ${ROOMS[room].name}`} loading="lazy" />
+            <span className="unt-tag">{ROOMS[room].name}</span>
+          </figure>
+          <ul className="unt-thumbs" role="tablist" aria-label="공간 선택">
+            {ROOMS.map((r, i) => (
+              <li key={r.name}>
+                <button type="button" role="tab" aria-selected={i === room} className={i === room ? 'on' : ''} onClick={() => setRoom(i)}>
+                  <img src={U + r.src} alt="" loading="lazy" />
+                  <span>{r.name}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <p className="unt-note">{ROOM_NOTE}</p>
+
+        {/* ── 3. 타입별 평면도 ── */}
+        <div className="unt-hd">
+          <p className="unt-eb">FLOOR PLAN</p>
+          <h3 className="unt-st">타입별 평면도</h3>
+        </div>
+        <div className="unt-tabs" role="tablist" aria-label="타입 선택">
+          {TYPES.map((x, i) => (
+            <button key={x.t} type="button" role="tab" aria-selected={i === type} className={i === type ? 'on' : ''} onClick={() => setType(i)}>
+              <i style={{ background: x.color }} aria-hidden="true" />{x.t}<small>{x.n}세대</small>
+            </button>
+          ))}
+        </div>
+        <div className="unt-plan">
+          <figure>
+            <a href={`${U}plan-${T.t}.jpg`} target="_blank" rel="noopener noreferrer" aria-label={`${T.t} 평면도 크게 보기`}>
+              <img key={T.t} src={`${U}plan-${T.t}.jpg`} alt={`${T.t} 평면도`} loading="lazy" />
+            </a>
+          </figure>
+          <div className="unt-info">
+            <p className="unt-tn"><i style={{ background: T.color }} aria-hidden="true" />{T.t}{T.mh && <em>견본주택 타입</em>}</p>
+            <p className="unt-shape">{T.shape}</p>
+            <table>
+              <tbody>
+                <tr><th scope="row">전용면적</th><td>{T.area}㎡</td></tr>
+                <tr><th scope="row">세대수</th><td>430세대 중 <b>{T.n}</b>세대</td></tr>
+                <tr><th scope="row">구조</th><td>방 3 · 욕실 2 · 거실 · 주방/식당</td></tr>
+              </tbody>
+            </table>
+            <ul className="unt-pts">{T.points.map((p) => <li key={p}>{p}</li>)}</ul>
+            <p className="unt-common"><em>모든 타입</em>{COMMON}</p>
+          </div>
+        </div>
+        <p className="unt-note">평면도는 이해를 돕기 위한 그림으로 실제와 다를 수 있습니다. "붙박이장 별매"는 선택 품목입니다.<span className="unt-mo"> 평면도를 누르면 크게 볼 수 있어요.</span></p>
+
+        {/* ── 4. 커뮤니티 ── */}
+        <div className="unt-hd">
+          <p className="unt-eb">COMMUNITY</p>
+          <h3 className="unt-st">지하 1층 커뮤니티</h3>
+        </div>
+        <div className="unt-com">
+          <figure>
+            <img src={U + 'community.jpg'} alt="지하 1층 커뮤니티 시설 배치" loading="lazy" />
+            {COMMUNITY.map((c, i) => (
+              <span key={c.name} className="unt-pin" style={{ left: `${c.x}%`, top: `${c.y}%` }} aria-hidden="true">{i + 1}</span>
+            ))}
+          </figure>
+          <ol>
+            {COMMUNITY.map((c, i) => (<li key={c.name}><em>{i + 1}</em>{c.name}</li>))}
+          </ol>
+        </div>
+        <ul className="unt-cpics">
+          {COMM_PICS.map((c) => (
+            <li key={c.n}>
+              <img src={U + c.src} alt={`${c.name} 이미지`} loading="lazy" />
+              <span><em>{c.n}</em>{c.name}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="unt-note">커뮤니티 그림과 이미지는 이해를 돕기 위해 제작된 것으로 실제와 다소 차이가 있을 수 있으며, 관계 기관 및 법규 변동 등에 따라 달라질 수 있습니다.</p>
+      </div>
+    </section>
+  );
+}
+
+const CSS = `
+.unt{background:#fff;color:#1C1C1E}
+.unt button{font:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;color:inherit;text-align:left}
+.unt-in{max-width:1280px;margin:0 auto;padding:96px 40px 120px}
+.unt-eb{margin:0;font-size:12px;font-weight:700;letter-spacing:3px;color:#71717A}
+.unt-tt{margin:12px 0 0;font-size:36px;font-weight:800;letter-spacing:-1.2px;line-height:1.2;color:#0F1C3A}
+.unt-ln{display:block;width:56px;height:3px;background:#FF671D;margin-top:20px}
+.unt-hd{margin-top:104px}
+.unt-st{margin:10px 0 0;font-size:26px;font-weight:800;letter-spacing:-1px;color:#0F1C3A}
+.unt-note{margin:14px 0 0;font-size:12px;line-height:1.6;color:#A1A1AA;word-break:keep-all}
+.unt-mo{display:none}
+.unt-cpics{list-style:none;margin:20px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.unt-cpics li{margin:0}
+.unt-cpics img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:6px;border:1px solid #E7E5E4}
+.unt-cpics span{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:13px;font-weight:700;color:#0F1C3A;letter-spacing:-.3px}
+.unt-cpics em{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#0F1C3A;color:#fff;font-style:normal;font-size:11px}
+@media (max-width:767px){.unt-cpics{grid-template-columns:repeat(2,1fr);gap:10px}.unt-cpics li:last-child{grid-column:1/-1}.unt-cpics li:last-child img{aspect-ratio:16/8}}
+.unt img{filter:saturate(.95) contrast(1.02)}
+
+/* 1. 답 */
+.unt-top{margin-top:48px;display:grid;grid-template-columns:7fr 5fr;gap:56px;align-items:center}
+.unt-ph{margin:0}
+.unt-ph>div{border-radius:6px;overflow:hidden;aspect-ratio:4/3;background:#E7E5E4}
+.unt-ph img{display:block;width:100%;height:100%;object-fit:cover}
+.unt-ph figcaption{margin-top:10px;font-size:12px;color:#A1A1AA}
+.unt-q{margin:0;font-size:16px;font-weight:700;color:#71717A}
+.unt-a{margin:10px 0 0;font-size:44px;font-weight:800;line-height:1.2;letter-spacing:-1.8px;color:#0F1C3A}
+.unt-a b{color:#D24A0E}
+.unt-stats{list-style:none;margin:36px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;border-top:2px solid #0F1C3A}
+.unt-stats li{padding:22px 4px 20px;border-bottom:1px solid #E7E5E4;display:flex;flex-direction:column}
+.unt-stats li:nth-child(odd){padding-right:16px;border-right:1px solid #E7E5E4}
+.unt-stats li:nth-child(even){padding-left:20px}
+.unt-stats b{font-size:40px;font-weight:800;letter-spacing:-1.5px;line-height:1.05;color:#0F1C3A}
+.unt-stats b.sm{font-size:26px;line-height:1.5;letter-spacing:-1px}
+.unt-stats span{margin-top:8px;font-size:15px;font-weight:600;color:#3F3F46}
+.unt-stats small{margin-top:2px;font-size:13px;color:#71717A}
+.unt-inc{margin:20px 0 0;font-size:15px;color:#3F3F46}
+.unt-inc em{font-style:normal;font-size:12px;font-weight:700;color:#D24A0E;border:1px solid #FF671D;border-radius:999px;padding:3px 9px;margin-right:10px}
+
+/* 2. 공간 사진 */
+.unt-gal{margin-top:32px;display:grid;grid-template-columns:1fr 280px;gap:16px}
+.unt-big{position:relative;margin:0;border-radius:6px;overflow:hidden;aspect-ratio:4/3;background:#E7E5E4}
+.unt-big img{display:block;width:100%;height:100%;object-fit:cover;animation:untFade .45s ease}
+.unt-tag{position:absolute;left:16px;top:16px;padding:6px 12px;border-radius:6px;background:rgba(15,28,58,.82);color:#fff;font-size:14px;font-weight:700}
+.unt-thumbs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start}
+.unt-thumbs button{display:block;width:100%;border-radius:6px;overflow:hidden;position:relative;outline-offset:2px}
+.unt-thumbs img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;opacity:.75;transition:opacity .2s}
+.unt-thumbs span{display:block;padding:6px 2px 0;font-size:13px;font-weight:600;color:#71717A}
+.unt-thumbs button.on img,.unt-thumbs button:hover img{opacity:1}
+.unt-thumbs button.on span{color:#0F1C3A;font-weight:800}
+.unt-thumbs button.on:after{content:'';position:absolute;left:0;right:0;top:0;aspect-ratio:4/3;border:2px solid #FF671D;border-radius:6px;pointer-events:none}
+@keyframes untFade{from{opacity:.3}to{opacity:1}}
+
+/* 3. 평면도 */
+.unt-tabs{margin-top:28px;display:flex;gap:8px;flex-wrap:wrap}
+.unt-tabs button{display:flex;align-items:center;gap:8px;padding:12px 18px;border:1px solid #E7E5E4 !important;border-radius:6px;font-size:17px;font-weight:800;color:#71717A}
+.unt-tabs button small{font-size:13px;font-weight:500;color:#A1A1AA}
+.unt-tabs button i{width:10px;height:10px;border-radius:3px}
+.unt-tabs button.on{border-color:#0F1C3A !important;background:#0F1C3A;color:#fff}
+.unt-tabs button.on small{color:rgba(255,255,255,.7)}
+.unt-plan{margin-top:20px;display:grid;grid-template-columns:7fr 5fr;gap:48px;align-items:start}
+.unt-plan figure{margin:0;border:1px solid #E7E5E4;border-radius:6px;padding:20px;background:#fff}
+.unt-plan figure a{display:block}
+.unt-plan figure img{display:block;width:100%;height:auto;max-height:560px;object-fit:contain;filter:none;animation:untFade .35s ease}
+.unt-tn{margin:0;display:flex;align-items:center;gap:10px;font-size:32px;font-weight:800;letter-spacing:-1px;color:#0F1C3A}
+.unt-tn i{width:14px;height:14px;border-radius:4px}
+.unt-tn em{font-style:normal;font-size:12px;font-weight:700;color:#D24A0E;border:1px solid #FF671D;border-radius:999px;padding:3px 9px;letter-spacing:0}
+.unt-shape{margin:8px 0 0;font-size:17px;font-weight:600;color:#3F3F46}
+.unt-info table{width:100%;margin-top:22px;border-collapse:collapse;border-top:2px solid #0F1C3A}
+.unt-info th,.unt-info td{text-align:left;border-bottom:1px solid #E7E5E4;padding:14px 16px;font-size:15px;line-height:1.5}
+.unt-info th{width:96px;background:#F6F4EF;font-size:13px;font-weight:700;color:#0F1C3A}
+.unt-info td b{font-size:18px;color:#0F1C3A}
+.unt-pts{list-style:none;margin:20px 0 0;padding:0}
+.unt-pts li{position:relative;padding:6px 0 6px 18px;font-size:15px;color:#3F3F46}
+.unt-pts li:before{content:'';position:absolute;left:2px;top:15px;width:6px;height:6px;border-radius:50%;background:#FF671D}
+.unt-common{margin:18px 0 0;padding:14px 16px;background:#F6F4EF;border-radius:6px;font-size:13px;line-height:1.6;color:#52525B;word-break:keep-all}
+.unt-common em{display:block;font-style:normal;font-size:12px;font-weight:700;color:#0F1C3A;margin-bottom:2px}
+
+/* 4. 커뮤니티 */
+.unt-com{margin-top:32px;display:grid;grid-template-columns:8fr 3fr;gap:40px;align-items:center}
+.unt-com figure{position:relative;margin:0}
+.unt-com figure img{display:block;width:100%;height:auto;filter:none}
+.unt-pin{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;background:#FF671D;color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #fff}
+.unt-com ol{list-style:none;margin:0;padding:0;border-top:2px solid #0F1C3A}
+.unt-com li{display:flex;align-items:center;gap:12px;padding:13px 2px;border-bottom:1px solid #E7E5E4;font-size:16px;font-weight:600;color:#0F1C3A}
+.unt-com li em{font-style:normal;flex:none;width:22px;height:22px;border-radius:50%;background:#FF671D;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+
+.unt button:focus-visible,.unt a:focus-visible{outline:3px solid #FF671D;outline-offset:3px}
+
+@media (max-width:1023px){
+  .unt-top,.unt-plan{grid-template-columns:1fr;gap:32px}
+  .unt-gal{grid-template-columns:1fr}
+  .unt-thumbs{grid-template-columns:repeat(4,1fr)}
+  .unt-com{grid-template-columns:1fr;gap:24px}
+  .unt-com ol{display:grid;grid-template-columns:1fr 1fr;column-gap:20px}
+}
+@media (max-width:767px){
+  .unt-in{padding:56px 20px 80px}
+  .unt-tt{font-size:28px}
+  .unt-top{margin-top:32px;gap:28px}
+  .unt-ph{margin:0 -20px}
+  .unt-ph>div{border-radius:0}
+  .unt-ph figcaption{padding:0 20px}
+  .unt-a{font-size:32px;letter-spacing:-1.2px}
+  .unt-stats b{font-size:32px}
+  .unt-stats b.sm{font-size:21px}
+  .unt-stats span{font-size:14px}
+  .unt-hd{margin-top:72px}
+  .unt-st{font-size:22px}
+  .unt-gal{margin:24px -20px 0}
+  .unt-big{border-radius:0}
+  .unt-thumbs{display:flex;gap:8px;overflow-x:auto;padding:0 20px;scrollbar-width:none}
+  .unt-thumbs::-webkit-scrollbar{display:none}
+  .unt-thumbs li{flex:none;width:96px}
+  .unt-tabs{gap:6px}
+  .unt-tabs button{padding:10px 12px;font-size:15px;flex:1;justify-content:center}
+  .unt-tabs button small{display:none}
+  .unt-plan figure{padding:10px}
+  .unt-tn{font-size:26px}
+  .unt-mo{display:inline}
+  .unt-com ol{grid-template-columns:1fr}
+  .unt-pin{width:20px;height:20px;font-size:11px}
+}
+@media (prefers-reduced-motion:reduce){.unt-big img,.unt-plan figure img{animation:none}}
+@media (min-width:1600px){.unt-in{zoom:1.12}}
+@media (min-width:1920px){.unt-in{zoom:1.3}}
+@media (min-width:2300px){.unt-in{zoom:1.45}}
+`;
+
+
+==================== [파일: src/sections/OfficetelPeople.tsx] 통째로 ====================
+
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+
+/* ───────── 오피스텔 · 누가 사나요 (상가 입지분석과 같은 틀: 카드 6장 → 누르면 왼쪽 목차 + 글) ─────────
+   글 내용은 아래 PEOPLE 과 각 Article 함수 안의 문장만 고치면 됩니다.
+   카드의 인물 그림은 연출 이미지이며, 카드 아래에 "인물: 연출 이미지"를 표시합니다.
+   이미지 파일은 public/photos/officetel/ 에 사용자가 직접 올립니다. */
+
+type Person = { n: number; tab: string; name: string; line: string; pic: string; subs: string[] };
+
+const PEOPLE: Person[] = [
+  { n: 1, tab: '직장인', name: '수원델타플렉스 직장인', line: '같은 고색동, 출근길이 짧은 3룸', pic: '/photos/officetel/people/p1.webp', subs: ['한눈에 보기', '짧은 출근길', '퇴근 후 저녁'] },
+  { n: 2, tab: '의료진', name: '수원덕산병원 의료진', line: '교대근무 끝나고 바로 집', pic: '/photos/officetel/people/p2.webp', subs: ['한눈에 보기', '교대근무와 집', '이른 아침, 늦은 밤'] },
+  { n: 3, tab: '통근자', name: '반도체·전자 통근자', line: '통근버스로 화성·기흥도, 수원도', pic: '/photos/officetel/people/p3.webp', subs: ['한눈에 보기', '상가 앞 버스로 수원역', '고색역에서 수원역', '통근버스'] },
+  { n: 4, tab: '화성 출근', name: '화성 쪽 출근자', line: '수원에 살면서 화성 출퇴근', pic: '/photos/officetel/people/p4.webp', subs: ['한눈에 보기', '차로 화성까지', '주차'] },
+  { n: 5, tab: '신혼부부', name: '신혼부부', line: '아파트처럼 사는 84㎡ 3룸', pic: '/photos/officetel/people/p5.webp', subs: ['한눈에 보기', '84㎡ 방 3개', '청약 자격', '단지 안 커뮤니티'] },
+  { n: 6, tab: '가족', name: '어르신·가족', line: '종합병원 바로 옆 새 집', pic: '/photos/officetel/people/p6.webp', subs: ['한눈에 보기', '병원이 가까운 집', '내려가면 있는 생활'] },
+];
+const LAST = PEOPLE.length;
+
+const PHONE = '031)293-1073';
+const TEL = 'tel:031-293-1073';
+const subId = (n: number, k: number) => `ppl${n}-${k}`;
+
+export default function OfficetelPeople() {
+  const [active, setActive] = useState<number>(0); // 0 = 카드 목록, 1~6 = 글
+  const [cur, setCur] = useState<number>(0);
+  const topRef = useRef<HTMLElement>(null);
+
+  // 주소 끝이 #people-2 처럼 들어오면 그 글을 바로 엽니다
+  useEffect(() => {
+    const m = window.location.hash.match(/^#people-([1-6])$/);
+    if (m) {
+      setActive(Number(m[1]));
+      setTimeout(() => topRef.current?.scrollIntoView({ block: 'start' }), 50);
+    }
+  }, []);
+
+  const open = (n: number) => {
+    setActive(n);
+    setCur(0);
+    try { history.replaceState(null, '', n ? `#people-${n}` : '#people'); } catch { /* 무시 */ }
+    requestAnimationFrame(() => topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  };
+
+  const goSub = (n: number, k: number) => {
+    document.getElementById(subId(n, k))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  useEffect(() => {
+    if (!active) return;
+    const t = PEOPLE[active - 1];
+    const els = t.subs.map((_, k) => document.getElementById(subId(active, k))).filter(Boolean) as HTMLElement[];
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) setCur(Number((e.target as HTMLElement).dataset.k)); }),
+      { rootMargin: '-30% 0px -60% 0px' },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [active]);
+
+  const next = active === LAST ? 1 : active + 1;
+
+  return (
+    <section id="people" ref={topRef} className="ppl">
+      <style>{CSS}</style>
+
+      {active === 0 ? (
+        /* ── 사람 카드 6장 ── */
+        <div className="ppl-in ppl-idx">
+          <p className="ppl-eb">WHO LIVES HERE</p>
+          <h2 className="ppl-h2">누가 사나요</h2>
+          <span className="ppl-ln" aria-hidden="true" />
+          <ul className="ppl-cards">
+            {PEOPLE.map((p) => (
+              <li key={p.n}>
+                <button type="button" onClick={() => open(p.n)} aria-label={`${String(p.n).padStart(2, '0')} ${p.name} 자세히 보기`}>
+                  <span className="ppl-pic"><img src={p.pic} alt="" loading="lazy" /></span>
+                  <span className="ppl-cap">
+                    <em>{String(p.n).padStart(2, '0')}</em>
+                    <b>{p.name}</b>
+                    <span>{p.line}</span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p className="ppl-hint">카드를 누르면 왜 이곳을 고르는지 볼 수 있어요.<small>인물: 연출 이미지</small></p>
+        </div>
+      ) : (
+        /* ── 글 화면 ── */
+        <>
+          <nav className="ppl-tabs" aria-label="누가 사나요 목록">
+            {PEOPLE.map((p) => (
+              <button key={p.n} type="button" className={p.n === active ? 'on' : ''} onClick={() => open(p.n)}>
+                <em>{String(p.n).padStart(2, '0')}</em>{p.tab}
+              </button>
+            ))}
+          </nav>
+          <div className="ppl-in ppl-pg">
+            <aside className="ppl-toc">
+              <button type="button" className="ppl-back" onClick={() => open(0)}>← 누가 사나요 전체</button>
+              <p className="ppl-eb">WHO LIVES HERE</p>
+              <p className="ppl-tt">누가 사나요</p>
+              <ol>
+                {PEOPLE.map((p) => (
+                  <li key={p.n} className={p.n === active ? 'on' : ''}>
+                    <button type="button" onClick={() => open(p.n)}>
+                      <em>{String(p.n).padStart(2, '0')}</em>{p.name}
+                    </button>
+                    {p.n === active && (
+                      <ul>
+                        {p.subs.map((s, k) => (
+                          <li key={s}>
+                            <button type="button" className={k === cur ? 'cur' : ''} onClick={() => goSub(p.n, k)}>{s}</button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ol>
+              <a className="ppl-call" href={TEL}><small>내 출퇴근길에 맞는지 궁금하시면</small><b>{PHONE}</b></a>
+            </aside>
+
+            <article className="ppl-ar" key={active}>
+              {active === 1 && <Article1 />}
+              {active === 2 && <Article2 />}
+              {active === 3 && <Article3 />}
+              {active === 4 && <Article4 />}
+              {active === 5 && <Article5 />}
+              {active === 6 && <Article6 />}
+              <button type="button" className="ppl-next" onClick={() => open(next)}>
+                <div>
+                  <small>{active === LAST ? '처음으로' : '다음'}</small>
+                  <b>{String(next).padStart(2, '0')} {PEOPLE[next - 1].name}</b>
+                </div>
+                <span aria-hidden="true">→</span>
+              </button>
+            </article>
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
+/* ───── 공통 조각 ───── */
+function Head({ n, kick, title, lead }: { n: number; kick: string; title: ReactNode; lead: ReactNode }) {
+  return (
+    <>
+      <p className="ppl-kick">{kick}</p>
+      <h1 className="ppl-h1">{title}</h1>
+      <span className="ppl-ln" aria-hidden="true" />
+      <p className="ppl-lead">{lead}</p>
+      <div className="ppl-who"><img src={PEOPLE[n - 1].pic} alt="" /><small>인물: 연출 이미지</small></div>
+    </>
+  );
+}
+function H({ n, k, children, small }: { n: number; k: number; children: ReactNode; small?: boolean }) {
+  return <h3 id={subId(n, k)} data-k={k} className={small ? 'ppl-sm' : ''}>{children}</h3>;
+}
+function Facts({ rows }: { rows: [string, ReactNode][] }) {
+  return (
+    <table className="ppl-ft">
+      <tbody>
+        {rows.map(([a, b]) => (<tr key={a}><th scope="row">{a}</th><td>{b}</td></tr>))}
+      </tbody>
+    </table>
+  );
+}
+function Tiles({ items }: { items: string[] }) {
+  return (
+    <ul className="ppl-tiles">
+      {items.map((x, i) => (<li key={x}><em>{String(i + 1).padStart(2, '0')}</em><b>{x}</b></li>))}
+    </ul>
+  );
+}
+function Photo({ src, alt, pos, cap, tall }: { src: string; alt: string; pos?: string; cap: string; tall?: boolean }) {
+  return (
+    <figure className={`ppl-fig${tall ? ' tall' : ''}`}>
+      <div><img src={src} alt={alt} loading="lazy" style={{ objectPosition: pos }} /></div>
+      <figcaption>{cap}</figcaption>
+    </figure>
+  );
+}
+const nw = (t: string) => <span className="ppl-nw">{t}</span>;
+
+/* ───── 01 수원델타플렉스 직장인 ───── */
+function Article1() {
+  return (
+    <>
+      <Head n={1} kick="01 · 직장인" title={<>출근길이 짧은<br />3룸 새 집</>}
+        lead={<>수원델타플렉스는 단지와 같은 고색동에 있는 수원시 유일의 산업단지입니다. 일터와 같은 동네에 {nw('84㎡ 새 집')}을 두면 출근길이 짧아지고, 하루가 길어집니다.</>} />
+      <H n={1} k={0} small>한눈에 보기</H>
+      <Facts rows={[
+        ['일터', '수원델타플렉스 (고색동 · 전기·전자·기계 업종)'],
+        ['출근', '같은 고색동 · 차로 짧은 거리'],
+        ['집', '전용 84㎡ · 방 3개'],
+        ['퇴근 후', '1층 상가 식당·카페'],
+      ]} />
+      <H n={1} k={1}>짧은 출근길</H>
+      <p>지금은 수원역·병점역에서 통근버스를 타거나 차로 멀리서 출근하는 경우가 많습니다. 같은 동네에 살면 <strong>출퇴근에 쓰던 시간</strong>이 그대로 내 시간이 됩니다.</p>
+      <H n={1} k={2}>퇴근 후 저녁</H>
+      <p>엘리베이터로 내려가면 1층에 칼국수·손만두, 죽집, 카페가 있습니다. 혼자 살아도, 둘이 살아도 저녁 한 끼가 가깝습니다.</p>
+    </>
+  );
+}
+
+/* ───── 02 수원덕산병원 의료진 ───── */
+function Article2() {
+  return (
+    <>
+      <Head n={2} kick="02 · 의료진" title={<>교대근무 끝나고<br />바로 집</>}
+        lead={<>수원덕산병원과 단지가 맞닿아 있습니다. 밤 근무를 마친 뒤 {nw('몇 분이면')} 집에 닿습니다.</>} />
+      <H n={2} k={0} small>한눈에 보기</H>
+      <Facts rows={[
+        ['일터', '수원덕산병원 (종합병원 · 지역응급의료센터)'],
+        ['출근', '단지 바로 옆'],
+        ['근무', '교대근무 · 야간 근무'],
+        ['집', '전용 84㎡ · 방 3개'],
+      ]} />
+      <Photo src="/photos/officetel/hospital.jpg" alt="수원덕산병원" pos="50% 50%" cap="단지 바로 옆 수원덕산병원" />
+      <H n={2} k={1}>교대근무와 집</H>
+      <p>교대근무는 쉬는 시간이 들쭉날쭉합니다. 병원 옆에 살면 <strong>남는 시간을 출퇴근이 아니라 잠과 쉼</strong>에 씁니다.</p>
+      <H n={2} k={2}>이른 아침, 늦은 밤</H>
+      <p>1층 카페는 아침 7시(평일), 죽집은 아침 8시 30분에 문을 엽니다. 근무 전후 끼니를 단지 안에서 해결할 수 있습니다.</p>
+      <p className="ppl-src">영업시간은 2026년 11월 매장 안내 기준이며 바뀔 수 있습니다.</p>
+    </>
+  );
+}
+
+/* ───── 03 반도체·전자 통근자 ───── */
+function Article3() {
+  return (
+    <>
+      <Head n={3} kick="03 · 통근자" title={<>통근버스로<br />화성·기흥도, 수원도</>}
+        lead={<>큰 사업장은 통근버스를 운영합니다. 상가 앞 정류장에서 {nw('수원역 가는 버스')}를 타거나, 고색역에서 수인분당선으로 수원역까지 바로 갈 수 있습니다.</>} />
+      <H n={3} k={0} small>한눈에 보기</H>
+      <Facts rows={[
+        ['상가 앞 정류장', <>수원역 가는 버스 <small>(GS25 쪽)</small></>],
+        ['고색역', '수인분당선 · 다음 역 수원역'],
+        ['수원역', '1호선 · KTX'],
+        ['집', '전용 84㎡ · 방 3개'],
+      ]} />
+      <H n={3} k={1}>상가 앞 버스로 수원역</H>
+      <p>단지 1층 상가 앞 정류장에서 수원역으로 가는 버스를 탈 수 있습니다.</p>
+      <div className="ppl-line">
+        <span className="st o">상가 앞 정류장</span><i>버스</i>
+        <span className="st n">수원역<small>1호선 · KTX</small></span>
+      </div>
+      <H n={3} k={2}>고색역에서 수원역</H>
+      <p>수인분당선 고색역의 다음 역이 <strong>수원역</strong>입니다. 갈아타지 않고 바로 갑니다.</p>
+      <div className="ppl-line">
+        <span className="st">고색역</span><i>수인분당선 1정거장</i>
+        <span className="st n">수원역<small>1호선 · KTX · GTX-C 예정</small></span>
+      </div>
+      <H n={3} k={3}>통근버스</H>
+      <p>대형 사업장 통근버스는 회사마다 노선과 정류장이 다릅니다. 수원역까지 버스로도, 지하철로도 바로 갈 수 있는 곳에 살면 <strong>통근버스를 고를 수 있는 폭</strong>이 넓어집니다.</p>
+      <p className="ppl-src">통근버스 노선과 정류장은 회사 사정에 따라 바뀔 수 있습니다. 상담 때 최신 정보를 안내해 드립니다.</p>
+    </>
+  );
+}
+
+/* ───── 04 화성 쪽 출근자 ───── */
+function Article4() {
+  return (
+    <>
+      <Head n={4} kick="04 · 화성 출근" title={<>수원에 살면서<br />화성으로 출퇴근</>}
+        lead={<>병원, 구청, 수원역 같은 {nw('수원 생활권')}은 그대로 두고, 일은 차로 화성까지 다니는 사람들입니다.</>} />
+      <H n={4} k={0} small>한눈에 보기</H>
+      <Facts rows={[
+        ['일터', '화성 산업단지 일대'],
+        ['출근', '자차'],
+        ['주차', <>지하 4층까지 608대 <small>(근린생활시설 포함)</small></>],
+        ['집', '전용 84㎡ · 방 3개'],
+      ]} />
+      <H n={4} k={1}>차로 화성까지</H>
+      <p>출근은 차로 화성까지, 장보기·병원·외식 같은 생활은 수원에서 합니다. 새 집은 그 사이에서 <strong>생활 쪽</strong>에 둡니다.</p>
+      <H n={4} k={2}>주차</H>
+      <p>지하 주차장 입구 앞에 층별 <strong>주차 가능 대수</strong>가 표시됩니다.</p>
+      <Photo src="/photos/officetel/parking.jpg" alt="e편한세상 시티 고색 지하 주차장 입구" pos="50% 50%" cap="지하 주차장 입구 (실제 사진)" />
+    </>
+  );
+}
+
+/* ───── 05 신혼부부 ───── */
+function Article5() {
+  return (
+    <>
+      <Head n={5} kick="05 · 신혼부부" title={<>아파트처럼 사는<br />84㎡ 3룸</>}
+        lead={<>전용 84㎡에 방 3개. 아파트 국민평형과 같은 크기의 새 집입니다. 오피스텔은 청약할 때 {nw('주택 수에 들어가지 않습니다.')}</>} />
+      <H n={5} k={0} small>한눈에 보기</H>
+      <Facts rows={[
+        ['크기', <>전용 84㎡ <small>(약 25.6평)</small></>],
+        ['구조', '방 3개'],
+        ['기본 제공', '시스템에어컨 4대 · 김치냉장고'],
+        ['청약', '오피스텔은 주택 수 미포함'],
+      ]} />
+      <H n={5} k={1}>84㎡ 방 3개</H>
+      <p>침실, 아이 방, 서재. 둘이 시작해서 셋이 되어도 넉넉한 크기입니다.</p>
+      <Photo tall src="/photos/officetel/in-living.jpg" alt="실제 세대 거실" pos="50% 50%" cap="실제 세대 거실" />
+      <H n={5} k={2}>청약 자격</H>
+      <p>오피스텔은 아파트 청약에서 주택으로 세지 않습니다. 새 집에 살면서 <strong>무주택 청약 자격</strong>을 지킬 수 있습니다.</p>
+      <p className="ppl-src">세금(취득세·양도세 등)에서는 쓰임에 따라 주택 수에 들어갈 수 있습니다. 상담 때 확인해 드립니다.</p>
+      <H n={5} k={3}>단지 안 커뮤니티</H>
+      <Tiles items={['피트니스', '스크린골프룸', '라운지카페', '실내놀이터', '개인오피스', '중앙 정원']} />
+    </>
+  );
+}
+
+/* ───── 06 어르신·가족 ───── */
+function Article6() {
+  return (
+    <>
+      <Head n={6} kick="06 · 어르신·가족" title={<>종합병원 바로 옆<br />새 집</>}
+        lead={<>병원에 자주 가는 어르신과 가족에게는 {nw('병원과의 거리')}가 곧 생활의 편안함입니다. 단지 바로 옆이 수원덕산병원입니다.</>} />
+      <H n={6} k={0} small>한눈에 보기</H>
+      <Facts rows={[
+        ['병원', '수원덕산병원 · 단지 바로 옆'],
+        ['응급', '지역응급의료센터'],
+        ['집', '엘리베이터가 있는 새 건물 · 중앙 정원'],
+        ['1층', '죽집 · 칼국수 · 카페'],
+      ]} />
+      <H n={6} k={1}>병원이 가까운 집</H>
+      <p>진료, 검사, 응급 상황. 병원이 가까우면 가족 모두 <strong>마음이 놓입니다.</strong></p>
+      <Photo tall src="/photos/officetel/in-garden.jpg" alt="세대 창밖으로 보이는 중앙 정원" pos="50% 60%" cap="세대 창밖 중앙 정원 (실제 촬영)" />
+      <H n={6} k={2}>내려가면 있는 생활</H>
+      <p>1층에 본죽, 장호덕 칼국수·손만두, 우지커피, 메가커피가 있습니다. 멀리 나가지 않아도 한 끼와 차 한 잔이 해결됩니다.</p>
+    </>
+  );
+}
+
+const CSS = `
+.ppl{background:#fff;color:#1C1C1E;scroll-margin-top:72px}
+.ppl button{font:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;color:inherit;text-align:left}
+.ppl-in{max-width:1280px;margin:0 auto;padding:96px 40px 110px}
+.ppl-eb{margin:0;font-size:12px;font-weight:700;letter-spacing:3px;color:#71717A}
+.ppl-h2{margin:12px 0 0;font-size:36px;font-weight:800;letter-spacing:-1.2px;line-height:1.2;color:#0F1C3A}
+.ppl-ln{display:block;width:56px;height:3px;background:#FF671D;margin-top:20px}
+.ppl-nw{white-space:nowrap}
+
+/* 사람 카드 6장 */
+.ppl-cards{list-style:none;margin:48px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.ppl-cards button{display:flex;width:100%;height:100%;flex-direction:column;border-radius:6px;overflow:hidden;background:#fff;border:1px solid #E7E5E4 !important;transition:transform .3s ease,box-shadow .3s ease}
+.ppl-pic{position:relative;height:210px;background:#F6F4EF;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.ppl-pic img{display:block;height:88%;width:auto;transform:translateY(2%)}
+.ppl-cap{display:block;padding:18px 20px 20px;border-top:1px solid #E7E5E4}
+.ppl-cap em{display:block;font-style:normal;font-size:12px;font-weight:700;letter-spacing:.5px;color:#D24A0E}
+.ppl-cap b{display:block;margin-top:6px;font-size:19px;font-weight:800;letter-spacing:-.6px;color:#0F1C3A}
+.ppl-cap span{display:block;margin-top:4px;font-size:15px;color:#52525B;letter-spacing:-.3px}
+.ppl-cards button:hover,.ppl-cards button:focus-visible{transform:translateY(-4px);box-shadow:0 16px 36px -14px rgba(15,28,58,.35)}
+.ppl-hint{margin:24px 0 0;text-align:center;font-size:14px;color:#71717A}
+.ppl-hint small{display:block;margin-top:4px;font-size:12px;color:#A1A1AA}
+
+/* 글 화면 */
+.ppl-pg{display:grid;grid-template-columns:260px minmax(0,1fr);gap:80px;padding-top:72px}
+.ppl-tabs{display:none}
+.ppl-toc{position:sticky;top:110px;align-self:start}
+.ppl-back{font-size:14px !important;font-weight:600;color:#71717A !important;margin-bottom:22px !important;display:block}
+.ppl-back:hover{color:#0F1C3A !important}
+.ppl-tt{margin:10px 0 0;font-size:24px;font-weight:800;letter-spacing:-.8px;color:#0F1C3A}
+.ppl-toc ol{list-style:none;margin:28px 0 0;padding:0;border-top:2px solid #0F1C3A}
+.ppl-toc ol>li{border-bottom:1px solid #E7E5E4}
+.ppl-toc ol>li>button{width:100%;display:flex;gap:14px;align-items:baseline;padding:16px 4px;font-size:16px;font-weight:600;color:#71717A}
+.ppl-toc ol>li>button em{font-style:normal;font-size:13px;font-weight:700;color:#A1A1AA;letter-spacing:.5px;width:20px}
+.ppl-toc ol>li.on>button{color:#0F1C3A;font-weight:800}
+.ppl-toc ol>li.on>button em{color:#D24A0E}
+.ppl-toc ol>li>button:hover{color:#0F1C3A}
+.ppl-toc ul{list-style:none;margin:-4px 0 0;padding:0 0 14px 38px}
+.ppl-toc ul button{display:block;padding:5px 0;font-size:14px;color:#71717A;line-height:1.45}
+.ppl-toc ul button.cur,.ppl-toc ul button:hover{color:#0F1C3A;font-weight:700}
+.ppl-call{margin-top:28px;display:block;padding:20px;background:#F6F4EF;border-radius:6px;text-decoration:none}
+.ppl-call small{display:block;font-size:13px;color:#52525B}
+.ppl-call b{display:block;margin-top:4px;font-size:22px;font-weight:800;color:#0F1C3A;letter-spacing:-.3px}
+
+.ppl-ar{max-width:720px;min-width:0}
+.ppl-kick{margin:0;font-size:14px;font-weight:700;color:#D24A0E;letter-spacing:.5px}
+.ppl-h1{margin:14px 0 0;font-size:44px;font-weight:800;line-height:1.22;letter-spacing:-1.8px;color:#0F1C3A}
+.ppl-ar .ppl-ln{margin-top:28px}
+.ppl-lead{margin:32px 0 0 !important;font-size:20px !important;line-height:1.75 !important;letter-spacing:-.4px;color:#27272A !important}
+.ppl-ar h3{margin:52px 0 0;font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1.35;color:#0F1C3A;scroll-margin-top:96px}
+.ppl-ar h3.ppl-sm{margin-top:48px;font-size:15px;font-weight:700;letter-spacing:0;color:#71717A}
+.ppl-ar p{margin:18px 0 0;font-size:17px;line-height:1.85;letter-spacing:-.3px;color:#3F3F46;word-break:keep-all}
+.ppl-ar p strong{color:#0F1C3A;font-weight:700}
+.ppl-ar p.ppl-src{margin-top:10px;font-size:12px;color:#A1A1AA;line-height:1.5}
+
+.ppl-ft{width:100%;margin-top:14px;border-collapse:collapse;border-top:2px solid #0F1C3A}
+.ppl-ft th,.ppl-ft td{text-align:left;vertical-align:top;border-bottom:1px solid #E7E5E4;padding:14px 18px;line-height:1.5}
+.ppl-ft th{width:120px;background:#F6F4EF;font-size:14px;font-weight:700;color:#0F1C3A;padding-top:15px;word-break:keep-all}
+.ppl-ft td{font-size:16px;font-weight:500}
+.ppl-ft td small{color:#71717A;font-size:14px;font-weight:400}
+
+.ppl-fig{margin:48px 0 0}
+.ppl-fig>div{border-radius:6px;overflow:hidden;aspect-ratio:16/9;background:#E7E5E4}
+.ppl-fig img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.9) contrast(1.03) sepia(.07)}
+.ppl-fig.tall>div{aspect-ratio:3/4;max-width:420px}
+.ppl-who{margin-top:30px;display:flex;align-items:flex-end;gap:16px}
+.ppl-who img{height:120px;width:auto}
+.ppl-who small{font-size:11px;color:#A1A1AA;padding-bottom:4px}
+.ppl-fig figcaption{margin-top:10px;font-size:13px;color:#A1A1AA}
+.ppl-svg>div{aspect-ratio:auto;background:#F6F4EF}
+.ppl-svg svg{display:block;width:100%;height:auto;max-height:560px}
+.ppl-svg .g{font-size:12px;fill:#71717A;font-weight:600}
+.ppl-svg .w{font-size:20px;fill:#fff;font-weight:800}
+.ppl-svg .ws{font-size:13px;fill:rgba(255,255,255,.8);font-weight:600}
+.ppl-svg .o{font-size:14px;fill:#D24A0E;font-weight:800}
+.ppl-svg .os{font-size:12px;fill:#52525B;font-weight:600}
+.ppl-map a{display:block;border-radius:6px;overflow:hidden}
+.ppl-map img{height:auto;filter:none}
+.ppl-mo{display:none}
+
+.ppl-tiles{list-style:none;margin:22px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#E7E5E4;border-top:2px solid #0F1C3A;border-bottom:1px solid #E7E5E4}
+.ppl-tiles.four{grid-template-columns:repeat(4,1fr);margin-top:14px}
+.ppl-tiles li{background:#fff;padding:22px 20px;display:flex;flex-direction:column;gap:8px}
+.ppl-tiles em{font-style:normal;font-size:12px;font-weight:700;color:#D24A0E;letter-spacing:.5px}
+.ppl-tiles b{font-size:18px;font-weight:800;color:#0F1C3A;letter-spacing:-.5px}
+
+.ppl-bus{list-style:none;margin:20px 0 0;padding:0;border-top:2px solid #0F1C3A}
+.ppl-bus li{display:flex;align-items:center;gap:22px;padding:18px 4px;border-bottom:1px solid #E7E5E4}
+.ppl-bus b{flex:none;width:76px;height:40px;border-radius:6px;background:#0F1C3A;color:#fff;font-size:19px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.ppl-bus strong{display:block;font-size:18px;font-weight:800;color:#0F1C3A;letter-spacing:-.4px}
+.ppl-bus span{display:block;margin-top:2px;font-size:14px;color:#71717A}
+
+.ppl-line{margin-top:24px;display:flex;align-items:center;padding:26px 24px;background:#F6F4EF;border-radius:6px}
+.ppl-line .st{font-size:16px;font-weight:800;color:#0F1C3A;padding:8px 14px;border:1.5px solid #0F1C3A;border-radius:999px;background:#fff;white-space:nowrap}
+.ppl-line .st.o{border-color:#FF671D;color:#D24A0E}
+.ppl-line .st.n{background:#0F1C3A;color:#fff;display:flex;flex-direction:column;align-items:center;border-radius:6px;padding:8px 16px}
+.ppl-line .st small{font-size:12px;font-weight:600;color:rgba(255,255,255,.75);margin-top:2px}
+.ppl-line+.ppl-line{margin-top:10px}
+.ppl-line i{flex:1;min-width:90px;font-style:normal;font-size:12px;color:#71717A;text-align:center;position:relative;padding:0 8px 10px}
+.ppl-line i:after{content:'';position:absolute;left:8px;right:8px;bottom:0;border-bottom:2px dashed #A1A1AA}
+
+.ppl-next{margin-top:80px !important;width:100%;display:flex !important;justify-content:space-between;align-items:center;padding:28px 0 !important;border-top:2px solid #0F1C3A !important;border-bottom:1px solid #E7E5E4 !important}
+.ppl-next small{display:block;font-size:13px;color:#71717A}
+.ppl-next b{display:block;margin-top:6px;font-size:22px;font-weight:800;color:#0F1C3A;letter-spacing:-.6px}
+.ppl-next>span{width:44px;height:44px;border-radius:50%;background:#1C1C1E;color:#fff;display:flex;align-items:center;justify-content:center;transition:transform .25s ease}
+.ppl-next:hover>span{transform:translateX(4px)}
+
+.ppl button:focus-visible,.ppl a:focus-visible{outline:3px solid #FF671D;outline-offset:3px;border-radius:4px}
+
+@media (max-width:1023px){
+  .ppl-cards{grid-template-columns:1fr 1fr}
+  .ppl-pic{height:180px}
+  .ppl-pg{display:block;padding:0 0 80px}
+  .ppl-toc{display:none}
+  .ppl-tabs{display:flex;position:sticky;top:65px;z-index:4;background:#fff;border-bottom:1px solid #E7E5E4;overflow-x:auto;scrollbar-width:none;padding:0 12px}
+  .ppl-tabs::-webkit-scrollbar{display:none}
+  .ppl-tabs button{flex:none;padding:15px 10px 13px;font-size:15px;font-weight:600;color:#71717A;white-space:nowrap;border-bottom:2px solid transparent}
+  .ppl-tabs button em{font-style:normal;font-size:12px;font-weight:700;margin-right:5px;color:#A1A1AA}
+  .ppl-tabs button.on{color:#0F1C3A;font-weight:800;border-color:#0F1C3A}
+  .ppl-tabs button.on em{color:#D24A0E}
+  .ppl-ar{padding:36px 20px 0;max-width:none}
+  .ppl-ar h3{scroll-margin-top:130px}
+}
+@media (max-width:767px){
+  .ppl-in.ppl-idx{padding:56px 20px 72px}
+  .ppl-h2{font-size:28px}
+  .ppl-cards{grid-template-columns:1fr 1fr;gap:10px;margin-top:32px}
+  .ppl-pic{height:150px}
+  .ppl-cap{padding:14px 14px 16px}
+  .ppl-cap b{font-size:16px}
+  .ppl-cap span{font-size:13px}
+  .ppl-fig.tall{margin-left:0;margin-right:0}
+  .ppl-fig.tall>div{border-radius:6px;aspect-ratio:3/4}
+  .ppl-who img{height:96px}
+  .ppl-hint{font-size:13px;margin-top:18px}
+  .ppl-h1{font-size:30px;letter-spacing:-1.2px}
+  .ppl-ar .ppl-ln{margin-top:22px}
+  .ppl-lead{font-size:17px !important;margin-top:24px !important}
+  .ppl-ar h3{margin-top:44px;font-size:21px}
+  .ppl-ar p{font-size:16px;line-height:1.8}
+  .ppl-ft th{width:100px;padding:13px 10px 12px;font-size:13px}
+  .ppl-ft td{padding:12px 14px;font-size:15px}
+  .ppl-fig{margin:36px -20px 0}
+  .ppl-fig>div{border-radius:0;aspect-ratio:4/3}
+  .ppl-fig figcaption{padding:0 20px}
+  .ppl-svg>div{aspect-ratio:auto}
+  .ppl-map a{border-radius:0}
+  .ppl-mo{display:inline}
+  .ppl-tiles{grid-template-columns:1fr 1fr}
+  .ppl-tiles.four{grid-template-columns:1fr 1fr}
+  .ppl-tiles li{padding:16px 14px}
+  .ppl-tiles b{font-size:16px}
+  .ppl-bus li{gap:14px}
+  .ppl-bus b{width:62px;height:36px;font-size:16px}
+  .ppl-bus strong{font-size:16px}
+  .ppl-line{flex-direction:column;align-items:flex-start;padding:22px 20px}
+  .ppl-line i{min-width:0;padding:10px 0 10px 18px;text-align:left}
+  .ppl-line i:after{left:6px;right:auto;top:0;bottom:0;border-bottom:0;border-left:2px dashed #A1A1AA}
+  .ppl-next{margin-top:64px !important}
+}
+@media (prefers-reduced-motion:reduce){.ppl-next>span,.ppl-cards button{transition:none}.ppl-cards button:hover{transform:none}}
+
+/* 한 화면 꽉 채우기: 섹션 높이를 화면 높이(헤더 제외)에 맞추고 내용은 세로 가운데 → 푸터는 항상 화면 아래 */
+.ppl:has(.ppl-idx){min-height:calc(100svh - 72px);display:flex;align-items:center}
+.ppl-idx{width:100%}
+/* 큰 화면(1600px 이상): 히어로와 같은 비율로 키움 */
+@media (min-width:1600px){.ppl-idx{zoom:1.12}}
+@media (min-width:1920px){.ppl-idx{zoom:1.3}}
+@media (min-width:2300px){.ppl-idx{zoom:1.45}}
+`;
+
+
+==================== [파일: src/sections/OfficetelOverview.tsx] 통째로 ====================
+
+/* ───────── 오피스텔 사업개요 (상가 사업개요와 같은 틀: 그림 하나 + 표 하나, 아래에 타입별 배치) ─────────
+   내용을 바꿀 때는 아래 IMAGE, ROWS, PLAN, TYPES만 고치면 됩니다.
+   이미지 파일은 public/photos/officetel/ 에 사용자가 직접 올립니다. */
+
+const IMAGE = { src: '/photos/officetel/aerial.jpg', alt: 'e편한세상 시티 고색 조감도', pos: '50% 50%' };
+
+// [항목, 값, 작은 글씨(선택), 둘째 줄(선택)]
+type Row = { label: string; value: string; note?: string; line2?: string };
+const ROWS: Row[] = [
+  { label: '사업명', value: 'e편한세상 시티 고색' },
+  { label: '대지위치', value: '경기도 수원시 권선구 고색동', line2: '894-125번지 외 6필지' },
+  { label: '건축규모', value: '지하 4층 ~ 지상 14층', note: '(3개 동)' },
+  { label: '공급규모', value: '오피스텔 430세대', note: '(전용 84㎡)', line2: '84A · 84B · 84C · 84D' },
+  { label: '커뮤니티', value: '피트니스 · 스크린골프룸', line2: '라운지카페 · 실내놀이터 · 개인오피스' },
+  { label: '기본 제공', value: '시스템에어컨 4대 · 김치냉장고' },
+  { label: '주차대수', value: '608대', note: '(근린생활시설 포함)' },
+  { label: '주변 개발', value: '탑동 이노베이션밸리', note: '(2029년 7월 준공 목표)' },
+  { label: '시공', value: 'DL이앤씨' },
+];
+
+// 단지 배치도 (타입별 위치)
+const PLAN = { src: '/photos/officetel/siteplan.jpg', alt: 'e편한세상 시티 고색 단지 배치도 · 타입별 위치' };
+
+// 타입별 전용면적·세대수 (배치도 색과 같은 색)
+const TYPES = [
+  { t: '84A', color: '#E09346', area: '84.63', py: '25.60', n: 302 },
+  { t: '84B', color: '#00B4BC', area: '84.51', py: '25.56', n: 89 },
+  { t: '84C', color: '#8676B0', area: '84.16', py: '25.45', n: 26 },
+  { t: '84D', color: '#EF5DA2', area: '84.52', py: '25.57', n: 13 },
+];
+const TOTAL = TYPES.reduce((s, x) => s + x.n, 0);
+
+export default function OfficetelOverview() {
+  return (
+    <section id="overview" className="pov scroll-mt-[72px]">
+      <style>{CSS}</style>
+      <div className="pov-in">
+        <div className="pov-hd">
+          <p className="pov-eb">PROJECT OVERVIEW</p>
+          <h2 className="pov-tt">사업개요</h2>
+          <span className="pov-ln" aria-hidden="true" />
+        </div>
+        <div className="pov-gr">
+          <figure className="pov-ph">
+            <div><img src={IMAGE.src} alt={IMAGE.alt} loading="lazy" style={{ objectPosition: IMAGE.pos }} /></div>
+            <figcaption>조감도(CG)로 실제와 다를 수 있습니다.</figcaption>
+          </figure>
+          <div className="pov-tb">
+            <table>
+              <tbody>
+                {ROWS.map((r) => (
+                  <tr key={r.label}>
+                    <th scope="row">{r.label}</th>
+                    <td>
+                      {r.value}
+                      {r.note && <small> {r.note}</small>}
+                      {r.line2 && <><br />{r.line2}</>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ── 타입별 배치 ── */}
+        <div className="pov-hd pov-hd2">
+          <p className="pov-eb">UNIT TYPE</p>
+          <h3 className="pov-st">타입별 배치</h3>
+        </div>
+        <div className="pov-gr">
+          <figure className="pov-ph pov-plan">
+            <a href={PLAN.src} target="_blank" rel="noopener noreferrer" aria-label="배치도 크게 보기">
+              <img src={PLAN.src} alt={PLAN.alt} loading="lazy" />
+            </a>
+            <figcaption>배치도는 이해를 돕기 위한 그림으로 실제와 다를 수 있습니다.<span className="pov-mo"> · 누르면 크게 보기</span></figcaption>
+          </figure>
+          <div className="pov-tb">
+            <table className="pov-ty">
+              <thead>
+                <tr><th scope="col">타입</th><th scope="col">전용면적</th><th scope="col">세대수</th></tr>
+              </thead>
+              <tbody>
+                {TYPES.map((x) => (
+                  <tr key={x.t}>
+                    <th scope="row"><i style={{ background: x.color }} aria-hidden="true" />{x.t}</th>
+                    <td>{x.area}㎡ <small>({x.py}평)</small></td>
+                    <td><b>{x.n}</b>세대</td>
+                  </tr>
+                ))}
+                <tr className="sum"><th scope="row">합계</th><td>전 세대 84㎡ · 방 3개</td><td><b>{TOTAL}</b>세대</td></tr>
+              </tbody>
+            </table>
+            <p className="pov-nt">배치도 색이 타입을 뜻합니다. 같은 84㎡라도 타입마다 방향과 구조가 달라요.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const CSS = `
+.pov{background:#fff;color:#1C1C1E}
+.pov-in{max-width:1280px;margin:0 auto;padding:96px 40px 110px}
+.pov-eb{margin:0;font-size:12px;font-weight:700;letter-spacing:3px;color:#71717A}
+.pov-tt{margin:12px 0 0;font-size:36px;font-weight:800;letter-spacing:-1.2px;line-height:1.2;color:#0F1C3A}
+.pov-ln{display:block;width:56px;height:3px;background:#FF671D;margin-top:20px}
+.pov-gr{margin-top:48px;display:grid;grid-template-columns:7fr 5fr;gap:48px;align-items:stretch}
+.pov-ph{margin:0;display:flex;flex-direction:column}
+.pov-ph>div{flex:1;min-height:420px;border-radius:6px;overflow:hidden;background:#E7E5E4}
+.pov-ph img{display:block;width:100%;height:100%;object-fit:cover;filter:saturate(.9) contrast(1.03) sepia(.07)}
+.pov-ph figcaption{margin-top:10px;font-size:12px;color:#A1A1AA}
+.pov table{width:100%;border-collapse:collapse;border-top:2px solid #0F1C3A}
+.pov th,.pov td{text-align:left;vertical-align:top;border-bottom:1px solid #E7E5E4;line-height:1.5}
+.pov th{width:132px;padding:19px 20px 17px;background:#F6F4EF;font-size:14px;font-weight:700;color:#0F1C3A;white-space:nowrap}
+.pov td{padding:17px 20px;font-size:16px;font-weight:500;letter-spacing:-.2px;word-break:keep-all}
+.pov td small{font-size:14px;font-weight:400;color:#71717A;white-space:nowrap}
+
+/* 타입별 배치 */
+.pov-hd2{margin-top:96px}
+.pov-st{margin:10px 0 0;font-size:26px;font-weight:800;letter-spacing:-1px;color:#0F1C3A}
+.pov-plan a{display:block;border-radius:6px;overflow:hidden;background:#1C1C1E}
+.pov-plan img{height:auto;filter:none}
+.pov-mo{display:none}
+.pov-tb{min-width:0}
+.pov-ty thead th{width:auto;padding:14px 16px;font-size:13px;color:#71717A;background:#fff;border-bottom:1px solid #D6D3D1}
+.pov-ty tbody th{width:96px;background:#fff;font-size:17px;font-weight:800;display:flex;align-items:center;gap:10px;border-bottom:0}
+.pov-ty tbody tr{border-bottom:1px solid #E7E5E4}
+.pov-ty tbody td{border-bottom:0}
+.pov-ty th i{width:12px;height:12px;border-radius:3px;flex:none}
+.pov-ty td b{font-size:20px;font-weight:800;color:#0F1C3A;margin-right:2px}
+.pov-ty tr.sum{background:#F6F4EF;border-bottom:2px solid #0F1C3A}
+.pov-ty tr.sum th{background:transparent;font-size:15px}
+.pov-ty tr.sum td{font-size:14px;color:#52525B}
+.pov-ty tr.sum td b{color:#D24A0E}
+.pov-nt{margin:16px 0 0;font-size:14px;line-height:1.6;color:#71717A;word-break:keep-all}
+
+@media (max-width:1023px){
+  .pov-gr{grid-template-columns:1fr;gap:32px}
+  .pov-ph>div{min-height:0;aspect-ratio:16/10}
+}
+@media (max-width:767px){
+  .pov-in{padding:56px 0 72px}
+  .pov-hd,.pov-tb,.pov-ph figcaption{padding:0 20px}
+  .pov-tt{font-size:28px}
+  .pov-gr{margin-top:32px;gap:28px}
+  .pov-ph>div{aspect-ratio:4/3;border-radius:0}
+  .pov th{width:88px;padding:15px 12px 14px;font-size:13px;white-space:normal}
+  .pov td{padding:14px;font-size:15px}
+  .pov td small{font-size:13px}
+  .pov-hd2{margin-top:64px}
+  .pov-st{font-size:22px}
+  .pov-plan a{border-radius:0}
+  .pov-mo{display:inline}
+  .pov-ty thead th{padding:12px 10px}
+  .pov-ty tbody th{width:74px;font-size:15px;gap:8px;padding:15px 10px}
+  .pov-ty tbody td{padding:14px 10px}
+  .pov-ty td b{font-size:17px}
+}
+
+.pov{min-height:calc(100svh - 72px);display:flex;align-items:center}
+.pov-in{width:100%}
+@media (min-width:1600px){.pov-in{zoom:1.12}}
+@media (min-width:1920px){.pov-in{zoom:1.3}}
+@media (min-width:2300px){.pov-in{zoom:1.45}}
+`;
+
+
+==================== [파일: src/sections/OfficetelHero.tsx] 통째로 ====================
+
+import { Link } from '../lib/router';
+
+/* ───────── 오피스텔 히어로 (/officetel 맨 위) ─────────
+   조감도 한 장 위에 "누가 사나요" 6명을 그 사람이 있을 법한 자리에 핀으로 세웁니다.
+   핀을 누르면 /officetel/people 의 해당 글로 이동합니다.
+   바꿀 때는 아래 AERIAL, PINS 만 고치면 됩니다. (x, y = 조감도 그림 기준 %, 핀 끝이 닿는 지점)
+   이미지 파일은 public/photos/officetel/ 에 사용자가 직접 올립니다. */
+
+// 조감도 (가로:세로 = w:h)
+const AERIAL = { src: '/photos/officetel/aerial-illu.jpg', w: 1376, h: 768, alt: 'e편한세상 시티 고색 조감도 일러스트' };
+
+// 6명 핀 (n = 누가 사나요 글 번호)
+const PINS = [
+  { n: 2, label: '의료진', line: '교대근무 끝나고 바로 집', x: 23, y: 88 },
+  { n: 6, label: '어르신·가족', line: '종합병원 바로 옆 새 집', x: 39, y: 80 },
+  { n: 5, label: '신혼부부', line: '아파트처럼 사는 84㎡ 3룸', x: 29.5, y: 70 },
+  { n: 3, label: '통근자', line: '상가 앞에서 수원역 가는 버스', x: 47.5, y: 91 },
+  { n: 1, label: '직장인', line: '같은 고색동, 출근길이 짧은 3룸', x: 60, y: 74 },
+  { n: 4, label: '화성 출근', line: '수원에 살면서 화성 출퇴근', x: 74, y: 66 },
+];
+
+export default function OfficetelHero() {
+  const d = (s: number) => `${(0.1 + s).toFixed(2)}s`;
+
+  return (
+    <section id="officetel-hero" className="oh-hero relative overflow-clip">
+      <style>{CSS}</style>
+
+      {/* ── 조감도 + 6명 핀 (PC: 화면 가득 / 휴대폰: 글 아래) ── */}
+      <div className="oh-map" aria-label="조감도 위 6가지 수요">
+        <div className="oh-stage" style={{ aspectRatio: `${AERIAL.w} / ${AERIAL.h}` }}>
+          <img src={AERIAL.src} alt={AERIAL.alt} fetchPriority="high" />
+        </div>
+        {/* 핀은 그림과 같은 크기의 윗층에 (PC에서 글 쪽 흐림 효과 위로 보이도록) */}
+        <div className="oh-stage oh-pins" style={{ aspectRatio: `${AERIAL.w} / ${AERIAL.h}` }}>
+          {PINS.map((p, i) => (
+            <Link
+              key={p.n}
+              to={`/officetel/people#people-${p.n}`}
+              className="oh-pin"
+              style={{ left: `${p.x}%`, top: `${p.y}%`, animationDelay: `${0.7 + i * 0.16}s` }}
+              aria-label={`${p.label}: ${p.line} (자세히 보기)`}
+            >
+              <span className="oh-pin-in" style={{ animationDelay: `${i * 0.4}s` }}>
+                <span className="oh-face"><img src={`/photos/officetel/people/a${p.n}.webp`} alt="" /></span>
+                <span className="oh-tag">{p.label}</span>
+                <span className="oh-tip">{p.line}</span>
+              </span>
+              <i className="oh-dot" aria-hidden="true" />
+            </Link>
+          ))}
+        </div>
+        <Link to="/officetel/overview" className="oh-news"><i aria-hidden="true" />2029년 7월 탑동 이노베이션밸리 준공 목표</Link>
+        <p className="oh-cap">일러스트 · 실제와 다를 수 있습니다</p>
+      </div>
+
+      {/* ── 글 ── */}
+      <div className="oh-wrap mx-auto max-w-[1280px] px-5 sm:px-10">
+        <div className="oh-text relative z-[2] flex max-w-[560px] flex-col">
+          <div className="relative">
+            <p className="oh-rise oh-el m-0" style={{ animationDelay: d(0.07) }}>
+              Enjoy your <b>E</b>-Life
+            </p>
+            <h1 className="oh-title oh-rise mt-[10px] mb-0 text-[#0F1C3A]" style={{ animationDelay: d(0.14) }}>
+              <span className="block whitespace-nowrap font-extrabold"><b className="font-extrabold text-[#FF671D]">e편한세상</b> 시티 고색</span>
+            </h1>
+            <p className="oh-rise oh-lead mt-[22px] mb-0" style={{ animationDelay: d(0.21) }}>
+              <strong>출근이 가까운 3룸,</strong>
+              <br />
+              <span>아파트처럼 사는 84타입 오피스텔</span>
+            </p>
+
+            <div className="oh-rise oh-act oh-act-d mt-[26px] flex flex-col items-start gap-4" style={{ animationDelay: d(0.28) }}>
+              <a href="tel:031-293-1073" className="oh-tel" aria-label="오피스텔 분양 문의 전화 031)293-1073">
+                <span className="flex flex-col text-[11px] font-bold leading-[1.25] text-[#3F3F46]"><span>분양</span><span>문의</span></span>
+                <span className="oh-num">031)293-1073</span>
+              </a>
+              <Link to="/officetel/units" className="oh-cta">
+                <span className="text-[#D24A0E]">84타입 3룸 둘러보기</span>
+                <span className="oh-ic" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                </span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 휴대폰: 조감도 아래에 전화·버튼 (PC에서는 숨김) */}
+      <div className="oh-act-m px-5 sm:px-10">
+        <div className="oh-act flex flex-col items-start gap-4">
+          <a href="tel:031-293-1073" className="oh-tel" aria-label="오피스텔 분양 문의 전화 031)293-1073">
+            <span className="flex flex-col text-[11px] font-bold leading-[1.25] text-[#3F3F46]"><span>분양</span><span>문의</span></span>
+            <span className="oh-num">031)293-1073</span>
+          </a>
+          <Link to="/officetel/units" className="oh-cta">
+            <span className="text-[#D24A0E]">84타입 3룸 둘러보기</span>
+            <span className="oh-ic" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            </span>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ───────── 스타일 (글 부분은 상가 히어로와 같은 값) ───────── */
+const CSS = `
+.oh-hero{background:#F6F4EF;min-height:640px}
+.oh-el{font-family:'Jost',sans-serif;font-style:italic;font-weight:300;font-size:clamp(22px,2.6vw,30px);line-height:1.1;letter-spacing:.3px;color:#3F3F46}
+.oh-el b{font-weight:400;color:#FF671D}
+.oh-title{font-family:'Pretendard Variable',Pretendard,sans-serif !important;font-size:clamp(38px,9.5vw,58px);line-height:1.1;letter-spacing:-.04em}
+.oh-lead{font-size:clamp(18px,1.8vw,22px);line-height:1.4;letter-spacing:-.6px;color:#1C1C1E}
+.oh-lead strong{font-weight:800;color:#0F1C3A}
+.oh-lead span{font-weight:400}
+.oh-rise{animation:ohRise .8s cubic-bezier(.2,.7,.2,1) both}
+@keyframes ohRise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+.oh-tel{display:inline-flex;align-items:center;gap:12px;color:#1C1C1E;text-decoration:none}
+.oh-num{font-size:26px;font-weight:700;letter-spacing:-.5px;line-height:1;transition:color .2s ease}
+.oh-tel:hover .oh-num{color:#D24A0E}
+.oh-cta{display:inline-flex;align-items:center;gap:12px;text-decoration:none;font-size:17px;font-weight:800}
+.oh-ic{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#1C1C1E;color:#fff;transition:transform .25s ease}
+.oh-cta:hover .oh-ic{transform:rotate(-45deg)}
+
+/* 조감도 */
+/* 그림은 칸을 꽉 채우고(cover) 핀은 같은 크기의 윗층에: 칸 비율이 달라도 핀 위치가 그림과 맞음 */
+.oh-map{position:relative;overflow:hidden;container-type:size;aspect-ratio:6/5}
+.oh-stage{position:absolute;left:50%;top:50%;width:max(100cqw,calc(100cqh * 1376 / 768));height:max(100cqh,calc(100cqw * 768 / 1376));transform:translate(-50%,-50%)}
+.oh-pins{z-index:2}
+.oh-stage>img{display:block;width:100%;height:100%;object-fit:cover;filter:saturate(.92) contrast(1.02)}
+.oh-news{position:absolute;right:12px;top:12px;z-index:3;display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.92);font-size:11px;font-weight:700;color:#0F1C3A;text-decoration:none;box-shadow:0 6px 16px -8px rgba(15,28,58,.4)}
+.oh-news i{width:7px;height:7px;border-radius:50%;background:#FF671D}
+.oh-cap{position:absolute;right:12px;bottom:10px;z-index:3;margin:0;padding:4px 9px;border-radius:6px;background:rgba(255,255,255,.88);font-size:11px;font-weight:700;color:#52525B}
+
+/* 핀 */
+.oh-pin{position:absolute;z-index:2;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;text-decoration:none;opacity:0;animation:ohPop .6s cubic-bezier(.2,1.4,.4,1) forwards}
+@keyframes ohPop{from{opacity:0;transform:translate(-50%,-80%) scale(.6)}to{opacity:1;transform:translate(-50%,-100%) scale(1)}}
+.oh-pin-in{position:relative;display:flex;flex-direction:column;align-items:center;animation:ohBob 3.2s ease-in-out infinite}
+@keyframes ohBob{50%{transform:translateY(-4px)}}
+.oh-face{display:block;width:64px;height:64px;border-radius:50%;padding:3px;background:#fff;box-shadow:0 10px 22px -8px rgba(15,28,58,.55);transition:transform .25s ease}
+.oh-face img{display:block;width:100%;height:100%;border-radius:50%}
+.oh-face:after{content:'';position:absolute;left:50%;top:64px;margin-left:-7px;border:7px solid transparent;border-top-color:#fff;border-bottom:0}
+.oh-tag{margin-top:9px;padding:3px 9px;border-radius:999px;background:#0F1C3A;color:#fff;font-size:12px;font-weight:700;white-space:nowrap;letter-spacing:-.2px}
+.oh-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translate(-50%,6px);padding:7px 12px;border-radius:12px;background:#fff;color:#0F1C3A;font-size:13px;font-weight:700;white-space:nowrap;box-shadow:0 10px 24px -10px rgba(15,28,58,.45);opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease}
+.oh-dot{display:block;width:10px;height:10px;margin-top:4px;border-radius:50%;background:#FF671D;box-shadow:0 0 0 3px rgba(255,255,255,.9);position:relative}
+.oh-dot:after{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid #FF671D;opacity:0;animation:ohRing 2.4s ease-out infinite}
+@keyframes ohRing{0%{opacity:.8;transform:scale(.5)}100%{opacity:0;transform:scale(1.8)}}
+.oh-pin:hover .oh-face,.oh-pin:focus-visible .oh-face{transform:scale(1.08)}
+.oh-pin:hover .oh-tip,.oh-pin:focus-visible .oh-tip{opacity:1;transform:translate(-50%,0)}
+.oh-pin:hover{z-index:4}
+
+/* 휴대폰·태블릿: 글 → 조감도 */
+.oh-hero{display:flex;flex-direction:column}
+.oh-wrap{order:1}.oh-map{order:2}.oh-act-m{order:3;padding-top:28px;padding-bottom:36px}
+.oh-text{padding-top:clamp(48px,8vh,72px);padding-bottom:28px}
+.oh-act-d{display:none !important}
+@media (min-width:640px) and (max-width:1023px){.oh-map{aspect-ratio:16/10}}
+@media (max-width:1023px){
+  .oh-hero{padding-bottom:0}
+  .oh-face{width:40px;height:40px;padding:2px}
+  .oh-face:after{top:40px;margin-left:-5px;border-width:5px}
+  .oh-tag{margin-top:6px;padding:2px 7px;font-size:10px}
+  .oh-dot{width:8px;height:8px}
+  .oh-tip{display:none}
+}
+
+/* PC: 조감도가 화면 가득, 글은 왼쪽 위 */
+@media (min-width:1024px){
+  .oh-act-m{display:none}
+  .oh-act-d{display:flex !important}
+  .oh-hero{display:block;height:max(760px,calc(100svh - 72px))}
+  .oh-map{position:absolute;inset:0;aspect-ratio:auto}
+  .oh-stage{transform:translate(-50%,-46%)}
+  .oh-map:before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(90deg,rgba(246,244,239,.8) 0,rgba(246,244,239,.55) 24%,rgba(246,244,239,0) 46%),linear-gradient(180deg,rgba(246,244,239,.55) 0,rgba(246,244,239,0) 30%)}
+  .oh-pins{z-index:2}
+  .oh-wrap{position:relative;z-index:3;height:100%;pointer-events:none}
+  .oh-text{padding-top:clamp(80px,15vh,150px);padding-bottom:0;pointer-events:auto}
+  .oh-cap{right:20px;bottom:18px;font-size:12px}
+  .oh-news{right:24px;top:24px;font-size:13px;padding:8px 14px}
+}
+@media (prefers-reduced-motion:reduce){.oh-rise,.oh-pin,.oh-pin-in,.oh-dot:after{animation:none !important;opacity:1}}
+
+/* 큰 화면(1600px 이상): 상가 히어로와 같은 비율로 키움 */
+@media (min-width:1600px){.oh-hero{zoom:1.12;height:max(760px,calc((100svh - 72px) / 1.12))}}
+@media (min-width:1920px){.oh-hero{zoom:1.3;height:max(760px,calc((100svh - 72px) / 1.3))}}
+@media (min-width:2300px){.oh-hero{zoom:1.6;height:max(760px,calc((100svh - 72px) / 1.6))}}
+`;
+
+
+==================== [파일: src/sections/OfficetelQuick.tsx] 통째로 ====================
+
+import { Link } from '../lib/router';
+
+/* ───────── 오피스텔 바로가기 3칸 (히어로 바로 아래) ─────────
+   바꿀 때는 아래 ITEMS 만 고치면 됩니다. */
+const ITEMS = [
+  { no: '01', to: '/officetel/units', title: '세대 안내', line: '아파트처럼 사는 84㎡ 3룸' },
+  { no: '02', to: '/officetel/people', title: '누가 사나요', line: '나에게 맞는 이유 6가지' },
+  { no: '03', to: '/officetel/overview', title: '사업개요', line: '한눈에 보는 단지 정보' },
+];
+
+export default function OfficetelQuick() {
+  return (
+    <section className="oq" aria-label="오피스텔 바로가기">
+      <style>{CSS}</style>
+      <ul className="oq-in">
+        {ITEMS.map((it) => (
+          <li key={it.to}>
+            <Link to={it.to} className="oq-card">
+              <span className="oq-no">{it.no}</span>
+              <span className="oq-tx">
+                <strong>{it.title}</strong>
+                <span>{it.line}</span>
+              </span>
+              <span className="oq-ic" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+const CSS = `
+.oq{background:#F6F4EF;padding:40px 20px 48px}
+.oq-in{list-style:none;margin:0 auto;padding:0;max-width:1280px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.oq-in li{margin:0}
+.oq-card{display:flex;align-items:center;gap:18px;padding:24px 26px;background:#fff;border:1px solid #E7E5E4;border-radius:6px;text-decoration:none;color:#1C1C1E;transition:border-color .2s ease,transform .2s ease}
+.oq-card:hover{border-color:#FF671D;transform:translateY(-2px)}
+.oq-no{font-size:12px;font-weight:700;letter-spacing:2px;color:#D24A0E}
+.oq-tx{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.oq-tx strong{font-size:20px;font-weight:800;letter-spacing:-.8px;color:#0F1C3A}
+.oq-tx span{font-size:14px;color:#52525B;letter-spacing:-.3px;word-break:keep-all}
+.oq-ic{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#1C1C1E;color:#fff;flex:none;transition:transform .25s ease}
+.oq-card:hover .oq-ic{transform:rotate(-45deg)}
+@media (min-width:640px){.oq{padding:48px 40px 56px}}
+@media (max-width:1023px){.oq{padding-top:4px}}
+@media (max-width:899px){.oq-in{grid-template-columns:1fr;gap:10px}.oq-card{padding:18px 20px}}
+`;
+
+
+==================== [파일: src/App.tsx] 통째로 ====================
+
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useState, useEffect } from 'react';
+import Navbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
+import Chooser from './sections/Chooser';
+import StoreHero from './sections/StoreHero';
+import StoreCalendar from './sections/StoreCalendar';
+import StoreUnits from './sections/StoreUnits';
+import StoreOverview from './sections/StoreOverview';
+import StoreLocation from './sections/StoreLocation';
+import OfficetelOverview from './sections/OfficetelOverview';
+import OfficetelPeople from './sections/OfficetelPeople';
+import OfficetelUnits from './sections/OfficetelUnits';
+import OfficetelHero from './sections/OfficetelHero';
+import OfficetelQuick from './sections/OfficetelQuick';
+import PrivacyPolicy from './sections/PrivacyPolicy';
+import ContactForm from './sections/ContactForm';
+import QuickMenu from './components/ui/QuickMenu';
+import SideSwitch from './components/ui/SideSwitch';
+import AdminDashboard from './components/ui/AdminDashboard';
+import StickyBottomForm from './components/ui/StickyBottomForm';
+import { navigate, normalizePath, useIsChooserView, usePath } from './lib/router';
+
+const ROUTE_META: Record<string, { title: string; canonical: string }> = {
+  '/': {
+    title: 'e편한세상시티고색 | 덕산병원 앞 1층 상가 분양·임대',
+    canonical: 'https://elife-gosaek.com/',
+  },
+  '/store': {
+    title: 'e편한세상 시티 고색 근린생활시설 | 덕산병원 앞 1층 상가 분양·임대',
+    canonical: 'https://elife-gosaek.com/store',
+  },
+  '/store/location': {
+    title: '입지분석 | e편한세상 시티 고색 1층 상가',
+    canonical: 'https://elife-gosaek.com/store/location',
+  },
+  '/store/overview': {
+    title: '사업개요 | e편한세상 시티 고색',
+    canonical: 'https://elife-gosaek.com/store/overview',
+  },
+  '/officetel': {
+    title: '84타입 3룸 오피스텔 | e편한세상 시티 고색',
+    canonical: 'https://elife-gosaek.com/officetel',
+  },
+  '/officetel/units': {
+    title: '세대 안내 | 84㎡ 3룸 오피스텔 · e편한세상 시티 고색',
+    canonical: 'https://elife-gosaek.com/officetel/units',
+  },
+  '/officetel/overview': {
+    title: '사업개요 | e편한세상 시티 고색 오피스텔',
+    canonical: 'https://elife-gosaek.com/officetel/overview',
+  },
+  '/officetel/people': {
+    title: '누가 사나요 | e편한세상 시티 고색 오피스텔',
+    canonical: 'https://elife-gosaek.com/officetel/people',
+  },
+  '/privacy': {
+    title: '개인정보처리방침 | e편한세상 시티 고색',
+    canonical: 'https://elife-gosaek.com/privacy',
+  },
+};
+
+const LEGACY_HASH_ROUTES: Record<string, string> = {
+  '#md': '/store#units',
+  '#location': '/store/location',
+  '#overview': '/store/overview',
+  '#officetel': '/officetel',
+  '#contact': '/store#contact',
+};
+
+export default function App() {
+  const path = usePath();
+  const isChooserView = useIsChooserView();
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+
+  // Redirect legacy hash URLs on "/" and fallback unknown non-root paths to "/store"
+  useEffect(() => {
+    const checkLegacyHash = () => {
+      if (isChooserView) return false;
+      const normalized = normalizePath(window.location.pathname || '/');
+      const currentHash = window.location.hash;
+      if (normalized === '/' && currentHash && LEGACY_HASH_ROUTES[currentHash]) {
+        navigate(LEGACY_HASH_ROUTES[currentHash], { replace: true });
+        return true;
+      }
+      return false;
+    };
+
+    if (!checkLegacyHash() && !isChooserView && path !== '/' && !ROUTE_META[path]) {
+      navigate('/store', { replace: true });
+    }
+
+    window.addEventListener('hashchange', checkLegacyHash);
+    return () => {
+      window.removeEventListener('hashchange', checkLegacyHash);
+    };
+  }, [path, isChooserView]);
+
+  // Update document.title and canonical link per route
+  useEffect(() => {
+    const meta = isChooserView ? ROUTE_META['/'] : (ROUTE_META[path] || ROUTE_META['/store']);
+    document.title = meta.title;
+    const canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (canonicalEl) {
+      canonicalEl.setAttribute('href', meta.canonical);
+    }
+  }, [path, isChooserView]);
+
+  // Scroll to initial hash on direct page load (e.g., /store#md or /officetel#contact)
+  useEffect(() => {
+    if (isChooserView) return;
+    const hash = window.location.hash.replace(/^#/, '');
+    if (!hash || LEGACY_HASH_ROUTES[`#${hash}`]) return;
+    const timer = window.setTimeout(() => {
+      const el = document.getElementById(hash);
+      if (el) {
+        const navEl = document.querySelector('nav');
+        const headerHeight = navEl ? navEl.getBoundingClientRect().height : 76;
+        const y = el.getBoundingClientRect().top + window.scrollY - headerHeight;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      }
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, [path, isChooserView]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Robust detection for modifier + Shift + (A, K, Q, or Z)
+      const keyUpper = e.key.toUpperCase();
+      const isTargetKey = 
+        keyUpper === 'A' || 
+        keyUpper === 'K' || 
+        keyUpper === 'Q' || 
+        keyUpper === 'Z' || 
+        e.key === 'ㅁ' || // Korean IME 'A' mapping
+        e.key === 'ㅏ' || // Korean IME 'K' mapping
+        e.key === 'ㅂ' || // Korean IME 'Q' mapping
+        e.key === 'ㅋ' || // Korean IME 'Z' mapping
+        e.keyCode === 65 || // A
+        e.keyCode === 75 || // K
+        e.keyCode === 81 || // Q
+        e.keyCode === 90;   // Z
+        
+      const hasModifiers = e.ctrlKey || e.altKey || e.metaKey;
+      
+      if (hasModifiers && e.shiftKey && isTargetKey) {
+        // Prevent action on mobile screens
+        if (window.innerWidth < 1024) {
+          return;
+        }
+        // Prevent action when user is typing inside an input/textarea
+        const activeEl = document.activeElement;
+        if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+          return;
+        }
+        e.preventDefault();
+        setIsAdminOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  const renderPage = () => {
+    if (isChooserView || path === '/') {
+      return (
+        <div className="pt-[65px] md:pt-[72px]">
+          <Chooser />
+        </div>
+      );
+    }
+
+    if (path === '/store/location') {
+      return (
+        <div className="pt-[72px] md:pt-[76px]">
+          <StoreLocation />
+        </div>
+      );
+    }
+
+    if (path === '/store/overview') {
+      return (
+        <div className="pt-[72px] md:pt-[76px]">
+          <StoreOverview />
+        </div>
+      );
+    }
+
+    if (path === '/officetel/units') {
+      return (
+        <div className="pt-[72px] md:pt-[76px]">
+          <OfficetelUnits />
+        </div>
+      );
+    }
+
+    if (path === '/officetel/overview') {
+      return (
+        <div className="pt-[72px] md:pt-[76px]">
+          <OfficetelOverview />
+        </div>
+      );
+    }
+
+    if (path === '/officetel/people') {
+      return (
+        <div className="pt-[72px] md:pt-[76px]">
+          <OfficetelPeople />
+        </div>
+      );
+    }
+
+    if (path === '/officetel') {
+      return (
+        <div className="pt-[65px] md:pt-[72px]">
+          <OfficetelHero />
+          <OfficetelQuick />
+          <div className="h-2.5 md:h-px bg-[#ECEFF1] md:bg-gray-200 border-t border-b border-gray-200/50 md:border-b-0 w-full" />
+          <ContactForm />
+        </div>
+      );
+    }
+
+    if (path === '/privacy') {
+      return (
+        <div className="pt-[65px] md:pt-[72px]">
+          <PrivacyPolicy />
+        </div>
+      );
+    }
+
+    // Default "/store" (and fallback for unknown routes)
+    return (
+      <div className="pt-[65px] md:pt-[72px]">
+        <StoreHero />
+        <StoreCalendar />
+        <div className="bg-white">
+          <StoreUnits />
+        </div>
+        <div className="h-2.5 md:h-px bg-[#ECEFF1] md:bg-gray-200 border-t border-b border-gray-200/50 md:border-b-0 w-full" />
+        <ContactForm />
+      </div>
+    );
+  };
+
+  const isHome = isChooserView || path === '/';
+  const isPrivacy = !isHome && path === '/privacy';
+
+  return (
+    <div className="min-h-screen bg-[#F5F5F0] font-sans text-gray-900 overflow-x-clip pb-0">
+      <Navbar />
+      
+      <main className="bg-[#F5F5F0]">
+        {renderPage()}
+      </main>
+
+      <Footer onAdminOpen={() => {
+        if (window.innerWidth >= 1024) {
+          setIsAdminOpen(true);
+        }
+      }} />
+      {!isHome && !isPrivacy && (
+        path.startsWith('/officetel') ? (
+          <SideSwitch to="/store" label="상가" side="left" onNavigate={navigate} />
+        ) : (
+          <SideSwitch to="/officetel" label="오피스텔" side="right" onNavigate={navigate} />
+        )
+      )}
+      {isHome && <QuickMenu />}
+      {!isPrivacy && <StickyBottomForm />}
+
+      <AdminDashboard isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
+    </div>
+  );
+}
+
+
+==================== [파일: src/components/layout/Navbar.tsx] 통째로 ====================
+
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Menu, X, ChevronRight, PenLine } from 'lucide-react';
+import { cn } from '@/src/lib/utils';
+import { PROJECT_INFO } from '../../constants';
+import { Link, useIsChooserView, usePath } from '../../lib/router';
+
+export default function Navbar() {
+  const path = usePath();
+  const isChooserView = useIsChooserView();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('');
+
+  const isHome = isChooserView || path === '/';
+  const isOfficetel = !isHome && path.startsWith('/officetel');
+  const isStoreHome = !isHome && path === '/store';
+
+  const logoTo = isOfficetel ? '/officetel' : isHome ? '/' : '/store';
+  const logoLabel = isOfficetel ? '고색 오피스텔' : isHome ? '고색' : '고색 상가';
+  const contactHref = isOfficetel ? '/officetel#contact' : '/store#contact';
+
+  const navItems = isHome
+    ? []
+    : isOfficetel
+      ? [
+          { name: '세대 안내', to: '/officetel/units', matchPath: '/officetel/units', hashId: '#units' },
+          { name: '누가 사나요', to: '/officetel/people', matchPath: '/officetel/people', hashId: '#people' },
+          { name: '사업개요', to: '/officetel/overview', matchPath: '/officetel/overview', hashId: '#overview' },
+        ]
+      : [
+          { name: '사업개요', to: '/store/overview', matchPath: '/store/overview', hashId: '#overview' },
+          { name: '입지분석', to: '/store/location', matchPath: '/store/location', hashId: '#location' },
+        ];
+
+  // Keep mobile menu closed on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [path]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll);
+
+    if (!isStoreHome) {
+      setActiveSection('');
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+      };
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(`#${entry.target.id}`);
+          }
+        });
+      },
+      { rootMargin: '-40% 0px -40% 0px' }
+    );
+
+    ['overview', 'location', 'md', 'officetel', 'contact'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      observer.disconnect();
+    };
+  }, [isStoreHome]);
+
+  const showSolidNav = true;
+
+  return (
+    <nav
+      className={cn(
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4',
+        showSolidNav ? 'bg-white/95 backdrop-blur-md shadow-md border-b border-gray-100' : 'bg-transparent text-white'
+      )}
+    >
+      <div className="max-w-7xl mx-auto flex justify-between items-center">
+        <Link to={logoTo} className="flex items-center gap-2">
+          <span className={cn("text-2xl font-black tracking-tight", showSolidNav ? "text-primary" : "text-white")}>
+            e편한세상<span className="text-accent font-medium ml-1 text-lg">CITY</span>
+          </span>
+          <span className={cn("text-sm font-medium border-l pl-2 ml-2", showSolidNav ? "border-gray-200 text-gray-600" : "border-white/30 text-white/80")}>
+            {logoLabel}
+          </span>
+        </Link>
+
+        {/* Desktop Right Utility: Menu (상가·오피스텔 같은 자리) + Phone + Consultation Link */}
+        <div className="hidden md:flex items-center gap-5 shrink-0">
+          {navItems.length > 0 && (
+            <div className="flex items-center gap-8">
+              {navItems.map((item) => {
+                const isActive = isStoreHome
+                  ? activeSection === item.hashId
+                  : path === item.matchPath;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.to}
+                    className={cn(
+                      'font-title text-sm font-semibold tracking-wide transition-colors hover:text-accent relative py-1 whitespace-nowrap',
+                      isActive 
+                        ? 'text-accent' 
+                        : (showSolidNav ? 'text-gray-800' : 'text-white')
+                    )}
+                  >
+                    {item.name}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeIndicator"
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"
+                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+          <div className={cn("h-7 w-px transition-colors", showSolidNav ? "bg-gray-200" : "bg-white/25")} />
+          <a
+            href="tel:031-293-1073"
+            className="flex flex-col leading-tight group whitespace-nowrap"
+          >
+            <span className={cn("text-[11px] font-bold tracking-tight transition-colors", showSolidNav ? "text-gray-500" : "text-white/75")}>
+              분양·임대 문의
+            </span>
+            <span className="font-title text-[20px] font-extrabold text-accent tracking-tight group-hover:opacity-90 transition-opacity">
+              {PROJECT_INFO.representativeNumber}
+            </span>
+          </a>
+          <div className={cn("h-7 w-px transition-colors", showSolidNav ? "bg-gray-200" : "bg-white/25")} />
+          <Link
+            to={contactHref}
+            className={cn(
+              "text-[14px] font-bold flex items-center gap-1.5 transition-colors hover:text-accent whitespace-nowrap",
+              showSolidNav ? "text-gray-800" : "text-white"
+            )}
+          >
+            <span>상담 신청</span>
+            <PenLine className="w-[15px] h-[15px]" />
+          </Link>
+        </div>
+
+        {/* Mobile Toggle */}
+        {navItems.length > 0 && (
+          <button
+            className="md:hidden"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? (
+              <X className={showSolidNav ? 'text-gray-900' : 'text-white'} />
+            ) : (
+              <Menu className={showSolidNav ? 'text-gray-900' : 'text-white'} />
+            )}
+          </button>
+        )}
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && navItems.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute top-full left-0 right-0 bg-white shadow-xl md:hidden border-t border-gray-100"
+          >
+            <div className="flex flex-col p-6 gap-6">
+              {navItems.map((item) => {
+                const isActive = isStoreHome
+                  ? activeSection === item.hashId
+                  : path === item.matchPath;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.to}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-between py-3.5 px-2 border-b border-gray-100 transition-all duration-200 group active:bg-gray-50/50 rounded-lg"
+                  >
+                    <span 
+                      className={cn(
+                        "text-[1.1rem] tracking-tight transition-colors duration-200",
+                        isActive 
+                          ? "text-accent font-extrabold" 
+                          : "text-[#0A1931] font-bold"
+                      )}
+                    >
+                      {item.name}
+                    </span>
+                    <ChevronRight 
+                      className={cn(
+                        "w-5 h-5 transition-transform duration-200 group-hover:translate-x-1",
+                        isActive 
+                          ? "text-accent opacity-100" 
+                          : "text-[#0A1931] opacity-40"
+                      )}
+                    />
+                  </Link>
+                );
+              })}
+              <a
+                href="tel:031-293-1073"
+                className="bg-primary text-white py-4 rounded-lg flex items-center justify-center gap-2 font-bold shadow-md active:scale-[0.98] transition-transform duration-100"
+              >
+                상담 전화하기
+              </a>
+              <div className="border-t border-gray-200 pt-4">
+                <Link
+                  to={isOfficetel ? '/store' : '/officetel'}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block py-1 px-2 text-[1.1rem] font-bold tracking-tight text-[#D24A0E] hover:opacity-80 transition-opacity"
+                >
+                  {isOfficetel ? '← 상가 보기' : '오피스텔 보기 →'}
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </nav>
+  );
+}

@@ -8,7 +8,7 @@ type Topic = { n: number; tab: string; name: string; fact: string; card: string;
 const TOPICS: Topic[] = [
   { n: 1, tab: '의료', name: '수원덕산병원', fact: '439병상 · 지역응급의료센터', card: '/photos/location/card-1.jpg', subs: ['한눈에 보기', '외래 환자·보호자 수요', '병원 종사자 수요', '24시간 운영 시설'] },
   { n: 2, tab: '교통', name: '광역 교통망', fact: '서울 직행버스 3개 노선 · 수원역', card: '/photos/location/card-2.jpg', subs: ['한눈에 보기', '서울 직행버스', '고색역 · 수원역', 'GTX-C'] },
-  { n: 3, tab: 'R&D', name: '탑동 이노베이션밸리', fact: '상가 앞 첨단업무용지 약 1만 8천 평', card: '/photos/location/card-3.jpg', subs: ['한눈에 보기', '들어오는 산업', '상가 앞 A2·A3 블록', '단지 안 상업시설 제한', '진행 단계'] },
+  { n: 3, tab: 'R&D', name: '탑동 이노베이션밸리', fact: '상가 앞 첨단업무용지 약 1만 8천 평', card: '/photos/location/card-3.jpg', subs: ['한눈에 보기', '들어오는 산업', '상가 앞 A2·A3 블록', '서수원 개발 위치', '단지 안 상업시설 제한', '진행 단계'] },
   { n: 4, tab: '행정', name: '서수원 행정타운', fact: '구청 · 경찰서 · 보건소 · 우체국', card: '/photos/location/card-4.jpg', subs: ['한눈에 보기', '위치', '평일 낮 수요'] },
 ];
 
@@ -287,10 +287,16 @@ function Article3() {
       <H n={3} k={2}>상가 앞 A2·A3 블록</H>
       <p>A2(38,856㎡, 11,754평)와 A3(23,327㎡, 7,056평)가 상가 전면 도로 건너편에 맞닿아 있습니다. 첨단업무용지는 첨단산업 기업이 입주하는 업무 부지입니다.</p>
       <Photo src="/photos/location/tapdong-site.jpg" alt="오피스텔에서 내려다본 탑동 이노베이션밸리 부지" pos="50% 50%" cap="e편한세상 시티 고색 오피스텔에서 내려다본 탑동 이노베이션밸리 부지" />
-      <H n={3} k={3}>단지 안 상업시설 제한</H>
+      <H n={3} k={3}>서수원 개발 위치</H>
+      <p>고색역과 델타플렉스 바로 위쪽에 탑동 이노베이션밸리가 있고, 북쪽으로 R&D사이언스파크(예정), 동쪽으로 수원역·삼성전자·광교가 이어지는 구상입니다.</p>
+      <figure className="loc-fig loc-svg">
+        <div><img src="/photos/location/seosuwon-map.jpg" alt="서수원 개발 구상도: 탑동 이노베이션밸리, 고색역, 델타플렉스, R&D사이언스파크, 수원역, 삼성전자, 광교신도시" loading="lazy" style={{ objectFit: 'contain' }} /></div>
+        <figcaption>서수원 개발 구상도 · 출처: 수원도시공사 「수원 탑동 이노베이션밸리」 카탈로그(2026.2) · 개략도이며 실제와 차이가 있을 수 있습니다.</figcaption>
+      </figure>
+      <H n={3} k={4}>단지 안 상업시설 제한</H>
       <p>인허가 고시문상 첨단업무용지의 근린생활시설 등 지원시설은 <strong>건축물 연면적의 30% 이하</strong>(공모 분양 기준)로 제한되고, 기숙사·오피스텔을 제외하면 <strong>지상 2층 이하</strong>에만 들어설 수 있습니다.</p>
       <p>단지 안에서 채우지 못하는 식사·카페·모임 수요는 걸어서 닿는 인접 상가가 받게 됩니다.</p>
-      <H n={3} k={4}>진행 단계</H>
+      <H n={3} k={5}>진행 단계</H>
       <p>현재 첨단업무용지는 특별설계 시행자 공모 방식으로 공급되고 있습니다. 기업 입주 시기는 공모와 건축 일정에 따라 정해집니다.</p>
     </>
   );

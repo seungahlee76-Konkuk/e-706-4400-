@@ -52,9 +52,9 @@ const PAGES: string[][] = [['117', '118', '126', '127', '128', '129'], ['132', '
 // 카드 사진 (실사진이 생기면 경로만 바꾸면 됩니다)
 const CARD_IMG: Record<string, [string, string]> = {
   '117': ['/photos/rooms/117-1.jpg', '55% 60%'], '118': ['/photos/rooms/118-1-1.jpg', '50% 60%'],
-  '119': ['/photos/hero-1.jpg', '15% 60%'], '120': ['/photos/hero-1.jpg', '35% 60%'], '122': ['/photos/hero-3.jpg', '45% 60%'],
+  '119': ['/photos/rooms/119-1.jpg', '50% 60%'], '120': ['/photos/rooms/120-1.jpg', '50% 60%'], '122': ['/photos/rooms/122-ext1.jpg', '50% 55%'],
   '126': ['/photos/rooms/126-1.jpg', '50% 60%'], '127': ['/photos/rooms/127-1.jpg', '50% 60%'], '128': ['/photos/rooms/128-1.jpg', '50% 60%'],
-  '129': ['/photos/street-08.jpg', '45% 50%'], '132': ['/photos/hero-4.jpg', '50% 50%'],
+  '129': ['/photos/street-08.jpg', '45% 50%'], '132': ['/photos/rooms/132-1.jpg', '35% 60%'],
   '137': ['/photos/rooms/137-1.jpg', '45% 60%'], '139': ['/photos/rooms/139-2-1.jpg', '50% 55%'],
 };
 
@@ -63,10 +63,14 @@ type Slot = { cap: string; src?: string };
 const ROOM_PHOTOS: Record<string, Slot[]> = {
   '117': [{ cap: '밖에서 본 전면', src: '/photos/rooms/117-1.jpg' }, { cap: '인테리어 콘셉트 예시 · AI 생성', src: '/photos/rooms/117-concept.jpg' }],
   '118': [{ cap: '밖에서 본 전면', src: '/photos/rooms/118-1-1.jpg' }, { cap: '내부 · 안쪽에서 본 입구', src: '/photos/rooms/118-2-1.jpg' }, { cap: '내부 · 창 쪽', src: '/photos/rooms/118-2-2.jpg' }, { cap: '옆에서 본 전면', src: '/photos/rooms/118-1-2.jpg' }],
+  '119': [{ cap: '밖에서 본 전면', src: '/photos/rooms/119-1.jpg' }],
+  '120': [{ cap: '밖에서 본 전면', src: '/photos/rooms/120-1.jpg' }],
+  '122': [{ cap: '외부 · 정문 앞 코너', src: '/photos/rooms/122-ext1.jpg' }, { cap: '외부 · 거리 쪽', src: '/photos/rooms/122-ext2.jpg' }, { cap: '내부 · 홍보관', src: '/photos/rooms/122-in1.jpg' }, { cap: '내부 · 창 쪽', src: '/photos/rooms/122-in2.jpg' }],
   '126': [{ cap: '밖에서 본 전면', src: '/photos/rooms/126-1.jpg' }, { cap: '내부', src: '/photos/rooms/126-2.jpg' }],
   '127': [{ cap: '밖에서 본 전면', src: '/photos/rooms/127-1.jpg' }, { cap: '내부 · 안쪽에서 본 입구', src: '/photos/rooms/127-2-2.jpg' }, { cap: '내부 · 안쪽 벽', src: '/photos/rooms/127-2-1.jpg' }, { cap: '내부 · 천장 설비', src: '/photos/rooms/127-2-3.jpg' }],
   '128': [{ cap: '밖에서 본 전면', src: '/photos/rooms/128-1.jpg' }, { cap: '내부', src: '/photos/rooms/128-2.jpg' }],
   '129': [{ cap: '밖에서 본 전면', src: '/photos/rooms/129-1-2.jpg' }, { cap: '내부', src: '/photos/rooms/129-2-1.jpg' }, { cap: '내부 · 창 쪽', src: '/photos/rooms/129-2-2.jpg' }, { cap: '102동 코너 전경', src: '/photos/rooms/129-1-1.jpg' }],
+  '132': [{ cap: '밖에서 본 전면', src: '/photos/rooms/132-1.jpg' }],
   '137': [{ cap: '밖에서 본 전면', src: '/photos/rooms/137-1.jpg' }, { cap: '내부', src: '/photos/rooms/137-2-1.jpg' }, { cap: '입구에서 본 내부', src: '/photos/rooms/137-2-2.jpg' }, { cap: '내부 · 창 쪽 기둥', src: '/photos/rooms/137-2-3.jpg' }],
   '139': [{ cap: '내부 · 코너 양면 유리', src: '/photos/rooms/139-2-1.jpg' }, { cap: '내부 · 출입문 쪽', src: '/photos/rooms/139-2-2.jpg' }, { cap: '내부 · 안쪽', src: '/photos/rooms/139-2-3.jpg' }, { cap: '가게 앞 보행로', src: '/photos/rooms/139-1.jpg' }],
 };
@@ -602,15 +606,15 @@ export default function StoreUnits() {
                 </span>
               )}
               <span className="absolute bottom-[14px] left-[14px] rounded-[6px] bg-[rgba(28,28,30,0.78)] px-3 py-[6px] text-[13px] font-bold text-white">{shot.cap}</span>
-              <span className="absolute top-[14px] right-[14px] rounded-[6px] bg-white/90 px-[10px] py-1 text-[12px] font-bold text-[#3F3F46]">{pi + 1} / {slots.length}</span>
-              {([['이전 사진', -1, 'left-3', 'M15 18l-6-6 6-6'], ['다음 사진', 1, 'right-3', 'M9 18l6-6-6-6']] as [string, number, string, string][]).map(([lb, dir, side, d]) => (
+              {slots.length > 1 && <span className="absolute top-[14px] right-[14px] rounded-[6px] bg-white/90 px-[10px] py-1 text-[12px] font-bold text-[#3F3F46]">{pi + 1} / {slots.length}</span>}
+              {slots.length > 1 && ([['이전 사진', -1, 'left-3', 'M15 18l-6-6 6-6'], ['다음 사진', 1, 'right-3', 'M9 18l6-6-6-6']] as [string, number, string, string][]).map(([lb, dir, side, d]) => (
                 <button key={lb} type="button" aria-label={lb} onClick={() => setPh((pi + dir + slots.length) % slots.length)}
                   className={`absolute top-1/2 ${side} inline-flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-white/90 text-[#1C1C1E] shadow-[0_2px_8px_rgba(0,0,0,0.15)]`}>
                   <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={d} /></svg>
                 </button>
               ))}
             </div>
-            <div className={`grid gap-2 ${slots.length <= 2 ? 'grid-cols-2' : 'grid-cols-4'}`}>
+            {slots.length > 1 && <div className={`grid gap-2 ${slots.length <= 2 ? 'grid-cols-2' : 'grid-cols-4'}`}>
               {slots.map((t, k) => (
                 <button key={k} type="button" aria-pressed={k === pi} aria-label={t.cap} onClick={() => setPh(k)}
                   className={`relative aspect-[4/3] cursor-pointer overflow-hidden rounded-[6px] p-0 ${t.src ? 'bg-[#D6D3D1]' : 'su-ph'}`}
@@ -619,7 +623,7 @@ export default function StoreUnits() {
                   <span className="absolute right-0 bottom-0 left-0 overflow-hidden bg-white/90 px-[6px] py-1 text-center text-[11px] font-bold text-ellipsis whitespace-nowrap text-[#3F3F46]">{t.cap}</span>
                 </button>
               ))}
-            </div>
+            </div>}
             {!ROOM_PHOTOS[cur.id] && <p className="m-0 text-[12px] text-[#A1A1AA]">투시도가 들어간 사진은 임시예요. 실제 호실 사진으로 바꿀 예정이에요.</p>}
           </div>
 

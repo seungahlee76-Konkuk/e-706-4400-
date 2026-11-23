@@ -12,7 +12,11 @@ import StoreCalendar from './sections/StoreCalendar';
 import StoreUnits from './sections/StoreUnits';
 import StoreOverview from './sections/StoreOverview';
 import StoreLocation from './sections/StoreLocation';
-import Officetel from './sections/Officetel';
+import OfficetelOverview from './sections/OfficetelOverview';
+import OfficetelPeople from './sections/OfficetelPeople';
+import OfficetelUnits from './sections/OfficetelUnits';
+import OfficetelHero from './sections/OfficetelHero';
+import OfficetelQuick from './sections/OfficetelQuick';
 import PrivacyPolicy from './sections/PrivacyPolicy';
 import ContactForm from './sections/ContactForm';
 import QuickMenu from './components/ui/QuickMenu';
@@ -41,6 +45,18 @@ const ROUTE_META: Record<string, { title: string; canonical: string }> = {
   '/officetel': {
     title: '84타입 3룸 오피스텔 | e편한세상 시티 고색',
     canonical: 'https://elife-gosaek.com/officetel',
+  },
+  '/officetel/units': {
+    title: '세대 안내 | 84㎡ 3룸 오피스텔 · e편한세상 시티 고색',
+    canonical: 'https://elife-gosaek.com/officetel/units',
+  },
+  '/officetel/overview': {
+    title: '사업개요 | e편한세상 시티 고색 오피스텔',
+    canonical: 'https://elife-gosaek.com/officetel/overview',
+  },
+  '/officetel/people': {
+    title: '누가 사나요 | e편한세상 시티 고색 오피스텔',
+    canonical: 'https://elife-gosaek.com/officetel/people',
   },
   '/privacy': {
     title: '개인정보처리방침 | e편한세상 시티 고색',
@@ -177,10 +193,35 @@ export default function App() {
       );
     }
 
-    if (path === '/officetel') {
+    if (path === '/officetel/units') {
       return (
         <div className="pt-[72px] md:pt-[76px]">
-          <Officetel />
+          <OfficetelUnits />
+        </div>
+      );
+    }
+
+    if (path === '/officetel/overview') {
+      return (
+        <div className="pt-[72px] md:pt-[76px]">
+          <OfficetelOverview />
+        </div>
+      );
+    }
+
+    if (path === '/officetel/people') {
+      return (
+        <div className="pt-[72px] md:pt-[76px]">
+          <OfficetelPeople />
+        </div>
+      );
+    }
+
+    if (path === '/officetel') {
+      return (
+        <div className="pt-[65px] md:pt-[72px]">
+          <OfficetelHero />
+          <OfficetelQuick />
           <div className="h-2.5 md:h-px bg-[#ECEFF1] md:bg-gray-200 border-t border-b border-gray-200/50 md:border-b-0 w-full" />
           <ContactForm />
         </div>
@@ -226,7 +267,7 @@ export default function App() {
         }
       }} />
       {!isHome && !isPrivacy && (
-        path === '/officetel' ? (
+        path.startsWith('/officetel') ? (
           <SideSwitch to="/store" label="상가" side="left" onNavigate={navigate} />
         ) : (
           <SideSwitch to="/officetel" label="오피스텔" side="right" onNavigate={navigate} />
