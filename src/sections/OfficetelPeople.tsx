@@ -181,6 +181,23 @@ function Photo({ src, alt, pos, cap, tall }: { src: string; alt: string; pos?: s
     </figure>
   );
 }
+function RoomTrio({ items, cap }: { items: { src: string; name: string; pos?: string }[]; cap: string }) {
+  return (
+    <figure className="ppl-figs">
+      <div className="ppl-figs-grid">
+        {items.map((item) => (
+          <div key={item.name} className="ppl-figs-item">
+            <div className="ppl-figs-img">
+              <img src={item.src} alt={`${item.name} 실제 세대 사진`} loading="lazy" style={{ objectPosition: item.pos || '50% 50%' }} />
+            </div>
+            <span className="ppl-figs-name">{item.name}</span>
+          </div>
+        ))}
+      </div>
+      <figcaption>{cap}</figcaption>
+    </figure>
+  );
+}
 const nw = (t: string) => <span className="ppl-nw">{t}</span>;
 
 /* ───── 01 수원델타플렉스 직장인 ───── */
@@ -327,7 +344,14 @@ function Article4() {
       ]} />
       <H n={4} k={1}>84㎡ 방 3개</H>
       <p>침실, 아이 방, 서재로 쓸 수 있습니다. 아이가 생겨도 방이 모자라지 않습니다.</p>
-      <Photo tall src="/photos/officetel/in-living.jpg" alt="실제 세대 거실" pos="50% 50%" cap="실제 세대 거실" />
+      <RoomTrio
+        items={[
+          { src: '/photos/officetel/room1.jpg', name: '침실' },
+          { src: '/photos/officetel/room2.jpg', name: '창 있는 방' },
+          { src: '/photos/officetel/room3.jpg', name: '드레스룸' },
+        ]}
+        cap="실제 세대 사진"
+      />
       <H n={4} k={2}>청약 자격</H>
       <p>오피스텔은 아파트 청약에서 주택으로 세지 않습니다. 새 집에 살면서 <strong>무주택 청약 자격</strong>을 지킬 수 있습니다.</p>
       <p className="ppl-src">세금(취득세·양도세 등)에서는 쓰임에 따라 주택 수에 들어갈 수 있습니다. 상담 때 확인해 드립니다.</p>
@@ -433,6 +457,13 @@ const CSS = `
 .ppl-who img{height:120px;width:auto}
 .ppl-who small{font-size:11px;color:#A1A1AA;padding-bottom:4px}
 .ppl-fig figcaption{margin-top:10px;font-size:13px;color:#A1A1AA}
+.ppl-figs{margin:40px 0 0}
+.ppl-figs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.ppl-figs-item{min-width:0}
+.ppl-figs-img{border-radius:6px;overflow:hidden;aspect-ratio:3/4;background:#E7E5E4}
+.ppl-figs-img img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.9) contrast(1.03) sepia(.07)}
+.ppl-figs-name{display:block;margin-top:8px;font-size:14px;font-weight:700;color:#0F1C3A;letter-spacing:-.3px}
+.ppl-figs figcaption{margin-top:10px;font-size:13px;color:#A1A1AA}
 .ppl-svg>div{aspect-ratio:auto;background:#F6F4EF}
 .ppl-svg svg{display:block;width:100%;height:auto;max-height:560px}
 .ppl-svg .g{font-size:12px;fill:#71717A;font-weight:600}
@@ -512,6 +543,9 @@ const CSS = `
   .ppl-fig{margin:36px -20px 0}
   .ppl-fig>div{border-radius:0;aspect-ratio:4/3}
   .ppl-fig figcaption{padding:0 20px}
+  .ppl-figs{margin:32px 0 0}
+  .ppl-figs-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .ppl-figs-name{margin-top:6px;font-size:12px}
   .ppl-svg>div{aspect-ratio:auto}
   .ppl-map a{border-radius:0}
   .ppl-mo{display:inline}
