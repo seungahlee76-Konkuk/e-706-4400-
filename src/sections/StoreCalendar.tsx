@@ -38,6 +38,7 @@ const OPEN: Row[] = [
   { unit: '127호', tag: 'focus',  title: '프랜차이즈 베이커리 임차인 모집', sub: '25평 · 정문 동선 · 주차장 인접' },
   { unit: '117호', tag: 'focus',  title: '1:1 프라이빗 필라테스 임차인 모집', sub: '15평 · 병원 통행로 변' },
   { unit: '129호', tag: 'income', title: '분양 모집 중 · 임차인 확정 호실', sub: '10평대 · 닭한상 입점' },
+  { unit: '136호', tag: 'open',   title: '호프집',                        sub: '10평대 · 137호와 합쳐 운영 가능' },
   { unit: '137호', tag: 'open',   title: '호프집 · 애견미용',             sub: '10평대 · CU 옆' },
   { unit: '139호', tag: 'open',   title: '호프 · 이자카야',               sub: '10평대 · 103동 코너 저녁 상권' },
 ];

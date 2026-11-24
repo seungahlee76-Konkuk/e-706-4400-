@@ -21,6 +21,7 @@ export const DEFAULT_PROJECT_INFO = {
     { value: '상업시설-128호', label: '128호 (쌀국수)', group: '상업시설 (1F)' },
     { value: '상업시설-129호', label: '129호 (임차인 있는 수익형 분양)', group: '상업시설 (1F)' },
     { value: '상업시설-132호', label: '132호 (1인 미용실 / 미술 교습소)', group: '상업시설 (1F)' },
+    { value: '상업시설-136호', label: '136호 (호프집 · 임대)', group: '상업시설 (1F)' },
     { value: '상업시설-137호', label: '137호 (호프집 / 애견미용)', group: '상업시설 (1F)' },
     { value: '상업시설-139호', label: '139호 (호프·이자카야)', group: '상업시설 (1F)' },
     { value: '상업시설-추천', label: '아직 모름 · 맞는 호실 추천 원함', group: '상업시설 (1F)' },

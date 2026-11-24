@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 
 /* ───────── 상가 히어로 (/store 맨 위) ─────────
    위: 제목(가운데) / 가운데: 실제 매장 정면 사진을 이어 붙인 거리 위로 연출 인물이 걸어가며 가게 앞에서 멈춤
-   아래: 가게 이름 버튼(누르면 음식·매장 사진) / 전화번호 + "바로 입점 가능한 8개 호실 보기"
+   아래: 가게 이름 버튼(누르면 음식·매장 사진) / 전화번호 + "바로 입점 가능한 9개 호실 보기"
+   - 사진 위 이름표 위에 "Click!" 글씨가 반짝입니다. 한 번 누르면 그 기기에서는 더 이상 뜨지 않습니다.
    - 화면이 간호사를 따라 자동으로 오른쪽으로 움직입니다. ‹ › 버튼으로 직접 넘겨 볼 수 있고, 8초 뒤 다시 따라갑니다.
    - 화면에 보일 때만 움직이고, 벗어나면 멈춥니다. "움직임 줄이기" 설정이면 멈춘 장면만 보여 줍니다.
    - 그림·사진 파일은 사용자가 GitHub public/walk/ 에 직접 올립니다.
@@ -11,23 +12,27 @@ import { useEffect, useRef, useState } from 'react';
 const BASE = '/walk/';
 
 // 거리 사진 (가로로 긴 한 장) · 바닥 높이 · 사람 키 (모두 사진 픽셀 기준)
-const STREET = { src: `${BASE}street.jpg`, w: 5887, h: 640, ground: 606, person: 215 };
+const STREET = { src: `${BASE}street.jpg`, w: 7765, h: 640, ground: 606, person: 215 };
 
 // 사람 그림 묶음 정보 (영상에서 잰 걸음 속도·멈춤 구간 포함, 고치지 마세요)
 type Sheet = { n: number; cols: number; rows: number };
-type Sprite = { walk: Sheet; act: Sheet; w: number; h: number; walkHs: number; actDx: number[]; enterWalk: number; exitWalk: number };
-const SPRITES: Record<'nurse' | 'md', Sprite> = {"nurse":{"walk":{"n":31,"cols":12,"rows":3},"act":{"n":42,"cols":12,"rows":4},"w":129,"h":240,"walkHs":0.4828,"actDx":[0.0448,0.0323,0.0323,0.0341,0.0394,0.043,0.0439,0.0403,0.0036,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0036,0.0278,0.0358,0.0305,0.0323,0.0349,0.0412,0.0448,0.0448,0.0448,0.0448],"enterWalk":8,"exitWalk":28},"md":{"walk":{"n":39,"cols":12,"rows":4},"act":{"n":45,"cols":12,"rows":4},"w":169,"h":240,"walkHs":-0.3114,"actDx":[-0.0285,-0.0292,-0.015,-0.0055,-0.0159,-0.0214,-0.0253,-0.0272,-0.0279,-0.0273,-0.0259,-0.0249,-0.0256,-0.0256,-0.0245,-0.0241,-0.0246,-0.0252,-0.0256,-0.022,-0.0015,-0.0019,-0.0113,-0.0174,-0.0123,-0.0037,-0.0035,-0.0077,-0.0127,-0.0127,-0.0248,-0.0248,-0.0249,-0.025,-0.0234,-0.0217,-0.0206,-0.0098,-0.0059,-0.0165,-0.0237,-0.024,-0.0264,-0.0272],"enterWalk":4,"exitWalk":7}};
+type Who = 'nurse' | 'md' | 'couple';
+// actFps: 멈춤 영상이 1초에 몇 장인지 (없으면 12장)
+type Sprite = { walk: Sheet; act: Sheet; w: number; h: number; walkHs: number; actDx: number[]; enterWalk: number; exitWalk: number; actFps?: number };
+const SPRITES: Record<Who, Sprite> = {"nurse":{"walk":{"n":31,"cols":12,"rows":3},"act":{"n":42,"cols":12,"rows":4},"w":129,"h":240,"walkHs":0.4828,"actDx":[0.0448,0.0323,0.0323,0.0341,0.0394,0.043,0.0439,0.0403,0.0036,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0036,0.0278,0.0358,0.0305,0.0323,0.0349,0.0412,0.0448,0.0448,0.0448,0.0448],"enterWalk":8,"exitWalk":28},"md":{"walk":{"n":39,"cols":12,"rows":4},"act":{"n":45,"cols":12,"rows":4},"w":169,"h":240,"walkHs":-0.3114,"actDx":[-0.0285,-0.0292,-0.015,-0.0055,-0.0159,-0.0214,-0.0253,-0.0272,-0.0279,-0.0273,-0.0259,-0.0249,-0.0256,-0.0256,-0.0245,-0.0241,-0.0246,-0.0252,-0.0256,-0.022,-0.0015,-0.0019,-0.0113,-0.0174,-0.0123,-0.0037,-0.0035,-0.0077,-0.0127,-0.0127,-0.0248,-0.0248,-0.0249,-0.025,-0.0234,-0.0217,-0.0206,-0.0098,-0.0059,-0.0165,-0.0237,-0.024,-0.0264,-0.0272],"enterWalk":4,"exitWalk":7},"couple":{"walk":{"n":33,"cols":12,"rows":3},"act":{"n":53,"cols":12,"rows":5},"w":239,"h":210,"walkHs":-0.4141,"actDx":[-0.0567,-0.0527,-0.049,-0.0248,-0.016,-0.048,-0.0466,-0.0463,-0.0405,-0.0255,-0.0093,-0.0037,-0.0047,-0.0024,0.0,-0.0009,-0.0024,-0.0028,-0.0027,-0.0015,-0.0006,-0.0002,-0.0002,-0.0003,-0.0001,0.0,0.0,0.0,0.0,0.0,0.0,-0.0001,-0.0008,-0.0033,-0.0058,-0.0089,-0.0089,-0.0034,0.0,-0.0179,-0.0364,-0.0391,-0.0437,-0.043,-0.0282,-0.032,-0.05,-0.0535,-0.0522,-0.0491,-0.0291,-0.0166,-0.0497],"enterWalk":17,"exitWalk":31,"actFps":8}};
 
 // 누가 어디서 출발해서 어느 가게 앞에서 멈추고 무슨 말을 하는지 (x = 거리 사진 가로 위치)
-type Plan = { who: 'nurse' | 'md'; dir: 1 | -1; x0: number; far: boolean; stops: { x: number; say: string }[]; pass: { from: number; to: number; say: string }[] };
-// 맨 위(간호사)를 화면이 따라갑니다. 어머니와 딸은 같은 그림으로 두 번 나옵니다 (본죽 앞 / 장호덕 앞).
+type Plan = { who: Who; dir: 1 | -1; x0: number; far: boolean; stops: { x: number; say: string }[]; pass: { from: number; to: number; say: string }[] };
+// 맨 위(간호사)를 화면이 따라갑니다. 어머니와 딸은 같은 그림으로 두 번 나옵니다 (본죽 앞 / 장호덕 앞). 강아지 부부는 137호 앞.
 const PLAN: Plan[] = [
-  { who: 'nurse', dir: 1, x0: -160, far: false, stops: [{ x: 720, say: '☕ 아아 한 잔' }], pass: [{ from: 2150, to: 2500, say: '🥐 여기 빵집 생기면 좋겠다' }, { from: 2990, to: 3340, say: '🍗 닭한상 12월 말 오픈이래' }] },
+  { who: 'nurse', dir: 1, x0: -160, far: false, stops: [{ x: 230, say: '따뜻한 아메리카노☕️' }], pass: [{ from: 650, to: 900, say: '겨울엔 라떼 한잔🤎' }, { from: 2150, to: 2500, say: '🗽우와 빵집 생기네?🥖' }, { from: 2990, to: 3340, say: '🍗 닭한상 12월 말 오픈이래' }, { from: 5950, to: 6250, say: '맥주 한 잔 생각나네🍺' }, { from: 7000, to: 7300, say: 'CU 들렀다가 한 잔 하러 가자🍻' }] },
   { who: 'md', dir: -1, x0: 2100, far: true, stops: [{ x: 1250, say: '🥣 죽은 역시 본죽이지' }], pass: [] },
   // 거리 사진 오른쪽 바깥에서 출발해, 간호사가 장호덕 근처에 올 때 맞춰 장호덕 앞에서 멈춤
-  { who: 'md', dir: -1, x0: 8300, far: true, stops: [{ x: 5000, say: '🥟 여기 새우김치 만두 맛있더라' }], pass: [] },
+  { who: 'md', dir: -1, x0: 8300, far: true, stops: [{ x: 5000, say: '장호덕 새우김치만두 맛집이야🥟' }], pass: [] },
+  // 강아지 데리고 가는 부부: 거리 오른쪽 바깥에서 출발해, 간호사가 136호 근처에 올 때 맞춰 137호 앞에서 멈춤
+  { who: 'couple', dir: -1, x0: 12230, far: true, stops: [{ x: 6700, say: '울 강아지 미용할 때 다 됐는데🐶' }], pass: [] },
 ];
-const LOOP_END = 5950; // 간호사가 여기까지 가면 처음부터 다시
+const LOOP_END = 7830; // 간호사가 여기까지 가면 처음부터 다시
 
 // 누르면 사진이 나오는 가게 (비어 있으면 이름표를 보여 주지 않음)
 // x: 거리 사진 속 가게 위치. -1 이면 아직 거리 사진에 없는 가게 → 장면 위 이름표 없이 아래 버튼으로만 사진 보기
@@ -41,7 +46,18 @@ const SHOPS: Shop[] = [
   { id: '128', name: '128호', x: 2720, line: '', vacant: true },
   { id: 'parking', name: '주차장', x: 3880, line: '총 608대 주차 가능 (근린생활시설 포함) · 102·103동 사이 출입구', photos: ['/photos/street-07.jpg'] },
   { id: '134', name: '장호덕 손만두', x: 5296, line: '134·135호 · 손만두·칼국수 · 영업 중', photos: ['/photos/stores/food-134-1.jpg', '/photos/stores/food-134-2.jpg'] },
+  { id: '136', name: '136호', x: 6115, line: '', vacant: true },
+  { id: '137', name: '137호', x: 6587, line: '', vacant: true },
+  { id: '138', name: 'CU', x: 7061, line: '138호 · 편의점 · 영업 중', photos: ['/photos/stores/shop-138-1.jpg'] },
+  { id: '139', name: '139호', x: 7556, line: '', vacant: true },
 ];
+// 139호는 CU에서 모퉁이를 돌아 있는 자리라, 거리 사진에 넓은 기둥을 두고 "모퉁이" 표시
+const CORNER_X = 7328;
+
+// "Click!" 안내를 이미 본 기기인지 (브라우저 저장소를 못 쓰면 매번 보여 줌)
+const HINT_KEY = 'sw-tag-clicked';
+const readHint = () => { try { return localStorage.getItem(HINT_KEY) === '1'; } catch { return false; } };
+const saveHint = () => { try { localStorage.setItem(HINT_KEY, '1'); } catch { /* 저장 못 해도 괜찮음 */ } };
 
 const RATE = 1.25; // 재생 속도 (걸음과 이동을 함께 빠르게)
 
@@ -54,6 +70,7 @@ export default function StoreHero() {
   const navRef = useRef<(d: 1 | -1) => void>(() => {});
   const pausedRef = useRef(false);
   const [open, setOpen] = useState<Shop | null>(null);
+  const [clicked, setClicked] = useState(readHint);
 
   useEffect(() => { pausedRef.current = !!open; }, [open]);
 
@@ -63,10 +80,10 @@ export default function StoreHero() {
     if (!scene || !world || PLAN.some((_, i) => !els[i])) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    type W = { id: 'nurse' | 'md'; c: Sprite; p: Plan; el: HTMLDivElement; bub: HTMLElement; x: number; mode: 'walk' | 'act'; f: number; acc: number; si: number; armed: boolean; pre: number; stopF: number; dw: number; dh: number; src: string; hideAt: number };
+    type W = { id: Who; c: Sprite; p: Plan; el: HTMLDivElement; bub: HTMLElement; x: number; mode: 'walk' | 'act'; f: number; acc: number; si: number; armed: boolean; pre: number; stopF: number; dw: number; dh: number; src: string; hideAt: number };
     const W: W[] = PLAN.map((p, idx) => {
       const id = p.who, c = SPRITES[id], el = els[idx] as HTMLDivElement;
-      const th = 0.45 * Math.abs(c.walkHs) / 12; // 멈춤 영상은 1초에 12장
+      const th = 0.45 * Math.abs(c.walkHs) / (c.actFps || 12); // 멈춤 영상 1장당 기준 이동량
       const slow = c.actDx.map((d) => Math.abs(d) < th);
       let stopF = slow.findIndex((v, i) => v && slow[i + 1] && slow[i + 2]);
       if (stopF < 0) stopF = Math.floor(c.actDx.length / 2);
@@ -134,7 +151,7 @@ export default function StoreHero() {
       if (!pausedRef.current) {
         for (const o of W) {
           const c = o.c, dir = o.p.dir;
-          o.acc += dt * (o.mode === 'walk' ? 24 : 12) * RATE;
+          o.acc += dt * (o.mode === 'walk' ? 24 : (c.actFps || 12)) * RATE;
           while (o.acc >= 1) {
             o.acc -= 1;
             if (o.mode === 'walk') {
@@ -170,6 +187,7 @@ export default function StoreHero() {
   }, []);
 
   const pick = (s: Shop) => {
+    if (!clicked) { setClicked(true); saveHint(); }
     if (s.vacant) {
       // 입점추천(StoreUnits)이 이 이벤트를 받아 해당 호실 상세를 엽니다.
       window.dispatchEvent(new CustomEvent('store-open-room', { detail: { room: s.id } }));
@@ -189,14 +207,15 @@ export default function StoreHero() {
         <p className="sw-lead"><strong>439병상 종합병원 바로 앞,</strong><br />의료·주거 수요가 만나는 스트리트 상가</p>
       </div>
 
-      <div ref={sceneRef} className="sw-scene" role="img" aria-label="102동 1층 상가 거리 실제 사진 위로 병원 직원과 진료 온 가족이 걸어가는 장면">
+      <div ref={sceneRef} className="sw-scene" role="img" aria-label="102동 1층 상가 거리 실제 사진 위로 병원 직원, 진료 온 가족, 강아지와 산책하는 부부가 걸어가는 장면">
         <div ref={worldRef} className="sw-world">
           <img className="sw-street" src={STREET.src} alt="" fetchPriority="high" />
-          {SHOPS.filter((s) => s.x >= 0).map((s) => (
-            <button key={s.id} type="button" className={`sw-tag ${s.vacant ? 'sw-tag-v' : ''}`} style={{ left: `${(s.x / STREET.w) * 100}%` }} onClick={() => pick(s)}>
+          {SHOPS.filter((s) => s.x >= 0).map((s, i) => (
+            <button key={s.id} type="button" className={`sw-tag ${s.vacant ? 'sw-tag-v' : ''} ${clicked ? '' : 'sw-hint'}`} style={{ left: `${(s.x / STREET.w) * 100}%`, ['--d' as string]: `${(i % 3) * 0.4}s` }} onClick={() => pick(s)}>
               {s.vacant ? `${s.id}호 입점 가능` : s.name}
             </button>
           ))}
+          <span className="sw-corner" style={{ left: `${(CORNER_X / STREET.w) * 100}%` }} aria-hidden="true">모퉁이</span>
           {PLAN.map((p, i) => (
             <div key={i} ref={(el) => { wkRefs.current[i] = el; }} className="sw-wk"><span className="sw-bub" /></div>
           ))}
@@ -236,7 +255,7 @@ export default function StoreHero() {
             <span className="sw-num">031)293-1073</span>
           </a>
           <a href="#units" className="sw-cta">
-            <span>바로 입점 가능한 8개 호실 보기</span>
+            <span>바로 입점 가능한 9개 호실 보기</span>
             <span className="sw-ic" aria-hidden="true">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
             </span>
@@ -262,12 +281,16 @@ const CSS = `
 .sw-street{display:block;height:100%;width:auto;max-width:none;filter:saturate(.95) contrast(1.02)}
 .sw-wk{position:absolute;left:0;top:0;background-repeat:no-repeat;will-change:left,background-position}
 .sw-wk::after{content:"";position:absolute;left:12%;right:12%;bottom:-1.5%;height:5%;border-radius:50%;background:radial-gradient(ellipse at center,rgba(15,28,58,.28),rgba(15,28,58,0) 70%);z-index:-1}
-.sw-bub{position:absolute;left:50%;bottom:100%;transform:translate(-50%,6px);margin-bottom:6px;background:rgba(255,255,255,.96);border-radius:14px;padding:7px 12px;font-size:13px;font-weight:800;color:#0F1C3A;white-space:nowrap;box-shadow:0 8px 20px -10px rgba(15,28,58,.45);opacity:0;transition:opacity .35s,transform .35s;pointer-events:none}
+.sw-bub{position:absolute;left:50%;bottom:100%;transform:translate(-50%,6px);margin-bottom:6px;background:rgba(255,255,255,.96);border-radius:16px;padding:9px 15px;font-size:16px;font-weight:800;color:#0F1C3A;white-space:nowrap;box-shadow:0 8px 20px -10px rgba(15,28,58,.45);opacity:0;transition:opacity .35s,transform .35s;pointer-events:none}
 .sw-bub.on{opacity:1;transform:translate(-50%,0)}
 .sw-ai{position:absolute;right:16px;bottom:10px;z-index:4;font-size:11px;font-weight:700;color:#71717A;background:rgba(255,255,255,.85);padding:4px 8px;border-radius:6px}
-.sw-tag{position:absolute;top:5%;z-index:3;transform:translateX(-50%);border:0;border-radius:999px;background:rgba(15,28,58,.86);color:#fff;font-family:inherit;font-size:13px;font-weight:800;padding:7px 12px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 16px -8px rgba(15,28,58,.6)}
+.sw-tag{position:absolute;top:11%;z-index:3;transform:translateX(-50%);border:0;border-radius:999px;background:rgba(15,28,58,.86);color:#fff;font-family:inherit;font-size:13px;font-weight:800;padding:7px 12px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 16px -8px rgba(15,28,58,.6)}
 .sw-tag::after{content:" ›";opacity:.7}
 .sw-tag-v{background:#FF671D}
+/* 처음 오신 분께: 이름표 위에 "Click!" 글씨가 반짝임 */
+.sw-hint::before{content:"Click!";position:absolute;left:50%;bottom:calc(100% + 3px);transform:translateX(-50%);color:#FF671D;font-size:14px;font-weight:900;font-style:italic;letter-spacing:.3px;white-space:nowrap;text-shadow:0 0 6px #fff,0 0 2px #fff,0 1px 2px rgba(15,28,58,.35);animation:swTwinkle 1.1s ease-in-out infinite;animation-delay:var(--d,0s);pointer-events:none}
+@keyframes swTwinkle{0%,100%{opacity:.35;transform:translateX(-50%) scale(.92)}50%{opacity:1;transform:translateX(-50%) scale(1.08);text-shadow:0 0 10px #fff,0 0 4px #FFD7BF,0 1px 2px rgba(15,28,58,.35)}}
+.sw-corner{position:absolute;top:26%;z-index:2;transform:translateX(-50%);writing-mode:vertical-rl;padding:8px 3px;border-radius:4px;background:rgba(15,28,58,.72);color:#fff;font-size:12px;font-weight:800;letter-spacing:2px;pointer-events:none}
 .sw-nav{position:absolute;top:50%;z-index:5;width:48px;height:48px;margin-top:-24px;border:0;border-radius:50%;background:rgba(255,255,255,.94);color:#0F1C3A;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px -8px rgba(15,28,58,.5);transition:opacity .25s,transform .2s}
 .sw-nav:hover{transform:scale(1.06)}
 .sw-nav:disabled{opacity:0;pointer-events:none}
@@ -299,7 +322,7 @@ const CSS = `
   .sw-in{padding:0 20px}
   .sw-h1{font-size:clamp(30px,9vw,40px)}
   .sw-scene{height:270px;margin-top:20px}
-  .sw-bub{font-size:12px;padding:6px 10px}
+  .sw-bub{font-size:14px;padding:7px 12px}
   .sw-tag{font-size:12px;padding:6px 10px}
   .sw-nav{width:40px;height:40px;margin-top:-20px}
   .sw-prev{left:10px}
@@ -312,5 +335,5 @@ const CSS = `
   .sw-card{position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;z-index:61;border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
   .sw-dim{display:block;position:fixed;inset:0;z-index:60;border:0;background:rgba(15,28,58,.45)}
 }
-@media (prefers-reduced-motion:reduce){.sw-nav,.sw-ic{transition:none}}
+@media (prefers-reduced-motion:reduce){.sw-hint::before{animation:none;opacity:1}.sw-nav,.sw-ic{transition:none}}
 `;
