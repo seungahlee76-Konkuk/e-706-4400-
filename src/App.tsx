@@ -24,45 +24,7 @@ import SideSwitch from './components/ui/SideSwitch';
 import AdminDashboard from './components/ui/AdminDashboard';
 import StickyBottomForm from './components/ui/StickyBottomForm';
 import { navigate, normalizePath, useIsChooserView, usePath } from './lib/router';
-
-const ROUTE_META: Record<string, { title: string; canonical: string }> = {
-  '/': {
-    title: 'e편한세상시티고색 | 덕산병원 앞 1층 상가 분양·임대',
-    canonical: 'https://elife-gosaek.com/',
-  },
-  '/store': {
-    title: 'e편한세상 시티 고색 근린생활시설 | 덕산병원 앞 1층 상가 분양·임대',
-    canonical: 'https://elife-gosaek.com/store',
-  },
-  '/store/location': {
-    title: '입지분석 | e편한세상 시티 고색 1층 상가',
-    canonical: 'https://elife-gosaek.com/store/location',
-  },
-  '/store/overview': {
-    title: '사업개요 | e편한세상 시티 고색',
-    canonical: 'https://elife-gosaek.com/store/overview',
-  },
-  '/officetel': {
-    title: '84타입 3룸 오피스텔 | e편한세상 시티 고색',
-    canonical: 'https://elife-gosaek.com/officetel',
-  },
-  '/officetel/units': {
-    title: '세대 안내 | 84㎡ 3룸 오피스텔 · e편한세상 시티 고색',
-    canonical: 'https://elife-gosaek.com/officetel/units',
-  },
-  '/officetel/overview': {
-    title: '사업개요 | e편한세상 시티 고색 오피스텔',
-    canonical: 'https://elife-gosaek.com/officetel/overview',
-  },
-  '/officetel/people': {
-    title: '누가 사나요 | e편한세상 시티 고색 오피스텔',
-    canonical: 'https://elife-gosaek.com/officetel/people',
-  },
-  '/privacy': {
-    title: '개인정보처리방침 | e편한세상 시티 고색',
-    canonical: 'https://elife-gosaek.com/privacy',
-  },
-};
+import { ROUTE_META } from './lib/seoRoutes';
 
 const LEGACY_HASH_ROUTES: Record<string, string> = {
   '#md': '/store#units',
@@ -100,14 +62,27 @@ export default function App() {
     };
   }, [path, isChooserView]);
 
-  // Update document.title and canonical link per route
+  // Update document.title, canonical, description, OpenGraph, and Twitter metadata per route
   useEffect(() => {
     const meta = isChooserView ? ROUTE_META['/'] : (ROUTE_META[path] || ROUTE_META['/store']);
     document.title = meta.title;
+
     const canonicalEl = document.querySelector('link[rel="canonical"]');
     if (canonicalEl) {
       canonicalEl.setAttribute('href', meta.canonical);
     }
+
+    const setMetaContent = (selector: string, content: string) => {
+      const el = document.querySelector(selector);
+      if (el) el.setAttribute('content', content);
+    };
+
+    setMetaContent('meta[name="description"]', meta.description);
+    setMetaContent('meta[property="og:title"]', meta.title);
+    setMetaContent('meta[property="og:description"]', meta.description);
+    setMetaContent('meta[property="og:url"]', meta.canonical);
+    setMetaContent('meta[name="twitter:title"]', meta.title);
+    setMetaContent('meta[name="twitter:description"]', meta.description);
   }, [path, isChooserView]);
 
   // Scroll to initial hash on direct page load (e.g., /store#md or /officetel#contact)
