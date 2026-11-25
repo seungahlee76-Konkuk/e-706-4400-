@@ -10,6 +10,7 @@ export interface RouteSeoMeta {
   title: string;
   description: string;
   canonical: string;
+  image: string;
   breadcrumbs: BreadcrumbItem[];
   prerenderHtml: string;
 }
@@ -48,8 +49,9 @@ export const ROUTE_META: Record<string, RouteSeoMeta> = {
     path: '/',
     title: 'e편한세상시티고색 | 덕산병원 앞 1층 상가 분양·임대',
     description:
-      '수원덕산병원 정문 바로 앞, e편한세상 시티 고색 1층 상가를 분양·임대합니다. 오피스텔 430세대 단지 1층, 약국·베이커리부터 외식·주점·생활편의 업종까지 입점 호실과 84타입 3룸 오피스텔을 상담해 드립니다.',
+      '수원덕산병원 앞 1층 상가 바로 입점 가능한 9개 호실 상업시설 분양·임대 전문.',
     canonical: `${SITE_ORIGIN}/`,
+    image: `${SITE_ORIGIN}/photos/hero-6.png`,
     breadcrumbs: [{ name: '홈', item: `${SITE_ORIGIN}/` }],
     prerenderHtml: wrapPage(`
       <article class="space-y-6">
@@ -77,8 +79,9 @@ export const ROUTE_META: Record<string, RouteSeoMeta> = {
     path: '/store',
     title: 'e편한세상 시티 고색 근린생활시설 | 덕산병원 앞 1층 상가 분양·임대',
     description:
-      '수원덕산병원 정문 앞 e편한세상 시티 고색 1층 상가 분양·임대 안내. 약국·메가커피·우지커피·본죽&비빔밥·장호덕 손만두·CU 영업 중, 닭한상 오픈 예정, 호실별 면적과 임대·분양 조건을 확인하세요.',
+      '바로 입점 가능한 9개 호실 상업시설 분양&임대 문의 환영합니다',
     canonical: `${SITE_ORIGIN}/store`,
+    image: `${SITE_ORIGIN}/photos/hero-3.jpg`,
     breadcrumbs: [
       { name: '홈', item: `${SITE_ORIGIN}/` },
       { name: '1층 상가 분양·임대', item: `${SITE_ORIGIN}/store` },
@@ -133,6 +136,7 @@ export const ROUTE_META: Record<string, RouteSeoMeta> = {
     description:
       '439병상 수원덕산병원 정문 앞 초밀착 입지, 고색역·수원역(KTX·GTX-C)·서울 직행버스 광역 교통망, 탑동 이노베이션밸리(2029년 목표), 서수원 행정타운과 고색 1·2지구 배후수요를 확인하세요.',
     canonical: `${SITE_ORIGIN}/store/location`,
+    image: `${SITE_ORIGIN}/photos/hero-3.jpg`,
     breadcrumbs: [
       { name: '홈', item: `${SITE_ORIGIN}/` },
       { name: '1층 상가', item: `${SITE_ORIGIN}/store` },
@@ -172,6 +176,7 @@ export const ROUTE_META: Record<string, RouteSeoMeta> = {
     description:
       '경기도 수원시 권선구 고색동 894-125번지 외 6필지, 대지면적 11,195㎡·연면적 85,512.62㎡, 지하 4층~지상 14층, 주거용 오피스텔 430세대 및 1층 근린생활시설, 주차 608대, DL이앤씨 시공 사업개요입니다.',
     canonical: `${SITE_ORIGIN}/store/overview`,
+    image: `${SITE_ORIGIN}/photos/hero-3.jpg`,
     breadcrumbs: [
       { name: '홈', item: `${SITE_ORIGIN}/` },
       { name: '1층 상가', item: `${SITE_ORIGIN}/store` },
@@ -200,6 +205,7 @@ export const ROUTE_META: Record<string, RouteSeoMeta> = {
     description:
       'e편한세상 시티 고색 전용 84㎡ 3룸 오피스텔 430세대 안내. 방 3개·욕실 2개 아파트 국민평형 크기, 시스템에어컨 4대·빌트인 김치냉장고 기본 제공, 수원덕산병원·수원델타플렉스·삼성전자 통근 입지를 만나보세요.',
     canonical: `${SITE_ORIGIN}/officetel`,
+    image: `${SITE_ORIGIN}/thumb.png`,
     breadcrumbs: [
       { name: '홈', item: `${SITE_ORIGIN}/` },
       { name: '84타입 3룸 오피스텔', item: `${SITE_ORIGIN}/officetel` },
@@ -233,6 +239,7 @@ export const ROUTE_META: Record<string, RouteSeoMeta> = {
     description:
       '84A(302세대)·84B(89세대)·84C(26세대)·84D(13세대) 타입별 평면도와 면적, 방 3개·욕실 2개 실사진, 시스템에어컨 4대·김치냉장고 기본 옵션 및 지하 1층 커뮤니티(피트니스·스크린골프·라운지카페·개인오피스)를 확인하세요.',
     canonical: `${SITE_ORIGIN}/officetel/units`,
+    image: `${SITE_ORIGIN}/thumb.png`,
     breadcrumbs: [
       { name: '홈', item: `${SITE_ORIGIN}/` },
       { name: '오피스텔', item: `${SITE_ORIGIN}/officetel` },
@@ -269,6 +276,7 @@ export const ROUTE_META: Record<string, RouteSeoMeta> = {
     description:
       'e편한세상 시티 고색 오피스텔 사업개요. 수원시 권선구 고색동 894-125번지, 지하 4층~지상 14층 3개 동 430세대(84A·84B·84C·84D), 주차 608대, DL이앤씨 시공, 탑동 이노베이션밸리 인접 단지 정보를 확인하세요.',
     canonical: `${SITE_ORIGIN}/officetel/overview`,
+    image: `${SITE_ORIGIN}/thumb.png`,
     breadcrumbs: [
       { name: '홈', item: `${SITE_ORIGIN}/` },
       { name: '오피스텔', item: `${SITE_ORIGIN}/officetel` },
@@ -294,6 +302,7 @@ export const ROUTE_META: Record<string, RouteSeoMeta> = {
     description:
       '수원델타플렉스 직장인, 수원덕산병원 의료진, 삼성전자 통근자, 신혼부부, 어르신·가족까지. 각 수요층의 실제 출퇴근·통원·육아·1층 상가 생활 동선으로 본 e편한세상 시티 고색 오피스텔 거주 가이드입니다.',
     canonical: `${SITE_ORIGIN}/officetel/people`,
+    image: `${SITE_ORIGIN}/thumb.png`,
     breadcrumbs: [
       { name: '홈', item: `${SITE_ORIGIN}/` },
       { name: '오피스텔', item: `${SITE_ORIGIN}/officetel` },
@@ -337,6 +346,7 @@ export const ROUTE_META: Record<string, RouteSeoMeta> = {
     description:
       '루에나파트너스(e편한세상 시티 고색 분양·임대 상담 안내) 개인정보처리방침. 상담 신청 시 수집 항목, 이용 목적, 1년 보유 기간, 위탁 안내 및 개인정보 보호책임자 연락처(031-293-1073)를 안내합니다.',
     canonical: `${SITE_ORIGIN}/privacy`,
+    image: `${SITE_ORIGIN}/thumb.png`,
     breadcrumbs: [
       { name: '홈', item: `${SITE_ORIGIN}/` },
       { name: '개인정보처리방침', item: `${SITE_ORIGIN}/privacy` },

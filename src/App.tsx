@@ -80,9 +80,11 @@ export default function App() {
     setMetaContent('meta[name="description"]', meta.description);
     setMetaContent('meta[property="og:title"]', meta.title);
     setMetaContent('meta[property="og:description"]', meta.description);
+    setMetaContent('meta[property="og:image"]', meta.image);
     setMetaContent('meta[property="og:url"]', meta.canonical);
     setMetaContent('meta[name="twitter:title"]', meta.title);
     setMetaContent('meta[name="twitter:description"]', meta.description);
+    setMetaContent('meta[name="twitter:image"]', meta.image);
   }, [path, isChooserView]);
 
   // Scroll to initial hash on direct page load (e.g., /store#md or /officetel#contact)

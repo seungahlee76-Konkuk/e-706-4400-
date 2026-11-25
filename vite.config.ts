@@ -35,6 +35,7 @@ function staticPrerenderPlugin(): Plugin {
         const safeTitleAttr = escapeHtmlAttr(route.title);
         const safeDescAttr = escapeHtmlAttr(route.description);
         const safeCanonical = escapeHtmlAttr(route.canonical);
+        const safeImage = escapeHtmlAttr(route.image);
 
         html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${safeTitleText}</title>`);
         html = html.replace(
@@ -54,6 +55,10 @@ function staticPrerenderPlugin(): Plugin {
           `<meta property="og:description" content="${safeDescAttr}" />`,
         );
         html = html.replace(
+          /<meta\s+property="og:image"\s+content="[^"]*"\s*\/?>/,
+          `<meta property="og:image" content="${safeImage}" />`,
+        );
+        html = html.replace(
           /<meta\s+property="og:url"\s+content="[^"]*"\s*\/?>/,
           `<meta property="og:url" content="${safeCanonical}" />`,
         );
@@ -64,6 +69,10 @@ function staticPrerenderPlugin(): Plugin {
         html = html.replace(
           /<meta\s+name="twitter:description"\s+content="[^"]*"\s*\/?>/,
           `<meta name="twitter:description" content="${safeDescAttr}" />`,
+        );
+        html = html.replace(
+          /<meta\s+name="twitter:image"\s+content="[^"]*"\s*\/?>/,
+          `<meta name="twitter:image" content="${safeImage}" />`,
         );
 
         const webPageJsonLd = {
